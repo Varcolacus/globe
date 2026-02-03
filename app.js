@@ -1,0 +1,285 @@
+// Données des villes principales
+const cities = [
+    { lat: 48.8566, lng: 2.3522, name: 'Paris', country: 'France', population: '2.2M' },
+    { lat: 51.5074, lng: -0.1278, name: 'Londres', country: 'Royaume-Uni', population: '9M' },
+    { lat: 40.7128, lng: -74.0060, name: 'New York', country: 'États-Unis', population: '8.3M' },
+    { lat: 35.6762, lng: 139.6503, name: 'Tokyo', country: 'Japon', population: '14M' },
+    { lat: -33.8688, lng: 151.2093, name: 'Sydney', country: 'Australie', population: '5.3M' },
+    { lat: 55.7558, lng: 37.6173, name: 'Moscou', country: 'Russie', population: '12M' },
+    { lat: 39.9042, lng: 116.4074, name: 'Pékin', country: 'Chine', population: '21M' },
+    { lat: 19.4326, lng: -99.1332, name: 'Mexico', country: 'Mexique', population: '9M' },
+    { lat: -23.5505, lng: -46.6333, name: 'São Paulo', country: 'Brésil', population: '12M' },
+    { lat: 30.0444, lng: 31.2357, name: 'Le Caire', country: 'Égypte', population: '10M' },
+    { lat: 28.6139, lng: 77.2090, name: 'New Delhi', country: 'Inde', population: '11M' },
+    { lat: 1.3521, lng: 103.8198, name: 'Singapour', country: 'Singapour', population: '5.7M' },
+    { lat: 25.2048, lng: 55.2708, name: 'Dubaï', country: 'Émirats', population: '3.4M' },
+    { lat: -1.2921, lng: 36.8219, name: 'Nairobi', country: 'Kenya', population: '4.4M' },
+    { lat: -34.6037, lng: -58.3816, name: 'Buenos Aires', country: 'Argentine', population: '3M' }
+];
+
+// Initialiser la carte avec vue globale
+const map = L.map('map', {
+    center: [20, 0],
+    zoom: 3,
+    minZoom: 2,
+    maxZoom: 19,
+    zoomControl: true,
+    worldCopyJump: true
+});
+
+// Définir les différentes couches de tuiles
+const layers = {
+    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles © Esri',
+        maxZoom: 19
+    }),
+    streets: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors',
+        maxZoom: 19
+    }),
+    topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+        attribution: 'Map data: © OpenStreetMap contributors, SRTM | Map style: © OpenTopoMap',
+        maxZoom: 17
+    }),
+    dark: L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        maxZoom: 19
+    })
+};
+
+// Ajouter la couche satellite par défaut
+let currentLayer = layers.satellite;
+currentLayer.addTo(map);
+
+// Gestionnaire de changement de couche
+document.getElementById('layer-select').addEventListener('change', (e) => {
+    map.removeLayer(currentLayer);
+    currentLayer = layers[e.target.value];
+    currentLayer.addTo(map);
+});
+
+// Ajouter des marqueurs pour les villes
+const cityIcon = L.divIcon({
+    className: 'city-marker',
+    html: '<div style="background: #ff6b6b; width: 12px; height: 12px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.4);"></div>',
+    iconSize: [16, 16],
+    iconAnchor: [8, 8]
+});
+
+cities.forEach(city => {
+    const marker = L.marker([city.lat, city.lng], { icon: cityIcon }).addTo(map);
+    
+    marker.bindPopup(`
+        <div class="city-popup">
+            <h3>${city.name}</h3>
+            <p>🌍 ${city.country}</p>
+            <p>👥 ${city.population} habitants</p>
+            <p>📍 ${city.lat.toFixed(4)}°, ${city.lng.toFixed(4)}°</p>
+        </div>
+    `);
+    
+    // Zoom sur la ville au clic
+    marker.on('click', () => {
+        map.flyTo([city.lat, city.lng], 12, {
+            duration: 2
+        });
+    });
+});
+
+// Bouton de réinitialisation de la vue
+document.getElementById('reset-view').addEventListener('click', () => {
+    map.flyTo([20, 0], 3, {
+        duration: 1.5
+    });
+});
+
+// Bouton de géolocalisation
+document.getElementById('find-me').addEventListener('click', () => {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                map.flyTo([lat, lng], 13, {
+                    duration: 2
+                });
+                
+                L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup(`
+                        <div class="city-popup">
+                            <h3>📍 Votre position</h3>
+                            <p>Latitude: ${lat.toFixed(6)}°</p>
+                            <p>Longitude: ${lng.toFixed(6)}°</p>
+                        </div>
+                    `)
+                    .openPopup();
+            },
+            (error) => {
+                alert('Impossible d\'obtenir votre position : ' + error.message);
+            }
+        );
+    } else {
+        alert('La géolocalisation n\'est pas supportée par votre navigateur');
+    }
+});
+
+// Clic sur la carte pour afficher les coordonnées
+map.on('click', (e) => {
+    const lat = e.latlng.lat.toFixed(6);
+    const lng = e.latlng.lng.toFixed(6);
+    
+    L.popup()
+        .setLatLng(e.latlng)
+        .setContent(`
+            <div class="city-popup">
+                <h3>📍 Coordonnées</h3>
+                <p>Latitude: ${lat}°</p>
+                <p>Longitude: ${lng}°</p>
+            </div>
+        `)
+        .openOn(map);
+});
+
+// Animation des marqueurs au survol
+const style = document.createElement('style');
+style.textContent = `
+    .city-marker:hover div {
+        transform: scale(1.5);
+        transition: transform 0.3s ease;
+    }
+    .city-marker div {
+        transition: transform 0.3s ease;
+    }
+`;
+document.head.appendChild(style);
+
+console.log('🌍 Globe HD initialisé avec', cities.length, 'villes');
+console.log('🗺️ Imagerie satellite haute résolution active');
+console.log('🔍 Zoom maximum: niveau 19 (détails de rue)');
+
+
+// Données pour les arcs entre les villes
+const connections = [
+    { from: 'Paris', to: 'New York' },
+    { from: 'Paris', to: 'Tokyo' },
+    { from: 'Londres', to: 'Sydney' },
+    { from: 'New York', to: 'Tokyo' },
+    { from: 'Pékin', to: 'Sydney' },
+    { from: 'Moscou', to: 'New Delhi' },
+    { from: 'Paris', to: 'Le Caire' },
+    { from: 'Dubaï', to: 'Singapour' }
+];
+
+// Créer les données d'arcs
+const arcsData = connections.map(conn => {
+    const startCity = cities.find(c => c.name === conn.from);
+    const endCity = cities.find(c => c.name === conn.to);
+    return {
+        startLat: startCity.lat,
+        startLng: startCity.lng,
+        endLat: endCity.lat,
+        endLng: endCity.lng,
+        color: ['#667eea', '#764ba2'][Math.floor(Math.random() * 2)]
+    };
+});
+
+// Initialiser le globe
+const globe = Globe()
+    (document.getElementById('globe-container'))
+    .globeImageUrl('images/earth-8k.jpg')
+    .bumpImageUrl('images/earth-topology.png')
+    .backgroundImageUrl('images/night-sky.png')
+    .pointsData(cities)
+    .pointAltitude(0.01)
+    .pointRadius(0.4)
+    .pointColor(() => '#ff6b6b')
+    .pointLabel(d => `
+        <div style="background: rgba(0,0,0,0.9); padding: 12px; border-radius: 8px; border: 1px solid #667eea;">
+            <div style="font-size: 16px; font-weight: bold; color: #667eea; margin-bottom: 5px;">
+                ${d.name}
+            </div>
+            <div style="font-size: 13px; color: #ccc;">
+                📍 ${d.country}<br>
+                👥 ${d.population} habitants
+            </div>
+        </div>
+    `)
+    .arcsData(arcsData)
+    .arcColor('color')
+    .arcDashLength(0.4)
+    .arcDashGap(0.2)
+    .arcDashAnimateTime(3000)
+    .arcStroke(0.5)
+    .arcsTransitionDuration(0);
+
+// Configuration de la caméra
+globe.pointOfView({ altitude: 2.5 }, 0);
+
+// Variables d'état
+let isRotating = true;
+let rotationSpeed = 0.2;
+
+// Animation de rotation automatique
+function animate() {
+    if (isRotating) {
+        const controls = globe.controls();
+        controls.autoRotate = true;
+        controls.autoRotateSpeed = rotationSpeed;
+    }
+    requestAnimationFrame(animate);
+}
+animate();
+
+// Gestion des boutons
+const rotateToggle = document.getElementById('rotate-toggle');
+const resetView = document.getElementById('reset-view');
+
+rotateToggle.addEventListener('click', () => {
+    isRotating = !isRotating;
+    const controls = globe.controls();
+    controls.autoRotate = isRotating;
+    rotateToggle.textContent = isRotating ? '⏸️ Pause Rotation' : '▶️ Reprendre Rotation';
+});
+
+resetView.addEventListener('click', () => {
+    globe.pointOfView({ lat: 0, lng: 0, altitude: 2.5 }, 1000);
+    isRotating = true;
+    const controls = globe.controls();
+    controls.autoRotate = true;
+    rotateToggle.textContent = '⏸️ Pause Rotation';
+});
+
+// Interaction avec les points
+globe.onPointClick(point => {
+    console.log('Ville cliquée:', point.name);
+    // Zoomer sur la ville
+    globe.pointOfView({ 
+        lat: point.lat, 
+        lng: point.lng, 
+        altitude: 1.5 
+    }, 2000);
+    
+    // Pause la rotation lors du clic
+    isRotating = false;
+    const controls = globe.controls();
+    controls.autoRotate = false;
+    rotateToggle.textContent = '▶️ Reprendre Rotation';
+});
+
+// Améliorer les contrôles
+const controls = globe.controls();
+controls.enableDamping = true;
+controls.dampingFactor = 0.1;
+controls.rotateSpeed = 0.5;
+controls.minDistance = 120;
+controls.maxDistance = 4000;
+
+// Effet de particules atmosphériques
+globe.atmosphereColor('#667eea');
+globe.atmosphereAltitude(0.2);
+
+// Log pour le débogage
+console.log('🌍 Globe interactif initialisé avec', cities.length, 'villes');
+console.log('✨ Connexions:', connections.length, 'arcs');
