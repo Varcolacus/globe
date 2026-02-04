@@ -1105,8 +1105,10 @@ function getMajorShippingRoutes(year) {
             name: 'Korea-Japan',
             waypoints: [
                 { lat: 35.18, lng: 129.08 }, // Busan
-                { lat: 35.0, lng: 132.0 },   // Mer du Japon
-                { lat: 35.2, lng: 135.0 },   // Intermédiaire
+                { lat: 33.0, lng: 129.5 },   // Détroit de Corée (plus au sud)
+                { lat: 31.0, lng: 131.0 },   // Mer de Seto (sud du Japon)
+                { lat: 32.0, lng: 135.0 },   // Pacifique sud Japon
+                { lat: 33.5, lng: 138.5 },   // Approche Tokyo (par le sud)
                 { lat: 35.62, lng: 139.78 }, // Tokyo
                 { lat: 35.5, lng: 139.7 },   // Intermédiaire
                 { lat: 35.44, lng: 139.64 }  // Yokohama
@@ -1150,9 +1152,13 @@ function getMajorShippingRoutes(year) {
             name: 'Northeast Asia',
             waypoints: [
                 { lat: 38.91, lng: 121.60 }, // Dalian
-                { lat: 37.5, lng: 125.0 },   // Mer Jaune
+                { lat: 36.0, lng: 124.0 },   // Mer Jaune (plus au sud)
+                { lat: 34.5, lng: 126.5 },   // Sud de la Mer Jaune
                 { lat: 35.18, lng: 129.08 }, // Busan
-                { lat: 35.3, lng: 134.0 },   // Mer du Japon
+                { lat: 33.0, lng: 129.5 },   // Détroit de Corée (plus au sud)
+                { lat: 31.0, lng: 131.0 },   // Sud du Japon
+                { lat: 32.0, lng: 135.0 },   // Pacifique sud Japon
+                { lat: 33.5, lng: 138.5 },   // Approche Tokyo (par le sud)
                 { lat: 35.62, lng: 139.78 }  // Tokyo
             ],
             intensity: 200,
@@ -1184,9 +1190,9 @@ function getMajorShippingRoutes(year) {
                 { lat: 1.29, lng: 103.85 },  // Singapore
                 { lat: 1.32, lng: 103.7 },   // Intermédiaire
                 { lat: 1.36, lng: 103.55 },  // Tanjung Pelepas
-                { lat: 3.0, lng: 102.5 },    // Golfe de Thaïlande Sud
-                { lat: 6.0, lng: 101.5 },    // Golfe de Thaïlande
-                { lat: 10.0, lng: 101.0 },   // Approche Laem Chabang
+                { lat: 3.0, lng: 104.0 },    // Golfe de Thaïlande Sud (plus à l'est)
+                { lat: 6.0, lng: 103.5 },    // Golfe de Thaïlande (plus à l'est)
+                { lat: 10.0, lng: 102.5 },   // Approche Laem Chabang
                 { lat: 13.08, lng: 100.88 }  // Laem Chabang
             ],
             intensity: 270,
@@ -1199,9 +1205,11 @@ function getMajorShippingRoutes(year) {
             name: 'Vietnam Coast',
             waypoints: [
                 { lat: 10.77, lng: 106.70 }, // Ho Chi Minh City
-                { lat: 13.0, lng: 107.5 },   // Centre Vietnam
-                { lat: 16.0, lng: 108.0 },   // Da Nang
-                { lat: 19.0, lng: 107.0 },   // Nord Vietnam
+                { lat: 11.0, lng: 108.5 },   // Large du Sud Vietnam (plus à l'est)
+                { lat: 13.0, lng: 110.0 },   // Large du Centre Vietnam (plus à l'est)
+                { lat: 16.0, lng: 110.0 },   // Large de Da Nang
+                { lat: 19.0, lng: 109.5 },   // Mer de Chine (large du Nord Vietnam)
+                { lat: 20.5, lng: 108.0 },   // Approche Hai Phong (plus à l'est)
                 { lat: 20.86, lng: 106.68 }  // Hai Phong
             ],
             intensity: 210,
@@ -1214,7 +1222,8 @@ function getMajorShippingRoutes(year) {
             name: 'Indochina-Philippines',
             waypoints: [
                 { lat: 13.08, lng: 100.88 }, // Laem Chabang
-                { lat: 12.0, lng: 103.5 },   // Golfe Thaïlande Est
+                { lat: 10.0, lng: 102.5 },   // Golfe Thaïlande Sud
+                { lat: 9.0, lng: 104.5 },    // Large du Cambodge
                 { lat: 10.77, lng: 106.70 }, // Ho Chi Minh City
                 { lat: 11.5, lng: 110.0 },   // Mer de Chine Sud
                 { lat: 13.0, lng: 115.0 },   // Approche Philippines
@@ -1246,10 +1255,11 @@ function getMajorShippingRoutes(year) {
             name: 'Indonesia-Malaysia',
             waypoints: [
                 { lat: 1.29, lng: 103.85 },  // Singapore
-                { lat: -2.0, lng: 105.0 },   // Détroit Sunda
+                { lat: -1.0, lng: 106.0 },   // Détroit Sunda (plus au nord)
                 { lat: -6.10, lng: 106.88 }, // Jakarta
-                { lat: -3.0, lng: 104.0 },   // Côte Sumatra
-                { lat: 1.0, lng: 102.0 },    // Détroit Malacca
+                { lat: -3.0, lng: 107.0 },   // Large de Sumatra (plus au nord-est)
+                { lat: 0.0, lng: 105.0 },    // Détroit Malacca (plus au nord-est)
+                { lat: 3.0, lng: 102.0 },    // Mer d'Andaman
                 { lat: 5.42, lng: 100.34 }   // Penang
             ],
             intensity: 220,
@@ -1262,8 +1272,14 @@ function getMajorShippingRoutes(year) {
             name: 'Myanmar-Thailand',
             waypoints: [
                 { lat: 16.78, lng: 96.16 },  // Yangon
-                { lat: 14.0, lng: 97.5 },    // Golfe Martaban
-                { lat: 11.5, lng: 99.0 },    // Golfe Thaïlande Ouest
+                { lat: 14.0, lng: 96.0 },    // Golfe Martaban
+                { lat: 10.0, lng: 96.0 },    // Mer d'Andaman
+                { lat: 6.0, lng: 98.0 },     // Large Thaïlande Sud
+                { lat: 3.0, lng: 100.5 },    // Détroit Malacca Nord
+                { lat: 2.0, lng: 102.0 },    // Détroit Malacca Sud
+                { lat: 4.0, lng: 102.5 },    // Golfe Thaïlande Sud
+                { lat: 8.0, lng: 101.0 },    // Golfe Thaïlande Centre
+                { lat: 11.0, lng: 100.5 },   // Approche Bangkok
                 { lat: 13.08, lng: 100.88 }  // Laem Chabang
             ],
             intensity: 150,
@@ -1291,7 +1307,9 @@ function getMajorShippingRoutes(year) {
             name: 'Thailand-Singapore Express',
             waypoints: [
                 { lat: 13.08, lng: 100.88 }, // Laem Chabang
-                { lat: 8.0, lng: 100.5 },    // Isthme de Kra
+                { lat: 10.0, lng: 102.5 },   // Golfe de Thaïlande
+                { lat: 7.0, lng: 103.5 },    // Approche détroit Malacca
+                { lat: 4.0, lng: 103.0 },    // Détroit Malacca (contournement)
                 { lat: 5.42, lng: 100.34 },  // Penang
                 { lat: 2.99, lng: 101.39 },  // Port Klang
                 { lat: 1.29, lng: 103.85 }   // Singapore
@@ -1306,10 +1324,12 @@ function getMajorShippingRoutes(year) {
             name: 'Indonesia-Philippines',
             waypoints: [
                 { lat: -6.10, lng: 106.88 }, // Jakarta
-                { lat: -2.0, lng: 110.0 },   // Mer de Java
-                { lat: 2.0, lng: 115.0 },    // Bornéo Sud
-                { lat: 6.0, lng: 118.0 },    // Mer de Sulu
-                { lat: 10.0, lng: 120.0 },   // Approche Manila
+                { lat: -2.0, lng: 108.0 },   // Mer de Java (plus à l'ouest)
+                { lat: 1.0, lng: 109.0 },    // Côte ouest Bornéo
+                { lat: 5.0, lng: 112.0 },    // Nord-ouest Bornéo
+                { lat: 7.0, lng: 118.0 },    // Mer de Célèbes (contournement)
+                { lat: 10.0, lng: 119.5 },   // Mer de Sulu (plus à l'ouest)
+                { lat: 12.5, lng: 120.0 },   // Approche Manila (plus à l'ouest)
                 { lat: 14.59, lng: 120.98 }  // Manila
             ],
             intensity: 170,
@@ -1354,8 +1374,12 @@ function getMajorShippingRoutes(year) {
                 { lat: 6.93, lng: 79.85 },   // Colombo
                 { lat: 10.0, lng: 79.5 },    // Intermédiaire
                 { lat: 13.08, lng: 80.27 },  // Chennai
-                { lat: 16.0, lng: 76.0 },    // Côte Inde Ouest
-                { lat: 18.95, lng: 72.95 }   // Jawaharlal Nehru
+                { lat: 11.0, lng: 79.0 },    // Sud Tamil Nadu
+                { lat: 8.0, lng: 77.5 },     // Sud de l'Inde (pointe)
+                { lat: 9.0, lng: 76.0 },     // Côte Kerala
+                { lat: 12.0, lng: 75.0 },    // Karnataka
+                { lat: 15.0, lng: 73.5 },    // Goa
+                { lat: 18.95, lng: 72.95 }   // Jawaharlal Nehru (Mumbai)
             ],
             intensity: 220,
             annualPassages: 4200,
@@ -1382,9 +1406,10 @@ function getMajorShippingRoutes(year) {
             name: 'Indian Ocean Crossing',
             waypoints: [
                 { lat: 6.93, lng: 79.85 },   // Colombo
-                { lat: 5.0, lng: 85.0 },     // Océan Indien
-                { lat: 4.0, lng: 92.0 },     // Approche Malacca
-                { lat: 3.0, lng: 98.0 },     // Détroit Malacca
+                { lat: 8.0, lng: 85.0 },     // Océan Indien
+                { lat: 8.0, lng: 92.0 },     // Mer d'Andaman
+                { lat: 6.0, lng: 97.0 },     // Approche Détroit Malacca
+                { lat: 3.0, lng: 100.5 },    // Détroit Malacca (plus au sud)
                 { lat: 1.29, lng: 103.85 }   // Singapore
             ],
             intensity: 280,
@@ -1399,7 +1424,10 @@ function getMajorShippingRoutes(year) {
                 { lat: 18.95, lng: 72.95 },  // Jawaharlal Nehru
                 { lat: 22.0, lng: 66.0 },    // Mer d'Arabie
                 { lat: 25.28, lng: 55.33 },  // Dubai
-                { lat: 21.0, lng: 58.0 },    // Golfe d'Oman
+                { lat: 25.0, lng: 57.0 },    // Détroit d'Hormuz
+                { lat: 24.0, lng: 59.0 },    // Golfe d'Oman (est)
+                { lat: 21.0, lng: 60.0 },    // Mer d'Arabie (est d'Oman)
+                { lat: 18.0, lng: 59.0 },    // Approche Salalah
                 { lat: 16.95, lng: 54.00 }   // Salalah
             ],
             intensity: 230,
@@ -1414,11 +1442,16 @@ function getMajorShippingRoutes(year) {
             name: 'Arabian Gulf',
             waypoints: [
                 { lat: 25.28, lng: 55.33 },  // Dubai
-                { lat: 23.0, lng: 58.0 },    // Golfe d'Oman
-                { lat: 19.0, lng: 58.0 },    // Mer d'Arabie
+                { lat: 25.5, lng: 56.5 },    // Détroit d'Hormuz
+                { lat: 25.0, lng: 58.5 },    // Golfe d'Oman (nord)
+                { lat: 23.0, lng: 60.0 },    // Golfe d'Oman (est)
+                { lat: 20.0, lng: 60.0 },    // Mer d'Arabie (est d'Oman)
+                { lat: 17.5, lng: 58.0 },    // Approche Salalah
                 { lat: 16.95, lng: 54.00 },  // Salalah
-                { lat: 15.0, lng: 48.0 },    // Golfe d'Aden
-                { lat: 16.0, lng: 42.0 },    // Mer Rouge Sud
+                { lat: 13.0, lng: 50.0 },    // Golfe d'Aden (plus au sud)
+                { lat: 12.5, lng: 45.0 },    // Entrée Mer Rouge
+                { lat: 15.0, lng: 42.0 },    // Mer Rouge Sud
+                { lat: 18.0, lng: 40.0 },    // Mer Rouge Centre
                 { lat: 21.54, lng: 39.17 }   // Jeddah
             ],
             intensity: 210,
@@ -1776,9 +1809,12 @@ function getMajorShippingRoutes(year) {
             waypoints: [
                 { lat: 9.36, lng: -79.90 },  // Colon
                 { lat: 10.39, lng: -75.51 }, // Cartagena
-                { lat: 5.0, lng: -60.0 },    // Atlantique Tropical
-                { lat: -5.0, lng: -40.0 },   // Côte Brésil Nord
-                { lat: -15.0, lng: -38.0 },  // Côte Brésil
+                { lat: 5.0, lng: -45.0 },    // Atlantique Tropical
+                { lat: -5.0, lng: -32.0 },   // Atlantique large de Fortaleza
+                { lat: -12.0, lng: -33.0 },  // Atlantique large de Salvador
+                { lat: -18.0, lng: -35.0 },  // Atlantique large d'Espírito Santo
+                { lat: -22.0, lng: -38.0 },  // Atlantique large de Rio
+                { lat: -24.0, lng: -42.0 },  // Approche Santos
                 { lat: -23.96, lng: -46.33 } // Santos
             ],
             intensity: 180,
@@ -1805,7 +1841,8 @@ function getMajorShippingRoutes(year) {
             name: 'South Atlantic',
             waypoints: [
                 { lat: -23.96, lng: -46.33 },// Santos
-                { lat: -30.0, lng: -50.0 },  // Large Brésil Sud
+                { lat: -28.0, lng: -45.0 },  // Atlantique large du Brésil Sud
+                { lat: -33.0, lng: -48.0 },  // Atlantique large de l'Uruguay
                 { lat: -34.61, lng: -58.37 },// Buenos Aires
                 { lat: -35.0, lng: -40.0 },  // Atlantique Sud
                 { lat: -34.0, lng: -20.0 },  // Approche Afrique
@@ -1822,9 +1859,11 @@ function getMajorShippingRoutes(year) {
             waypoints: [
                 { lat: 40.67, lng: -74.05 }, // New York
                 { lat: 32.03, lng: -81.09 }, // Savannah
-                { lat: 20.0, lng: -65.0 },   // Caraïbes
-                { lat: 5.0, lng: -50.0 },    // Atlantique Équatorial
-                { lat: -10.0, lng: -40.0 },  // Côte Brésil
+                { lat: 20.0, lng: -55.0 },   // Atlantique Nord
+                { lat: 10.0, lng: -45.0 },   // Atlantique Tropical
+                { lat: 0.0, lng: -35.0 },    // Équateur
+                { lat: -10.0, lng: -32.0 },  // Atlantique large du Brésil
+                { lat: -20.0, lng: -35.0 },  // Atlantique Sud
                 { lat: -23.96, lng: -46.33 } // Santos
             ],
             intensity: 160,
@@ -1872,7 +1911,10 @@ function getMajorShippingRoutes(year) {
             name: 'East Africa Coast',
             waypoints: [
                 { lat: -29.86, lng: 31.04 }, // Durban
-                { lat: -20.0, lng: 35.0 },   // Canal Mozambique
+                { lat: -25.0, lng: 34.0 },   // Large du Mozambique
+                { lat: -20.0, lng: 38.0 },   // Canal Mozambique
+                { lat: -15.0, lng: 41.5 },   // Large du Mozambique Nord
+                { lat: -10.0, lng: 42.5 },   // Approche Tanzanie
                 { lat: -6.80, lng: 39.28 },  // Dar es Salaam
                 { lat: -5.0, lng: 39.5 },    // Intermédiaire
                 { lat: -4.04, lng: 39.67 }   // Mombasa
@@ -1890,8 +1932,10 @@ function getMajorShippingRoutes(year) {
                 { lat: -29.86, lng: 31.04 }, // Durban
                 { lat: -15.0, lng: 40.0 },   // Canal Mozambique
                 { lat: -4.04, lng: 39.67 },  // Mombasa
-                { lat: 5.0, lng: 45.0 },     // Océan Indien Ouest
-                { lat: 13.0, lng: 45.0 },    // Golfe Aden
+                { lat: 0.0, lng: 48.0 },     // Océan Indien large de Somalie
+                { lat: 5.0, lng: 52.0 },     // Océan Indien Est Somalie
+                { lat: 10.0, lng: 52.0 },    // Approche Golfe d'Aden
+                { lat: 13.0, lng: 48.0 },    // Entrée Golfe d'Aden
                 { lat: 20.0, lng: 38.0 },    // Mer Rouge
                 { lat: 29.97, lng: 32.55 }   // Suez
             ],
