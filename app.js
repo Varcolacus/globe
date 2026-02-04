@@ -1279,11 +1279,9 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.suez, routePortWeights.suez),
             annualPassages: stats.suez,
             color: '#3498db'
-        }
-        
-        /*
+        },
         // Route Atlantique Nord (Europe ↔ USA)
-        ,{
+        {
             name: 'North Atlantic',
             waypoints: [
                 { lat: 51.5, lng: -0.1 },   // Londres
@@ -1305,13 +1303,12 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 40.7, lng: -74.0 }   // New York
             ],
             intensity: calculateIntensity(stats.atlantic, routePortWeights.atlantic),
-         
-        */
+            annualPassages: stats.atlantic,
+            color: '#2ecc71'
+        }
         
         /*
-           annualPassages: stats.atlantic,
-            color: '#2ecc71'
-        },
+        ,
         // Route Europe → Cap (alternative à Suez)
         {
             name: 'Europe-Asia (Cape)',
