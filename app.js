@@ -1379,10 +1379,7 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.cape, routePortWeights.cape),
             annualPassages: stats.cape,
             color: '#e74c3c'
-        }
-        
-        /*
-        ,
+        },
         // Route Méditerranée (commerce intra-européen)
         {
             name: 'Mediterranean',
@@ -1412,11 +1409,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 41.2, lng: 29.5 },   // Sortie Bosphore Nord
                 { lat: 41.5, lng: 30.5 },   // Mer Noire Ouest
                 { lat: 42.0, lng: 32.0 },   // Mer Noire Centre-Ouest
-         
-        */
-        
-        /*
-               { lat: 43.0, lng: 34.0 },   // Mer Noire Nord-Ouest
+                { lat: 43.0, lng: 34.0 },   // Mer Noire Nord-Ouest
                 { lat: 44.5, lng: 36.0 },   // Mer Noire Nord (Crimée)
                 { lat: 45.5, lng: 37.5 },   // Mer d'Azov (optionnel)
                 { lat: 44.0, lng: 38.5 },   // Mer Noire Nord-Est
@@ -1426,7 +1419,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        },
+        }
+        
+        /*
+        ,
         // Route Transpacifique (Asie ↔ USA)
         {
             name: 'Transpacific',
