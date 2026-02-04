@@ -623,8 +623,8 @@ const sharedShipMaterial = new THREE.MeshBasicMaterial({
 });
 
 // Seuils de distance pour LOD (en unités du globe)
-const LOD_DISTANCE_HIGH = 150;   // < 150 = haute qualité
-const LOD_DISTANCE_MEDIUM = 300; // 150-300 = moyenne qualité
+const LOD_DISTANCE_HIGH = 800;   // < 800 = haute qualité
+const LOD_DISTANCE_MEDIUM = 1500; // 800-1500 = moyenne qualité
                                  // > 300 = basse qualité
 
 // ===== OBJECT POOLING SYSTEM =====
@@ -2091,7 +2091,7 @@ async function initializeShips() {
                 route: route,
                 speed: speed,
                 offset: offset,
-                size: 0.020 + Math.random() * 0.010, // Taille plus grande et variable
+                size: 0.15 + Math.random() * 0.1, // Taille beaucoup plus grande pour être visible
                 color: route.color,
                 direction: 1, // Unidirectionnel - les routes sont divisées en Est/Ouest
                 isReal: false
