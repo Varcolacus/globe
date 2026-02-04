@@ -603,8 +603,8 @@ let instancedShips = null;
 let shipCount = 0;
 const maxShips = 500; // Capacité maximale
 
-// Créer la géométrie partagée une seule fois - TAILLE AUGMENTÉE
-const sharedShipGeometry = new THREE.SphereGeometry(2.0, 8, 8); // 4x plus gros
+// Créer la géométrie partagée une seule fois - TAILLE ÉQUILIBRÉE
+const sharedShipGeometry = new THREE.SphereGeometry(1.0, 8, 8); // Taille optimale
 const sharedShipMaterial = new THREE.MeshBasicMaterial({ 
     color: 0xff6600, // Couleur orange par défaut
     vertexColors: false // Désactiver pour l'instant
