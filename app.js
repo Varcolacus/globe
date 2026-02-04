@@ -7,6 +7,27 @@ const countryRegions = {
     'Océanie': ['Australie', 'Fidji', 'Kiribati', 'Îles Marshall', 'Micronésie', 'Nauru', 'Nouvelle-Zélande', 'Palaos', 'Papouasie-Nouvelle-Guinée', 'Samoa', 'Îles Salomon', 'Tonga', 'Tuvalu', 'Vanuatu']
 };
 
+// Groupes de revenu selon la Banque mondiale
+const incomeGroups = {
+    'Revenu élevé': ['Allemagne', 'Andorre', 'Arabie saoudite', 'Argentine', 'Australie', 'Autriche', 'Bahamas', 'Bahreïn', 'Barbade', 'Belgique', 'Brunei', 'Canada', 'Chili', 'Chypre', 'Corée du Sud', 'Croatie', 'Danemark', 'Émirats arabes unis', 'Espagne', 'Estonie', 'États-Unis', 'Finlande', 'France', 'Grèce', 'Hongrie', 'Irlande', 'Islande', 'Israël', 'Italie', 'Japon', 'Koweït', 'Lettonie', 'Liechtenstein', 'Lituanie', 'Luxembourg', 'Malte', 'Monaco', 'Nauru', 'Norvège', 'Nouvelle-Zélande', 'Oman', 'Pays-Bas', 'Pologne', 'Portugal', 'Qatar', 'Roumanie', 'Royaume-Uni', 'Saint-Kitts-et-Nevis', 'Saint-Marin', 'Seychelles', 'Singapour', 'Slovaquie', 'Slovénie', 'Suède', 'Suisse', 'Taïwan', 'Tchéquie', 'Trinité-et-Tobago', 'Uruguay', 'Vatican'],
+    'Revenu intermédiaire supérieur': ['Afrique du Sud', 'Albanie', 'Algérie', 'Arménie', 'Azerbaïdjan', 'Biélorussie', 'Belize', 'Bosnie-Herzégovine', 'Botswana', 'Brésil', 'Bulgarie', 'Chine', 'Colombie', 'Costa Rica', 'Cuba', 'Dominique', 'Équateur', 'Fidji', 'Gabon', 'Grenade', 'Guatemala', 'Guyana', 'Indonésie', 'Irak', 'Iran', 'Jamaïque', 'Jordanie', 'Kazakhstan', 'Liban', 'Libye', 'Macédoine du Nord', 'Malaisie', 'Maldives', 'Maurice', 'Mexique', 'Moldavie', 'Mongolie', 'Monténégro', 'Namibie', 'Palaos', 'Panama', 'Paraguay', 'Pérou', 'République dominicaine', 'Russie', 'Sainte-Lucie', 'Saint-Vincent-et-les-Grenadines', 'Samoa', 'Serbie', 'Suriname', 'Thaïlande', 'Tonga', 'Turquie', 'Turkménistan', 'Tuvalu'],
+    'Revenu intermédiaire inférieur': ['Angola', 'Bangladesh', 'Bénin', 'Bhoutan', 'Bolivie', 'Cabo Verde', 'Cambodge', 'Cameroun', 'Comores', 'Congo', 'Côte d\'Ivoire', 'Djibouti', 'Égypte', 'Salvador', 'Eswatini', 'Ghana', 'Honduras', 'Inde', 'Kenya', 'Kirghizistan', 'Kiribati', 'Laos', 'Lesotho', 'Maroc', 'Mauritanie', 'Micronésie', 'Myanmar', 'Nepal', 'Nicaragua', 'Nigeria', 'Pakistan', 'Papouasie-Nouvelle-Guinée', 'Philippines', 'Sao Tomé-et-Principe', 'Sénégal', 'Îles Salomon', 'Sri Lanka', 'Tanzanie', 'Tadjikistan', 'Timor oriental', 'Tunisie', 'Ukraine', 'Ouzbékistan', 'Vanuatu', 'Vietnam', 'Zambie', 'Zimbabwe'],
+    'Revenu faible': ['Afghanistan', 'Burkina Faso', 'Burundi', 'Centrafrique', 'Tchad', 'RD Congo', 'Érythrée', 'Éthiopie', 'Gambie', 'Guinée', 'Guinée-Bissau', 'Haïti', 'Corée du Nord', 'Libéria', 'Madagascar', 'Malawi', 'Mali', 'Mozambique', 'Niger', 'Rwanda', 'Sierra Leone', 'Somalie', 'Soudan du Sud', 'Soudan', 'Syrie', 'Togo', 'Ouganda', 'Yémen']
+};
+
+// Groupes économiques
+const economicGroups = {
+    'G7': ['Allemagne', 'Canada', 'États-Unis', 'France', 'Italie', 'Japon', 'Royaume-Uni'],
+    'G20': ['Afrique du Sud', 'Allemagne', 'Arabie saoudite', 'Argentine', 'Australie', 'Brésil', 'Canada', 'Chine', 'Corée du Sud', 'États-Unis', 'France', 'Inde', 'Indonésie', 'Italie', 'Japon', 'Mexique', 'Royaume-Uni', 'Russie', 'Turquie'],
+    'BRICS': ['Afrique du Sud', 'Brésil', 'Chine', 'Inde', 'Russie'],
+    'Union Européenne': ['Allemagne', 'Autriche', 'Belgique', 'Bulgarie', 'Chypre', 'Croatie', 'Danemark', 'Espagne', 'Estonie', 'Finlande', 'France', 'Grèce', 'Hongrie', 'Irlande', 'Italie', 'Lettonie', 'Lituanie', 'Luxembourg', 'Malte', 'Pays-Bas', 'Pologne', 'Portugal', 'Roumanie', 'Slovaquie', 'Slovénie', 'Suède', 'Tchéquie'],
+    'Zone Euro': ['Allemagne', 'Autriche', 'Belgique', 'Bulgarie', 'Chypre', 'Croatie', 'Espagne', 'Estonie', 'Finlande', 'France', 'Grèce', 'Irlande', 'Italie', 'Lettonie', 'Lituanie', 'Luxembourg', 'Malte', 'Pays-Bas', 'Portugal', 'Slovaquie', 'Slovénie'],
+    'OPEP': ['Algérie', 'Angola', 'Arabie saoudite', 'Congo', 'Émirats arabes unis', 'Gabon', 'Guinée équatoriale', 'Iran', 'Irak', 'Koweït', 'Libye', 'Nigeria', 'Venezuela'],
+    'ASEAN': ['Brunei', 'Cambodge', 'Indonésie', 'Laos', 'Malaisie', 'Myanmar', 'Philippines', 'Singapour', 'Thaïlande', 'Vietnam'],
+    'Pays du Golfe': ['Arabie saoudite', 'Bahreïn', 'Émirats arabes unis', 'Koweït', 'Oman', 'Qatar'],
+    'Maghreb': ['Algérie', 'Libye', 'Maroc', 'Mauritanie', 'Tunisie']
+};
+
 const countries = [
     { lat: 46.2276, lng: 2.2137, name: 'France', capital: 'Paris', flag: '🇫🇷', region: 'Europe' , region: 'Europe' },
     { lat: 33.9391, lng: 67.7100, name: 'Afghanistan', capital: 'Kabul', flag: '🇦🇫' , region: 'Asie' },
@@ -215,7 +236,8 @@ const connections = countries
 let balanceData = [];
 let currentDataType = 'balance'; // balance, exports, imports, volume
 let currentYear = 2025;
-let currentRegion = 'Tous';
+let currentFilterType = 'all'; // all, region, income, group, country
+let currentFilterValue = null;
 
 async function loadBalanceData(year = currentYear) {
     try {
@@ -231,12 +253,27 @@ async function loadBalanceData(year = currentYear) {
 function updateGlobeWithBalanceData(dataType = 'balance') {
     currentDataType = dataType;
     
-    // Filtrer les pays avec du commerce réel (volume > 0) et par région
+    // Filtrer les pays avec du commerce réel (volume > 0)
     let countriesWithTrade = balanceData.filter(c => c.volume > 0 && c.name !== 'France');
     
-    // Appliquer le filtre de région
-    if (currentRegion !== 'Tous') {
-        countriesWithTrade = countriesWithTrade.filter(c => c.region === currentRegion);
+    // Appliquer le filtre selon le type
+    if (currentFilterType !== 'all' && currentFilterValue) {
+        switch(currentFilterType) {
+            case 'region':
+                countriesWithTrade = countriesWithTrade.filter(c => c.region === currentFilterValue);
+                break;
+            case 'income':
+                const incomeCountries = incomeGroups[currentFilterValue] || [];
+                countriesWithTrade = countriesWithTrade.filter(c => incomeCountries.includes(c.name));
+                break;
+            case 'group':
+                const groupCountries = economicGroups[currentFilterValue] || [];
+                countriesWithTrade = countriesWithTrade.filter(c => groupCountries.includes(c.name));
+                break;
+            case 'country':
+                countriesWithTrade = countriesWithTrade.filter(c => c.name === currentFilterValue);
+                break;
+        }
     }
     
     // Calculer les valeurs min/max selon le type de données
@@ -528,11 +565,81 @@ document.getElementById('year-selector').addEventListener('change', (e) => {
     loadBalanceData(selectedYear);
 });
 
-document.getElementById('region-selector').addEventListener('change', (e) => {
-    currentRegion = e.target.value;
-    console.log(`🌍 Filtre région: ${currentRegion}`);
+// Gestionnaire pour le type de filtre
+document.getElementById('filter-type-selector').addEventListener('change', (e) => {
+    const filterType = e.target.value;
+    currentFilterType = filterType;
+    const valueSelector = document.getElementById('filter-value-selector');
+    
+    if (filterType === 'all') {
+        valueSelector.style.display = 'none';
+        currentFilterValue = null;
+        updateGlobeWithBalanceData(currentDataType);
+    } else {
+        valueSelector.style.display = 'block';
+        updateFilterOptions(filterType);
+    }
+});
+
+// Gestionnaire pour la valeur du filtre
+document.getElementById('filter-value-selector').addEventListener('change', (e) => {
+    currentFilterValue = e.target.value;
+    console.log(`🎯 Filtre ${currentFilterType}: ${currentFilterValue}`);
     updateGlobeWithBalanceData(currentDataType);
 });
+
+// Fonction pour mettre à jour les options du sélecteur de valeur
+function updateFilterOptions(filterType) {
+    const valueSelector = document.getElementById('filter-value-selector');
+    valueSelector.innerHTML = '';
+    
+    switch(filterType) {
+        case 'region':
+            Object.keys(countryRegions).forEach(region => {
+                const option = document.createElement('option');
+                option.value = region;
+                const emoji = {'Europe': '🇪🇺', 'Asie': '🌏', 'Afrique': '🌍', 'Amériques': '🌎', 'Océanie': '🏝️'}[region];
+                option.textContent = `${emoji} ${region}`;
+                valueSelector.appendChild(option);
+            });
+            break;
+        case 'income':
+            Object.keys(incomeGroups).forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = `💰 ${group}`;
+                valueSelector.appendChild(option);
+            });
+            break;
+        case 'group':
+            Object.keys(economicGroups).forEach(group => {
+                const option = document.createElement('option');
+                option.value = group;
+                option.textContent = `🤝 ${group}`;
+                valueSelector.appendChild(option);
+            });
+            break;
+        case 'country':
+            // Trier les pays alphabétiquement (sauf France)
+            const sortedCountries = countries
+                .filter(c => c.name !== 'France')
+                .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+            
+            sortedCountries.forEach(country => {
+                const option = document.createElement('option');
+                option.value = country.name;
+                option.textContent = `${country.flag} ${country.name}`;
+                valueSelector.appendChild(option);
+            });
+            break;
+    }
+    
+    // Déclencher le changement avec la première option
+    if (valueSelector.options.length > 0) {
+        currentFilterValue = valueSelector.options[0].value;
+        updateGlobeWithBalanceData(currentDataType);
+    }
+}
 
 document.getElementById('modal-year-selector').addEventListener('change', (e) => {
     const selectedYear = parseInt(e.target.value);

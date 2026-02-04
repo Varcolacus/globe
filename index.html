@@ -33,14 +33,16 @@
                 <option value="2021">2021</option>
                 <option value="2020">2020</option>
             </select>
-            <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">🌍 Région:</h3>
-            <select id="region-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px;">
-                <option value="Tous">🌐 Tous les pays</option>
-                <option value="Europe">🇪🇺 Europe</option>
-                <option value="Asie">🌏 Asie</option>
-                <option value="Afrique">🌍 Afrique</option>
-                <option value="Amériques">🌎 Amériques</option>
-                <option value="Océanie">🏝️ Océanie</option>
+            <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">� Filtrer par:</h3>
+            <select id="filter-type-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 10px;">
+                <option value="all">🌐 Tous les pays</option>
+                <option value="region">🌍 Région géographique</option>
+                <option value="income">💰 Groupe de revenu</option>
+                <option value="group">🤝 Groupe économique</option>
+                <option value="country">🏳️ Pays individuel</option>
+            </select>
+            <select id="filter-value-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px; display: none;">
+                <!-- Options remplies dynamiquement -->
             </select>
             <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">Visualiser:</h3>
             <div style="display: flex; flex-direction: column; gap: 8px;">
