@@ -1991,20 +1991,7 @@ function animateShips() {
     }
     
     // Mode simulation: routes prédéfinies
-    const ships = shipAnimations.filter((shipAnim, i) => {
-        const route = shipAnim.route;
-        const totalTime = shipAnim.speed;
-        const currentTime = (Date.now() + shipAnim.offset) % totalTime;
-        let progress = currentTime / totalTime;
-        
-        // IMPORTANT: FILTER OUT ships pendant la transition (95%-100%)
-        // Ne pas les inclure du tout dans le tableau ships
-        if (progress > 0.95) {
-            return false; // Exclure ce bateau complètement
-        }
-        
-        return true; // Garder ce bateau
-    }).map((shipAnim, i) => {
+    const ships = shipAnimations.map((shipAnim, i) => {
         const route = shipAnim.route;
         const totalTime = shipAnim.speed;
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
@@ -2013,12 +2000,24 @@ function animateShips() {
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
         
-        // Altitude légèrement au-dessus de l'eau avec effet de vague
-        const waveEffect = Math.sin(progress * Math.PI * 6 + Date.now() * 0.001) * 0.0008;
-        const alt = 0.01 + waveEffect;
+        // Altitude avec fade out/in: bateaux "plongent" sous l'eau pendant la transition
+        let alt;
+        if (progress > 0.92) {
+            // Transition finale: descendre sous l'eau de 0.92 à 1.0
+            const fadeProgress = (progress - 0.92) / 0.08; // 0.0 à 1.0
+            alt = 0.01 - (fadeProgress * 0.05); // Descend de 0.01 à -0.04 (sous l'eau)
+        } else if (progress < 0.08) {
+            // Transition initiale: remonter de sous l'eau de 0.0 à 0.08
+            const fadeProgress = progress / 0.08; // 0.0 à 1.0
+            alt = -0.04 + (fadeProgress * 0.05); // Monte de -0.04 à 0.01
+        } else {
+            // Navigation normale avec effet de vague
+            const waveEffect = Math.sin(progress * Math.PI * 6 + Date.now() * 0.001) * 0.0008;
+            alt = 0.01 + waveEffect;
+        }
         
         // Calculer l'angle de direction pour orienter le bateau
-        const nextProgress = Math.min(progress + 0.005, 0.95);
+        const nextProgress = Math.min(progress + 0.005, 1.0);
         const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
         
