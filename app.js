@@ -1984,18 +1984,24 @@ function animateShips() {
     }
     
     // Mode simulation: routes prédéfinies
-    const ships = shipAnimations.map((shipAnim, i) => {
+    const ships = shipAnimations.filter((shipAnim, i) => {
         const route = shipAnim.route;
         const totalTime = shipAnim.speed;
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
         let progress = currentTime / totalTime;
         
-        // IMPORTANT: Pour les routes avec grand écart géographique (ex: Transpacific)
-        // Ne pas faire de transition visible. Quand progress approche 1, reset proprement.
+        // IMPORTANT: FILTER OUT ships pendant la transition (95%-100%)
+        // Ne pas les inclure du tout dans le tableau ships
         if (progress > 0.95) {
-            // Forcer le bateau au début de la route (comme s'il venait de commencer)
-            progress = 0;
+            return false; // Exclure ce bateau complètement
         }
+        
+        return true; // Garder ce bateau
+    }).map((shipAnim, i) => {
+        const route = shipAnim.route;
+        const totalTime = shipAnim.speed;
+        const currentTime = (Date.now() + shipAnim.offset) % totalTime;
+        let progress = currentTime / totalTime;
         
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
