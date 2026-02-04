@@ -990,7 +990,7 @@ const shipGeometryLOD = [
     new THREE.SphereGeometry(2.0, 8, 8),   // Moyenne qualité
     new THREE.SphereGeometry(2.0, 4, 4)    // Basse qualité (loin)
 ];
-const portGeometry = new THREE.CircleGeometry(0.4, 8); // Taille réduite pour ne pas couvrir les pays
+const portGeometry = new THREE.CircleGeometry(0.8, 8); // Taille équilibrée - visible mais pas envahissant
 
 function initializeInstancedRendering(scene) {
     if (!scene) {
@@ -1356,7 +1356,7 @@ function animateShips() {
                 radius * Math.sin(phi) * Math.sin(theta)
             );
             
-            const size = Math.min(0.3 + (port.teu / 10000000) * 0.4, 0.8); // Taille réduite pour ne pas couvrir les pays
+            const size = Math.min(0.8 + (port.teu / 10000000) * 1.0, 2.0); // Visible mais pas trop gros
             dummy.scale.set(size, size, 1);
             dummy.lookAt(0, 0, 0);
             
