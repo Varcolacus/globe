@@ -1279,9 +1279,11 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.suez, routePortWeights.suez),
             annualPassages: stats.suez,
             color: '#3498db'
-        },
+        }
+        
+        /*
         // Route Atlantique Nord (Europe ↔ USA)
-        {
+        ,{
             name: 'North Atlantic',
             waypoints: [
                 { lat: 51.5, lng: -0.1 },   // Londres
@@ -1303,7 +1305,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 40.7, lng: -74.0 }   // New York
             ],
             intensity: calculateIntensity(stats.atlantic, routePortWeights.atlantic),
-            annualPassages: stats.atlantic,
+         
+        */
+        
+        /*
+           annualPassages: stats.atlantic,
             color: '#2ecc71'
         },
         // Route Europe → Cap (alternative à Suez)
@@ -1373,7 +1379,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 0.0, lng: 70.0 },    // Océan Indien
                 { lat: 2.5, lng: 80.0 },    // Entre Océan-Approche Malacca
                 { lat: 5.0, lng: 90.0 },    // Approche Malacca
-                { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
+         
+        */
+        
+        /*
+               { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
                 { lat: 1.3, lng: 103.8 }    // Singapour
             ],
             intensity: calculateIntensity(stats.cape, routePortWeights.cape),
@@ -1409,7 +1419,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 41.2, lng: 29.5 },   // Sortie Bosphore Nord
                 { lat: 41.5, lng: 30.5 },   // Mer Noire Ouest
                 { lat: 42.0, lng: 32.0 },   // Mer Noire Centre-Ouest
-                { lat: 43.0, lng: 34.0 },   // Mer Noire Nord-Ouest
+         
+        */
+        
+        /*
+               { lat: 43.0, lng: 34.0 },   // Mer Noire Nord-Ouest
                 { lat: 44.5, lng: 36.0 },   // Mer Noire Nord (Crimée)
                 { lat: 45.5, lng: 37.5 },   // Mer d'Azov (optionnel)
                 { lat: 44.0, lng: 38.5 },   // Mer Noire Nord-Est
@@ -1455,7 +1469,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 40.5, lng: -158.0 }, // Pacifique Est
                 { lat: 40.0, lng: -154.5 }, // Entre Est-Approche Hawaï
                 { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
-                { lat: 39.0, lng: -147.5 }, // Entre Hawaï-Pacifique NE
+         
+        */
+        
+        /*
+               { lat: 39.0, lng: -147.5 }, // Entre Hawaï-Pacifique NE
                 { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
                 { lat: 38.0, lng: -140.5 }, // Entre NE-Approche USA
                 { lat: 37.5, lng: -137.0 }, // Approche USA
@@ -1509,7 +1527,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 11.0, lng: -72.0 },  // Caraïbes Colombie
                 { lat: 12.5, lng: -68.0 },  // Caraïbes Venezuela
                 { lat: 14.0, lng: -65.0 },  // Petites Antilles
-                { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
+         
+        */
+        
+        /*
+               { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
                 { lat: 17.0, lng: -57.0 },  // Caraïbes Est
                 { lat: 18.5, lng: -53.0 },  // Sortie Caraïbes
                 { lat: 20.0, lng: -48.0 },  // Atlantique Tropical Ouest
@@ -1544,7 +1566,11 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 52.45, lng: 5.5 },   // Entre Rotterdam-Mer Nord
                 { lat: 53.0, lng: 6.5 },    // Mer du Nord
                 { lat: 53.3, lng: 8.2 },    // Entre Mer Nord-Hamburg
-                { lat: 53.6, lng: 9.9 },    // Hamburg
+         
+        */
+        
+        /*
+               { lat: 53.6, lng: 9.9 },    // Hamburg
                 { lat: 54.05, lng: 10.7 },  // Entre Hamburg-Kiel
                 { lat: 54.5, lng: 11.5 },   // Kiel
                 { lat: 55.1, lng: 12.05 },  // Entre Kiel-Copenhague
@@ -1619,6 +1645,7 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.westAfrica,
             color: '#e67e22'
         }
+        */
     ];
 }
 
