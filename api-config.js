@@ -88,3 +88,117 @@ const API_CONFIG = {
         });
     }
 };
+
+// Configuration pour l'API VesselFinder (gratuit, limité)
+const VESSEL_CONFIG = {
+    // VesselFinder API publique (limitée, pas de clé requise pour endpoints basiques)
+    baseUrl: 'https://www.vesselfinder.com/api/pub/vesselsonmap',
+    
+    // Zones géographiques pour filtrer (bounding boxes)
+    zones: {
+        mediterranean: { zoom: 5, centerLat: 38, centerLon: 15 },
+        northAtlantic: { zoom: 4, centerLat: 45, centerLon: -35 },
+        channel: { zoom: 7, centerLat: 50, centerLon: 0 },
+        suez: { zoom: 7, centerLat: 30, centerLon: 32 },
+        worldWide: { zoom: 2, centerLat: 30, centerLon: 0 }
+    },
+    
+    // Fonction pour récupérer les positions des navires
+    async fetchVessels(zone = 'worldWide') {
+        try {
+            const z = this.zones[zone];
+            // VesselFinder API publique (données limitées mais gratuites)
+            const url = `${this.baseUrl}?zoom=${z.zoom}&lat=${z.centerLat}&lon=${z.centerLon}`;
+            
+            console.log(`🔍 Tentative VesselFinder: ${zone}...`);
+            
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (!response.ok) {
+                console.warn(`⚠️ VesselFinder ${zone}: HTTP ${response.status}`);
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            // Parser les données VesselFinder
+            if (data && Array.isArray(data)) {
+                const vessels = data.map(v => ({
+                    mmsi: v.mmsi || v.MMSI || v[0],
+                    lat: parseFloat(v.lat || v.LAT || v[1]),
+                    lng: parseFloat(v.lon || v.LON || v[2]),
+                    speed: parseFloat(v.speed || v.SPEED || v[3] || 0),
+                    course: parseFloat(v.course || v.COURSE || v[4] || 0),
+                    heading: parseFloat(v.heading || v.HEADING || v[4] || 0),
+                    shipType: v.type || v.TYPE || v[5] || 'Unknown',
+                    name: v.name || v.SHIPNAME || 'Unknown'
+                })).filter(v => v.lat && v.lng && !isNaN(v.lat) && !isNaN(v.lng));
+                
+                console.log(`✅ VesselFinder ${zone}: ${vessels.length} navires`);
+                return vessels;
+            }
+            
+            console.warn(`⚠️ VesselFinder ${zone}: format inattendu`);
+            return null;
+        } catch (error) {
+            console.warn(`❌ Erreur VesselFinder ${zone}:`, error.message);
+            return null;
+        }
+    },
+    
+    // Cache pour éviter trop de requêtes
+    cache: {
+        data: null,
+        timestamp: 0,
+        ttl: 120000 // 2 minutes (API limitée)
+    },
+    
+    // Fonction avec cache
+    async getCachedVessels() {
+        const now = Date.now();
+        if (this.cache.data && (now - this.cache.timestamp) < this.cache.ttl) {
+            console.log(`♻️ Utilisation cache: ${this.cache.data.length} navires`);
+            return this.cache.data;
+        }
+        
+        // Essayer la vue mondiale d'abord (plus de données)
+        console.log('🌍 Récupération données VesselFinder...');
+        let allVessels = await this.fetchVessels('worldWide');
+        
+        // Si échec ou peu de données, essayer zones spécifiques
+        if (!allVessels || allVessels.length < 10) {
+            console.log('🔄 Tentative zones spécifiques...');
+            allVessels = [];
+            const zones = ['mediterranean', 'northAtlantic', 'channel'];
+            
+            for (const zone of zones) {
+                const vessels = await this.fetchVessels(zone);
+                if (vessels) {
+                    allVessels = allVessels.concat(vessels);
+                }
+                // Petite pause pour éviter rate limiting
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        if (allVessels && allVessels.length > 0) {
+            // Dédupliquer par MMSI
+            const uniqueVessels = Array.from(
+                new Map(allVessels.map(v => [v.mmsi, v])).values()
+            );
+            
+            this.cache.data = uniqueVessels;
+            this.cache.timestamp = now;
+            console.log(`✅ ${uniqueVessels.length} navires uniques récupérés`);
+            return uniqueVessels;
+        }
+        
+        console.warn('⚠️ Aucune donnée VesselFinder disponible');
+        return null;
+    }
+};

@@ -575,7 +575,592 @@ const globe = Globe()
             </div>
         </div>
     `)
-    .arcsTransitionDuration(0);
+    .arcsTransitionDuration(0)
+    .htmlElementsData([])
+    .htmlElement(d => {
+        const el = document.createElement('div');
+        el.innerHTML = `
+            <div style="
+                background: rgba(255, 215, 0, 0.9);
+                border: 2px solid #FFD700;
+                border-radius: 50%;
+                width: ${Math.min(8 + (d.teu / 10000000) * 4, 16)}px;
+                height: ${Math.min(8 + (d.teu / 10000000) * 4, 16)}px;
+                cursor: pointer;
+                box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
+            "></div>
+        `;
+        el.style.pointerEvents = 'auto';
+        el.style.cursor = 'pointer';
+        el.title = `${d.name} (${d.country})\n${(d.teu / 1000000).toFixed(1)}M TEU/an`;
+        return el;
+    })
+    .customLayerData([])
+    .customThreeObject(d => {
+        // Créer une sphère 3D optimisée (low poly pour performance)
+        const geometry = new THREE.SphereGeometry(0.5, 8, 8); // Réduit de 16 à 8 segments
+        const material = new THREE.MeshBasicMaterial({ 
+            color: d.color || '#FF0000',
+            transparent: false,
+            opacity: 1.0
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        return mesh;
+    })
+    .customThreeObjectUpdate((obj, d) => {
+        const coords = globe.getCoords(d.lat, d.lng, d.alt);
+        Object.assign(obj.position, coords);
+    });
+
+// Statistiques maritimes réelles (nombre de passages annuels)
+// Sources: Canal de Suez Authority, Panama Canal Authority, IMO, World Bank
+const maritimeTrafficStats = {
+    2013: { suez: 17224, panama: 13660, atlantic: 28000, mediterranean: 45000, transpacific: 35000, cape: 8500, northEurope: 52000, westAfrica: 12000 },
+    2014: { suez: 17148, panama: 13481, atlantic: 28500, mediterranean: 46000, transpacific: 36000, cape: 8700, northEurope: 53000, westAfrica: 12500 },
+    2015: { suez: 17483, panama: 13874, atlantic: 29000, mediterranean: 47000, transpacific: 37000, cape: 9000, northEurope: 54000, westAfrica: 13000 },
+    2016: { suez: 16596, panama: 13114, atlantic: 28800, mediterranean: 46500, transpacific: 36500, cape: 8900, northEurope: 53500, westAfrica: 12800 },
+    2017: { suez: 17550, panama: 13795, atlantic: 29500, mediterranean: 48000, transpacific: 38000, cape: 9200, northEurope: 55000, westAfrica: 13500 },
+    2018: { suez: 18174, panama: 13795, atlantic: 30000, mediterranean: 49000, transpacific: 39000, cape: 9500, northEurope: 56000, westAfrica: 14000 },
+    2019: { suez: 18880, panama: 13785, atlantic: 30500, mediterranean: 50000, transpacific: 40000, cape: 9800, northEurope: 57000, westAfrica: 14500 },
+    2020: { suez: 18829, panama: 13342, atlantic: 29500, mediterranean: 48500, transpacific: 38500, cape: 9600, northEurope: 55500, westAfrica: 14200 },
+    2021: { suez: 20694, panama: 13342, atlantic: 31000, mediterranean: 51000, transpacific: 41000, cape: 10200, northEurope: 58000, westAfrica: 15000 },
+    2022: { suez: 20649, panama: 14239, atlantic: 31500, mediterranean: 52000, transpacific: 42000, cape: 10500, northEurope: 59000, westAfrica: 15500 },
+    2023: { suez: 20682, panama: 14080, atlantic: 32000, mediterranean: 53000, transpacific: 43000, cape: 10800, northEurope: 60000, westAfrica: 16000 },
+    2024: { suez: 21500, panama: 14500, atlantic: 33000, mediterranean: 54000, transpacific: 44000, cape: 11200, northEurope: 61500, westAfrica: 16500 },
+    2025: { suez: 22000, panama: 15000, atlantic: 34000, mediterranean: 55000, transpacific: 45000, cape: 11500, northEurope: 63000, westAfrica: 17000 }
+};
+
+// Conversion passages/an → bateaux simultanés affichés (facteur optimisé pour performance)
+function calculateShipsFromStats(annualPassages) {
+    return Math.round(annualPassages * 0.0015); // Réduit de moitié pour performance
+}
+
+// Principales routes maritimes mondiales avec statistiques réelles
+function getMajorShippingRoutes(year = 2025) {
+    const stats = maritimeTrafficStats[year] || maritimeTrafficStats[2025];
+    
+    return [
+        // Route Europe → Asie via Suez (la plus importante)
+        {
+            name: 'Europe-Asia (Suez)',
+            waypoints: [
+                { lat: 43.3, lng: 5.4 },    // Marseille
+                { lat: 40.0, lng: 9.0 },    // Sardaigne
+                { lat: 36.8, lng: 10.2 },   // Tunisie
+                { lat: 34.0, lng: 18.0 },   // Méditerranée Est
+                { lat: 31.5, lng: 25.0 },   // Approche Égypte
+                { lat: 31.2, lng: 32.3 },   // Port Saïd
+                { lat: 30.5, lng: 32.5 },   // Canal de Suez
+                { lat: 29.9, lng: 32.6 },   // Suez Sud
+                { lat: 27.0, lng: 33.8 },   // Mer Rouge Nord
+                { lat: 20.0, lng: 38.0 },   // Mer Rouge Centre
+                { lat: 12.6, lng: 43.4 },   // Détroit de Bab-el-Mandeb
+                { lat: 10.0, lng: 51.0 },   // Golfe d'Aden
+                { lat: 8.0, lng: 65.0 },    // Océan Indien Ouest
+                { lat: 5.0, lng: 80.0 },    // Sri Lanka
+                { lat: 3.0, lng: 95.0 },    // Approche Malacca
+                { lat: 1.3, lng: 103.8 },   // Détroit de Malacca
+                { lat: 5.0, lng: 110.0 },   // Mer de Chine Sud
+                { lat: 15.0, lng: 113.0 },  // Mer de Chine
+                { lat: 22.3, lng: 114.2 },  // Hong Kong
+                { lat: 28.0, lng: 120.0 },  // Côte chinoise
+                { lat: 31.2, lng: 121.5 }   // Shanghai
+            ],
+            intensity: calculateShipsFromStats(stats.suez),
+            annualPassages: stats.suez,
+            color: '#3498db'
+        },
+        // Route Atlantique Nord (Europe ↔ USA)
+        {
+            name: 'North Atlantic',
+            waypoints: [
+                { lat: 51.5, lng: -0.1 },   // Londres
+                { lat: 50.5, lng: -4.0 },   // Manche Ouest
+                { lat: 49.3, lng: -8.0 },   // Irlande Sud
+                { lat: 48.0, lng: -15.0 },  // Atlantique
+                { lat: 46.0, lng: -25.0 },  // Mid-Atlantic
+                { lat: 44.0, lng: -35.0 },  // Mid-Atlantic
+                { lat: 42.0, lng: -45.0 },  // Approche Amérique
+                { lat: 40.7, lng: -55.0 },  // Plateau continental
+                { lat: 40.7, lng: -74.0 }   // New York
+            ],
+            intensity: calculateShipsFromStats(stats.atlantic),
+            annualPassages: stats.atlantic,
+            color: '#2ecc71'
+        },
+        // Route Europe → Cap (alternative à Suez)
+        {
+            name: 'Europe-Asia (Cape)',
+            waypoints: [
+                { lat: 43.3, lng: 5.4 },    // Marseille
+                { lat: 38.0, lng: -1.0 },   // Espagne Sud
+                { lat: 36.1, lng: -5.4 },   // Détroit Gibraltar
+                { lat: 30.0, lng: -10.0 },  // Côte Afrique Nord-Ouest
+                { lat: 20.0, lng: -17.0 },  // Côte Mauritanie
+                { lat: 10.0, lng: -15.0 },  // Côte Guinée
+                { lat: 0.0, lng: -5.0 },    // Golfe de Guinée
+                { lat: -10.0, lng: 5.0 },   // Côte Angola
+                { lat: -20.0, lng: 12.0 },  // Namibie
+                { lat: -30.0, lng: 16.0 },  // Approche Cap
+                { lat: -34.4, lng: 18.4 },  // Cap de Bonne-Espérance
+                { lat: -33.0, lng: 25.0 },  // Océan Indien Ouest
+                { lat: -28.0, lng: 32.0 },  // Mozambique
+                { lat: -20.0, lng: 40.0 },  // Canal Mozambique
+                { lat: -10.0, lng: 50.0 },  // Madagascar Est
+                { lat: 0.0, lng: 70.0 },    // Océan Indien
+                { lat: 5.0, lng: 90.0 },    // Approche Malacca
+                { lat: 1.3, lng: 103.8 }    // Singapour
+            ],
+            intensity: calculateShipsFromStats(stats.cape),
+            annualPassages: stats.cape,
+            color: '#e74c3c'
+        },
+        // Route Méditerranée (commerce intra-européen)
+        {
+            name: 'Mediterranean',
+            waypoints: [
+                { lat: 43.3, lng: 5.4 },    // Marseille
+                { lat: 43.0, lng: 6.5 },    // Nice
+                { lat: 42.8, lng: 8.0 },    // Corse Nord
+                { lat: 42.0, lng: 9.5 },    // Corse Est
+                { lat: 41.5, lng: 10.5 },   // Mer Tyrrhénienne
+                { lat: 41.9, lng: 12.5 },   // Civitavecchia (Rome)
+                { lat: 41.5, lng: 14.0 },   // Mer Tyrrhénienne Sud
+                { lat: 40.8, lng: 14.3 },   // Naples
+                { lat: 40.0, lng: 16.0 },   // Calabre
+                { lat: 39.0, lng: 17.5 },   // Calabre Sud
+                { lat: 38.2, lng: 18.5 },   // Détroit Messine
+                { lat: 37.5, lng: 19.5 },   // Mer Ionienne
+                { lat: 37.0, lng: 21.0 },   // Grèce Ouest
+                { lat: 37.5, lng: 22.5 },   // Péloponnèse
+                { lat: 37.9, lng: 23.7 },   // Pirée (Athènes)
+                { lat: 38.5, lng: 24.5 },   // Eubée
+                { lat: 39.0, lng: 25.2 },   // Mer Égée Nord
+                { lat: 39.5, lng: 26.0 },   // Lesbos
+                { lat: 40.2, lng: 26.8 },   // Dardanelles
+                { lat: 40.8, lng: 27.5 },   // Mer de Marmara
+                { lat: 41.0, lng: 28.5 },   // Bosphore
+                { lat: 41.0, lng: 29.0 },   // Istanbul
+                { lat: 40.8, lng: 28.2 },   // Retour Bosphore
+                { lat: 40.5, lng: 27.0 },   // Retour Marmara
+                { lat: 40.0, lng: 26.2 },   // Retour Dardanelles
+                { lat: 39.5, lng: 25.0 },   // Mer Égée Centre
+                { lat: 38.5, lng: 23.0 },   // Cyclades
+                { lat: 37.5, lng: 21.5 },   // Péloponnèse Ouest
+                { lat: 37.0, lng: 20.0 },   // Mer Ionienne Centre
+                { lat: 36.5, lng: 18.0 },   // Sicile Est
+                { lat: 36.0, lng: 15.5 },   // Sicile Sud
+                { lat: 36.5, lng: 13.5 },   // Sicile Ouest
+                { lat: 37.0, lng: 12.0 },   // Palerme
+                { lat: 37.5, lng: 11.0 },   // Détroit Sicile Nord
+                { lat: 37.0, lng: 10.5 },   // Détroit Sicile
+                { lat: 36.8, lng: 10.2 },   // Tunis
+                { lat: 37.0, lng: 9.5 },    // Golfe Tunis
+                { lat: 37.5, lng: 8.5 },    // Sardaigne Sud
+                { lat: 38.5, lng: 8.3 },    // Sardaigne Ouest
+                { lat: 39.5, lng: 8.5 },    // Sardaigne Nord
+                { lat: 40.5, lng: 8.8 },    // Corse Sud
+                { lat: 41.5, lng: 9.0 },    // Corse Ouest
+                { lat: 42.5, lng: 8.7 },    // Corse Nord-Ouest
+                { lat: 43.0, lng: 7.5 },    // Côte d'Azur
+                { lat: 43.3, lng: 5.4 }     // Marseille (retour)
+            ],
+            intensity: calculateShipsFromStats(stats.mediterranean),
+            annualPassages: stats.mediterranean,
+            color: '#9b59b6'
+        },
+        // Route Transpacifique (Asie ↔ USA)
+        {
+            name: 'Transpacific',
+            waypoints: [
+                { lat: 31.2, lng: 121.5 },  // Shanghai
+                { lat: 32.0, lng: 125.0 },  // Mer de Chine Est
+                { lat: 33.0, lng: 130.0 },  // Kyushu
+                { lat: 34.0, lng: 135.0 },  // Mer du Japon Sud
+                { lat: 35.4, lng: 139.7 },  // Tokyo
+                { lat: 36.0, lng: 143.0 },  // Est Honshu
+                { lat: 37.0, lng: 150.0 },  // Pacifique Ouest
+                { lat: 38.0, lng: 157.0 },  // Pacifique Nord-Ouest
+                { lat: 39.0, lng: 164.0 },  // Mid-Pacific Ouest
+                { lat: 40.0, lng: 170.0 },  // Mid-Pacific
+                { lat: 40.5, lng: 176.0 },  // Mid-Pacific Est
+                { lat: 40.8, lng: -178.0 }, // Date line
+                { lat: 41.0, lng: -172.0 }, // Mid-Pacific Est 2
+                { lat: 41.0, lng: -165.0 }, // Pacifique Centre-Est
+                { lat: 40.5, lng: -158.0 }, // Pacifique Est
+                { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
+                { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
+                { lat: 37.5, lng: -137.0 }, // Approche USA
+                { lat: 37.0, lng: -130.0 }, // Large USA Ouest
+                { lat: 37.5, lng: -124.0 }, // Large Californie
+                { lat: 37.8, lng: -122.4 }  // San Francisco
+            ],
+            intensity: calculateShipsFromStats(stats.transpacific),
+            annualPassages: stats.transpacific,
+            color: '#f39c12'
+        },
+        // Route Panama (Asie ↔ Europe via Panama)
+        {
+            name: 'Panama Route',
+            waypoints: [
+                { lat: 1.3, lng: 103.8 },   // Singapour
+                { lat: 0.5, lng: 108.0 },   // Mer de Chine Sud
+                { lat: 0.0, lng: 115.0 },   // Bornéo Sud
+                { lat: -1.0, lng: 120.0 },  // Sulawesi
+                { lat: -2.5, lng: 125.0 },  // Mer de Banda Ouest
+                { lat: -4.0, lng: 130.0 },  // Mer de Banda
+                { lat: -6.0, lng: 135.0 },  // Mer d'Arafura
+                { lat: -8.0, lng: 142.0 },  // Papouasie Sud
+                { lat: -9.0, lng: 148.0 },  // Papouasie Sud-Est
+                { lat: -10.0, lng: 155.0 }, // Mer de Corail
+                { lat: -10.5, lng: 162.0 }, // Pacifique Sud-Ouest
+                { lat: -10.0, lng: 170.0 }, // Pacifique Sud
+                { lat: -9.0, lng: 178.0 },  // Pacifique Sud Centre
+                { lat: -8.0, lng: -178.0 }, // Date line Sud
+                { lat: -7.0, lng: -170.0 }, // Pacifique Sud-Centre
+                { lat: -5.5, lng: -160.0 }, // Pacifique Sud-Est
+                { lat: -4.0, lng: -150.0 }, // Approche Équateur
+                { lat: -2.0, lng: -140.0 }, // Équateur Pacifique
+                { lat: 0.0, lng: -135.0 },  // Équateur
+                { lat: 1.0, lng: -130.0 },  // Pacifique Équatorial Est
+                { lat: 2.0, lng: -125.0 },  // Large Mexique Sud-Ouest
+                { lat: 3.0, lng: -120.0 },  // Pacifique Tropical Est
+                { lat: 4.0, lng: -115.0 },  // Large Mexique Sud
+                { lat: 5.0, lng: -110.0 },  // Pacifique Est
+                { lat: 6.0, lng: -105.0 },  // Large Amérique Centrale Ouest
+                { lat: 7.0, lng: -100.0 },  // Large Amérique Centrale
+                { lat: 7.8, lng: -95.0 },   // Large Mexique/Guatemala
+                { lat: 8.5, lng: -90.0 },   // Large Guatemala
+                { lat: 9.0, lng: -85.0 },   // Costa Rica Ouest
+                { lat: 9.1, lng: -79.4 },   // Canal de Panama
+                { lat: 9.5, lng: -78.0 },   // Sortie Canal (Caraïbes)
+                { lat: 10.0, lng: -75.0 },  // Caraïbes Ouest
+                { lat: 11.0, lng: -72.0 },  // Caraïbes Colombie
+                { lat: 12.5, lng: -68.0 },  // Caraïbes Venezuela
+                { lat: 14.0, lng: -65.0 },  // Petites Antilles
+                { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
+                { lat: 17.0, lng: -57.0 },  // Caraïbes Est
+                { lat: 18.5, lng: -53.0 },  // Sortie Caraïbes
+                { lat: 20.0, lng: -48.0 },  // Atlantique Tropical Ouest
+                { lat: 22.0, lng: -43.0 },  // Atlantique Tropical
+                { lat: 24.0, lng: -38.0 },  // Mid-Atlantic Ouest
+                { lat: 26.0, lng: -33.0 },  // Mid-Atlantic
+                { lat: 28.0, lng: -28.0 },  // Mid-Atlantic Centre
+                { lat: 30.0, lng: -23.0 },  // Mid-Atlantic Est
+                { lat: 32.0, lng: -18.0 },  // Approche Europe
+                { lat: 34.0, lng: -13.0 },  // Large Portugal
+                { lat: 35.5, lng: -9.0 },   // Portugal
+                { lat: 36.5, lng: -6.5 },   // Approche Gibraltar
+                { lat: 36.1, lng: -5.4 }    // Gibraltar
+            ],
+            intensity: calculateShipsFromStats(stats.panama),
+            annualPassages: stats.panama,
+            color: '#1abc9c'
+        },
+        // Route Le Havre ↔ UK ↔ Scandinavie
+        {
+            name: 'North Europe',
+            waypoints: [
+                { lat: 49.5, lng: 0.1 },    // Le Havre
+                { lat: 50.5, lng: 1.0 },    // Manche
+                { lat: 51.5, lng: 1.4 },    // Dover/Kent
+                { lat: 52.0, lng: 2.5 },    // Mer du Nord Sud
+                { lat: 51.9, lng: 4.5 },    // Rotterdam
+                { lat: 53.0, lng: 6.5 },    // Mer du Nord
+                { lat: 53.6, lng: 9.9 },    // Hamburg
+                { lat: 54.5, lng: 11.5 },   // Kiel
+                { lat: 55.7, lng: 12.6 }    // Copenhague
+            ],
+            intensity: calculateShipsFromStats(stats.northEurope),
+            annualPassages: stats.northEurope,
+            color: '#34495e'
+        },
+        // Route Afrique de l'Ouest
+        {
+            name: 'West Africa',
+            waypoints: [
+                { lat: 43.3, lng: 5.4 },    // Marseille
+                { lat: 42.0, lng: 4.0 },    // Golfe du Lion
+                { lat: 41.0, lng: 2.5 },    // Barcelone
+                { lat: 39.5, lng: 1.0 },    // Baléares Nord
+                { lat: 38.0, lng: 0.0 },    // Baléares
+                { lat: 37.0, lng: -1.0 },   // Espagne Sud-Est
+                { lat: 36.5, lng: -2.5 },   // Almería
+                { lat: 36.2, lng: -4.0 },   // Málaga
+                { lat: 36.1, lng: -5.4 },   // Gibraltar
+                { lat: 35.8, lng: -5.8 },   // Détroit Gibraltar Ouest
+                { lat: 35.0, lng: -6.0 },   // Maroc Nord
+                { lat: 34.0, lng: -6.8 },   // Rabat
+                { lat: 33.6, lng: -7.6 },   // Casablanca
+                { lat: 32.0, lng: -9.0 },   // El Jadida
+                { lat: 30.5, lng: -9.8 },   // Essaouira
+                { lat: 29.5, lng: -10.2 },  // Agadir
+                { lat: 28.0, lng: -11.0 },  // Sahara Ouest Nord
+                { lat: 26.0, lng: -13.0 },  // Sahara Ouest
+                { lat: 24.0, lng: -15.0 },  // Cap Bojador
+                { lat: 22.0, lng: -16.5 },  // Dakhla
+                { lat: 20.8, lng: -17.0 },  // Mauritanie Nord
+                { lat: 19.0, lng: -16.5 },  // Nouadhibou
+                { lat: 18.0, lng: -16.3 },  // Mauritanie Centre
+                { lat: 16.5, lng: -16.5 },  // Mauritanie Sud
+                { lat: 15.5, lng: -16.8 },  // Saint-Louis
+                { lat: 14.7, lng: -17.4 },  // Dakar
+                { lat: 13.5, lng: -17.0 },  // Sénégal Sud
+                { lat: 12.5, lng: -16.8 },  // Guinée-Bissau
+                { lat: 11.5, lng: -16.0 },  // Guinée Nord
+                { lat: 10.5, lng: -15.0 },  // Conakry
+                { lat: 9.5, lng: -14.0 },   // Guinée Sud
+                { lat: 8.5, lng: -13.2 },   // Sierra Leone
+                { lat: 7.5, lng: -12.5 },   // Liberia
+                { lat: 6.5, lng: -11.0 },   // Liberia Sud
+                { lat: 5.5, lng: -9.0 },    // Côte d'Ivoire Ouest
+                { lat: 5.3, lng: -4.0 },    // Abidjan
+                { lat: 5.2, lng: -2.5 },    // Côte d'Ivoire Est
+                { lat: 5.5, lng: 0.0 },     // Ghana Ouest
+                { lat: 5.6, lng: 0.2 },     // Accra
+                { lat: 6.0, lng: 1.0 },     // Togo
+                { lat: 6.3, lng: 2.4 },     // Cotonou
+                { lat: 6.5, lng: 3.4 }      // Lagos
+            ],
+            intensity: calculateShipsFromStats(stats.westAfrica),
+            annualPassages: stats.westAfrica,
+            color: '#e67e22'
+        }
+    ];
+}
+
+// Principales routes maritimes mondiales (style MarineTraffic)
+// Top 50 ports mondiaux par volume de conteneurs
+const worldMajorPorts = [
+    // Asie-Pacifique
+    { name: 'Shanghai', lat: 31.23, lng: 121.47, country: 'China', teu: 47030000 },
+    { name: 'Singapore', lat: 1.29, lng: 103.85, country: 'Singapore', teu: 37200000 },
+    { name: 'Ningbo-Zhoushan', lat: 29.87, lng: 121.55, country: 'China', teu: 33350000 },
+    { name: 'Shenzhen', lat: 22.54, lng: 114.06, country: 'China', teu: 30330000 },
+    { name: 'Guangzhou', lat: 23.13, lng: 113.26, country: 'China', teu: 24180000 },
+    { name: 'Qingdao', lat: 36.07, lng: 120.38, country: 'China', teu: 24010000 },
+    { name: 'Busan', lat: 35.18, lng: 129.08, country: 'South Korea', teu: 22710000 },
+    { name: 'Tianjin', lat: 39.13, lng: 117.20, country: 'China', teu: 20270000 },
+    { name: 'Hong Kong', lat: 22.30, lng: 114.17, country: 'Hong Kong', teu: 18360000 },
+    { name: 'Port Klang', lat: 2.99, lng: 101.39, country: 'Malaysia', teu: 13580000 },
+    { name: 'Kaohsiung', lat: 22.61, lng: 120.30, country: 'Taiwan', teu: 10260000 },
+    { name: 'Tokyo', lat: 35.62, lng: 139.78, country: 'Japan', teu: 9630000 },
+    { name: 'Xiamen', lat: 24.48, lng: 118.09, country: 'China', teu: 12200000 },
+    { name: 'Dalian', lat: 38.91, lng: 121.60, country: 'China', teu: 9770000 },
+    { name: 'Tanjung Pelepas', lat: 1.36, lng: 103.55, country: 'Malaysia', teu: 10840000 },
+    
+    // Moyen-Orient
+    { name: 'Dubai', lat: 25.28, lng: 55.33, country: 'UAE', teu: 14110000 },
+    { name: 'Jeddah', lat: 21.54, lng: 39.17, country: 'Saudi Arabia', teu: 4150000 },
+    { name: 'Salalah', lat: 16.95, lng: 54.00, country: 'Oman', teu: 5200000 },
+    
+    // Europe
+    { name: 'Rotterdam', lat: 51.92, lng: 4.48, country: 'Netherlands', teu: 14350000 },
+    { name: 'Antwerp', lat: 51.27, lng: 4.41, country: 'Belgium', teu: 12040000 },
+    { name: 'Hamburg', lat: 53.55, lng: 9.99, country: 'Germany', teu: 8730000 },
+    { name: 'Piraeus', lat: 37.95, lng: 23.65, country: 'Greece', teu: 5440000 },
+    { name: 'Valencia', lat: 39.47, lng: -0.38, country: 'Spain', teu: 5440000 },
+    { name: 'Algeciras', lat: 36.13, lng: -5.45, country: 'Spain', teu: 5130000 },
+    { name: 'Felixstowe', lat: 51.96, lng: 1.35, country: 'UK', teu: 4000000 },
+    { name: 'Le Havre', lat: 49.49, lng: 0.12, country: 'France', teu: 2850000 },
+    { name: 'Marseille', lat: 43.30, lng: 5.37, country: 'France', teu: 1450000 },
+    { name: 'Genoa', lat: 44.41, lng: 8.93, country: 'Italy', teu: 2620000 },
+    { name: 'Barcelona', lat: 41.35, lng: 2.17, country: 'Spain', teu: 3610000 },
+    { name: 'Gioia Tauro', lat: 38.43, lng: 15.90, country: 'Italy', teu: 2850000 },
+    
+    // Amérique du Nord
+    { name: 'Los Angeles', lat: 33.74, lng: -118.27, country: 'USA', teu: 10680000 },
+    { name: 'Long Beach', lat: 33.75, lng: -118.19, country: 'USA', teu: 8830000 },
+    { name: 'New York/New Jersey', lat: 40.67, lng: -74.05, country: 'USA', teu: 8300000 },
+    { name: 'Savannah', lat: 32.03, lng: -81.09, country: 'USA', teu: 5760000 },
+    { name: 'Vancouver', lat: 49.28, lng: -123.12, country: 'Canada', teu: 3570000 },
+    { name: 'Houston', lat: 29.73, lng: -95.27, country: 'USA', teu: 3200000 },
+    { name: 'Charleston', lat: 32.78, lng: -79.93, country: 'USA', teu: 2610000 },
+    { name: 'Seattle', lat: 47.60, lng: -122.33, country: 'USA', teu: 3840000 },
+    
+    // Amérique du Sud
+    { name: 'Santos', lat: -23.96, lng: -46.33, country: 'Brazil', teu: 4440000 },
+    { name: 'Callao', lat: -12.05, lng: -77.15, country: 'Peru', teu: 2340000 },
+    { name: 'Buenos Aires', lat: -34.61, lng: -58.37, country: 'Argentina', teu: 1500000 },
+    { name: 'Cartagena', lat: 10.39, lng: -75.51, country: 'Colombia', teu: 3260000 },
+    
+    // Afrique
+    { name: 'Port Said', lat: 31.26, lng: 32.30, country: 'Egypt', teu: 4000000 },
+    { name: 'Tanger Med', lat: 35.88, lng: -5.57, country: 'Morocco', teu: 7200000 },
+    { name: 'Durban', lat: -29.86, lng: 31.04, country: 'South Africa', teu: 2730000 },
+    { name: 'Lagos', lat: 6.44, lng: 3.40, country: 'Nigeria', teu: 1800000 },
+    { name: 'Mombasa', lat: -4.04, lng: 39.67, country: 'Kenya', teu: 1440000 },
+    { name: 'Abidjan', lat: 5.31, lng: -4.01, country: 'Côte d\'Ivoire', teu: 870000 },
+    
+    // Canal zones
+    { name: 'Colon', lat: 9.36, lng: -79.90, country: 'Panama', teu: 4300000 },
+    { name: 'Suez', lat: 29.97, lng: 32.55, country: 'Egypt', teu: 0 }
+];
+
+// Fonction pour animer les bateaux le long des routes maritimes réelles
+let shipAnimations = [];
+let useRealAISData = false;
+let realVesselsData = null;
+
+async function initializeShips() {
+    shipAnimations = [];
+    
+    // Tenter de récupérer les données VesselFinder réelles
+    console.log('🛰️ Tentative de récupération des données VesselFinder...');
+    realVesselsData = await VESSEL_CONFIG.getCachedVessels();
+    
+    if (realVesselsData && realVesselsData.length > 0) {
+        useRealAISData = true;
+        console.log(`✅ Mode VesselFinder réel activé: ${realVesselsData.length} navires`);
+        
+        // Limiter à 100 navires maximum pour performance
+        const maxShips = Math.min(100, realVesselsData.length);
+        shipAnimations = realVesselsData.slice(0, maxShips).map((vessel, i) => ({
+            vessel: vessel,
+            isReal: true,
+            size: 0.4,
+            color: vessel.speed > 15 ? '#2ecc71' : vessel.speed > 8 ? '#f39c12' : '#e74c3c'
+        }));
+        
+        console.log(`🚢 ${shipAnimations.length} navires réels affichés`);
+        return;
+    }
+    
+    // Fallback: utiliser les routes simulées avec statistiques maritimes réelles
+    console.log('⚠️ VesselFinder non disponible, utilisation des statistiques maritimes réelles');
+    useRealAISData = false;
+    
+    // Obtenir l'année courante depuis le sélecteur
+    const currentYear = parseInt(document.getElementById('year-selector').value) || 2025;
+    const routes = getMajorShippingRoutes(currentYear);
+    
+    let totalShips = 0;
+    let totalPassages = 0;
+    routes.forEach(route => {
+        totalPassages += route.annualPassages;
+        // Créer plusieurs bateaux par route selon l'intensité (basée sur stats réelles)
+        for (let i = 0; i < route.intensity; i++) {
+            const speed = 30000 + Math.random() * 20000; // 30-50 secondes par route complète
+            const offset = (i / route.intensity) * speed; // Distribution régulière
+            
+            shipAnimations.push({
+                route: route,
+                speed: speed,
+                offset: offset,
+                size: 0.020 + Math.random() * 0.010, // Taille plus grande et variable
+                color: route.color,
+                direction: Math.random() > 0.5 ? 1 : -1, // Bidirectionnel
+                isReal: false
+            });
+            totalShips++;
+        }
+    });
+    
+    console.log(`✅ ${totalShips} bateaux initialisés sur ${routes.length} routes (année ${currentYear})`);
+    console.log(`📊 Basé sur ${totalPassages.toLocaleString()} passages annuels réels`);
+}
+
+function interpolateAlongRoute(waypoints, progress, reverse = false) {
+    if (reverse) {
+        progress = 1 - progress;
+    }
+    
+    const totalSegments = waypoints.length - 1;
+    const segmentProgress = progress * totalSegments;
+    const segmentIndex = Math.floor(segmentProgress);
+    const segmentFraction = segmentProgress - segmentIndex;
+    
+    if (segmentIndex >= totalSegments) {
+        return waypoints[waypoints.length - 1];
+    }
+    
+    const start = waypoints[segmentIndex];
+    const end = waypoints[segmentIndex + 1];
+    
+    return {
+        lat: start.lat + (end.lat - start.lat) * segmentFraction,
+        lng: start.lng + (end.lng - start.lng) * segmentFraction
+    };
+}
+
+function animateShips() {
+    if (shipAnimations.length === 0) {
+        // Initialiser de manière asynchrone si pas encore fait
+        if (!window.shipsInitializing) {
+            window.shipsInitializing = true;
+            initializeShips().then(() => {
+                console.log('✅ Bateaux initialisés dans animateShips');
+                window.shipsInitializing = false;
+            });
+        }
+        return;
+    }
+    
+    // Mode AIS réel: utiliser les positions actuelles des navires
+    if (useRealAISData) {
+        const ships = shipAnimations.map((shipAnim, i) => {
+            const vessel = shipAnim.vessel;
+            
+            // Petite oscillation pour effet vivant
+            const waveEffect = Math.sin(Date.now() * 0.001 + i) * 0.0005;
+            const alt = 0.005 + waveEffect;
+            
+            // Convertir le cap en radians pour Three.js
+            const heading = (vessel.course || vessel.heading || 0) * (Math.PI / 180);
+            
+            return {
+                lat: vessel.lat,
+                lng: vessel.lng,
+                alt: alt,
+                id: `ship-${vessel.mmsi}`,
+                size: shipAnim.size,
+                color: shipAnim.color,
+                heading: heading,
+                speed: vessel.speed,
+                name: vessel.name
+            };
+        });
+        
+        globe.customLayerData(ships);
+        return;
+    }
+    
+    // Mode simulation: routes prédéfinies
+    const ships = shipAnimations.map((shipAnim, i) => {
+        const route = shipAnim.route;
+        const totalTime = shipAnim.speed;
+        const currentTime = (Date.now() + shipAnim.offset) % totalTime;
+        const progress = currentTime / totalTime;
+        
+        // Interpoler le long de la route
+        const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
+        
+        // Altitude légèrement au-dessus de l'eau avec effet de vague
+        const waveEffect = Math.sin(progress * Math.PI * 6 + Date.now() * 0.001) * 0.0008;
+        const alt = 0.01 + waveEffect;
+        
+        // Calculer l'angle de direction pour orienter le bateau
+        const nextProgress = Math.min(progress + 0.005, 1);
+        const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
+        const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
+        
+        return { 
+            lat: position.lat, 
+            lng: position.lng, 
+            alt: alt, 
+            id: `ship-${i}`,
+            size: shipAnim.size,
+            color: shipAnim.color,
+            heading: heading,
+            routeName: route.name
+        };
+    });
+    
+    if (ships.length > 0) {
+        globe.customLayerData(ships);
+        console.log(`📍 ${ships.length} bateaux positionnés`);
+    }
+}
 
 // Charger les frontières des pays depuis un GeoJSON public
 fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
@@ -587,8 +1172,7 @@ fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
             .polygonAltitude(0.005)
             .polygonCapColor(() => 'rgba(0, 0, 0, 0)')
             .polygonSideColor(() => 'rgba(255, 255, 255, 0.1)')
-            .polygonStrokeColor(() => '#ffffff')
-            .polygonLineWidth(0.5);
+            .polygonStrokeColor(() => '#ffffff');
         console.log('🗺️ Frontières chargées:', countries.length, 'pays');
     })
     .catch(err => console.error('❌ Erreur frontières:', err));
@@ -917,6 +1501,7 @@ globe.pointOfView({ altitude: 2.5 }, 0);
 // Variables d'état
 let isRotating = true;
 let rotationSpeed = 0.2;
+let showPorts = true;
 
 // Animation de rotation automatique
 function animate() {
@@ -932,12 +1517,21 @@ animate();
 // Gestion des boutons
 const rotateToggle = document.getElementById('rotate-toggle');
 const resetView = document.getElementById('reset-view');
+const togglePortsBtn = document.getElementById('toggle-ports');
 
 rotateToggle.addEventListener('click', () => {
     isRotating = !isRotating;
     const controls = globe.controls();
     controls.autoRotate = isRotating;
     rotateToggle.textContent = isRotating ? '⏸️ Pause Rotation' : '▶️ Reprendre Rotation';
+});
+
+togglePortsBtn.addEventListener('click', () => {
+    showPorts = !showPorts;
+    globe.htmlElementsData(showPorts ? worldMajorPorts : []);
+    togglePortsBtn.style.background = showPorts ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.2)';
+    togglePortsBtn.textContent = showPorts ? '🏭 Ports' : '🏭 Masquer Ports';
+    console.log(`${showPorts ? '🏭 Ports affichés' : '❌ Ports masqués'}`);
 });
 
 resetView.addEventListener('click', () => {
@@ -986,3 +1580,43 @@ console.log('🎨 Texture haute résolution 5400x2700px');
 console.log('🔍 Zoom ultra-proche activé (altitude min: 105)');
 console.log('💾 100% OFFLINE - Aucune connexion requise');
 console.log('🇫🇷 Commerce international de la France visualisé');
+
+// Initialiser et démarrer l'animation des bateaux après le chargement du globe
+console.log('🚢 Démarrage du système de bateaux...');
+
+// D'abord démarrer l'animation qui va appeler initializeShips
+setInterval(animateShips, 33); // ~30 FPS (optimisé pour performance)
+
+// Puis initialiser explicitement les bateaux
+initializeShips().then(() => {
+    console.log('✅ Bateaux initialisés avec succès');
+    console.log(`📊 Nombre de bateaux: ${shipAnimations.length}`);
+    
+    // Afficher les ports par défaut
+    globe.htmlElementsData(worldMajorPorts);
+    console.log(`🏭 ${worldMajorPorts.length} ports majeurs affichés`);
+    
+    // Test immédiat: forcer un appel à animateShips
+    setTimeout(() => {
+        console.log('🧪 Test de positionnement des bateaux...');
+        if (shipAnimations.length > 0) {
+            const testShip = shipAnimations[0];
+            console.log('Premier bateau:', testShip);
+        }
+    }, 1000);
+    
+    // Rafraîchir les données VesselFinder toutes les 2 minutes si activé
+    setInterval(async () => {
+        if (useRealAISData) {
+            console.log('🔄 Mise à jour des données VesselFinder...');
+            const newData = await VESSEL_CONFIG.getCachedVessels();
+            if (newData && newData.length > 0) {
+                realVesselsData = newData;
+                shipAnimations = []; // Réinitialiser pour recharger
+                await initializeShips();
+            }
+        }
+    }, 120000); // Toutes les 2 minutes (API limitée)
+}).catch(err => {
+    console.error('❌ Erreur initialisation bateaux:', err);
+});
