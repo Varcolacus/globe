@@ -1882,7 +1882,7 @@ async function initializeShips() {
                 offset: offset,
                 size: 0.020 + Math.random() * 0.010, // Taille plus grande et variable
                 color: route.color,
-                direction: Math.random() > 0.5 ? 1 : -1, // Bidirectionnel
+                direction: 1, // Unidirectionnel - les routes sont divisées en Est/Ouest
                 isReal: false
             });
             totalShips++;
