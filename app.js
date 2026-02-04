@@ -603,10 +603,11 @@ let instancedShips = null;
 let shipCount = 0;
 const maxShips = 500; // Capacité maximale
 
-// Créer la géométrie partagée une seule fois
-const sharedShipGeometry = new THREE.SphereGeometry(0.5, 8, 8);
+// Créer la géométrie partagée une seule fois - TAILLE AUGMENTÉE
+const sharedShipGeometry = new THREE.SphereGeometry(2.0, 8, 8); // 4x plus gros
 const sharedShipMaterial = new THREE.MeshBasicMaterial({ 
-    vertexColors: true // Permettre des couleurs individuelles
+    color: 0xff6600, // Couleur orange par défaut
+    vertexColors: false // Désactiver pour l'instant
 });
 
 // Initialiser l'InstancedMesh quand le globe est prêt
@@ -619,10 +620,6 @@ globe.onGlobeReady(() => {
         sharedShipMaterial,
         maxShips
     );
-    
-    // Buffer pour les couleurs individuelles
-    const colors = new Float32Array(maxShips * 3);
-    instancedShips.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
     
     // Commencer avec 0 instances visibles
     instancedShips.count = 0;
@@ -1146,7 +1143,6 @@ function animateShips() {
         // Utiliser InstancedMesh pour AIS aussi
         if (instancedShips && ships.length > 0) {
             const dummy = new THREE.Object3D();
-            const color = new THREE.Color();
             
             ships.forEach((ship, i) => {
                 if (i >= maxShips) return;
@@ -1154,20 +1150,16 @@ function animateShips() {
                 const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
                 
                 dummy.position.set(coords.x, coords.y, coords.z);
-                dummy.scale.set(ship.size, ship.size, ship.size);
+                dummy.scale.set(1.0, 1.0, 1.0);
                 dummy.lookAt(0, 0, 0);
                 dummy.rotateY(ship.heading);
                 
                 dummy.updateMatrix();
                 instancedShips.setMatrixAt(i, dummy.matrix);
-                
-                color.set(ship.color);
-                instancedShips.instanceColor.setXYZ(i, color.r, color.g, color.b);
             });
             
             instancedShips.count = ships.length;
             instancedShips.instanceMatrix.needsUpdate = true;
-            instancedShips.instanceColor.needsUpdate = true;
         }
         return;
     }
@@ -1206,7 +1198,6 @@ function animateShips() {
     // Utiliser InstancedMesh pour performance maximale
     if (instancedShips && ships.length > 0) {
         const dummy = new THREE.Object3D();
-        const color = new THREE.Color();
         
         ships.forEach((ship, i) => {
             if (i >= maxShips) return; // Limite de sécurité
@@ -1214,24 +1205,19 @@ function animateShips() {
             // Obtenir les coordonnées 3D
             const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
             
-            // Positionner et orienter
+            // Positionner et orienter - ÉCHELLE AUGMENTÉE
             dummy.position.set(coords.x, coords.y, coords.z);
-            dummy.scale.set(ship.size, ship.size, ship.size);
+            dummy.scale.set(1.0, 1.0, 1.0); // Échelle uniforme pour visibilité
             dummy.lookAt(0, 0, 0); // Pointer vers le centre du globe
             dummy.rotateY(ship.heading); // Appliquer la direction
             
             dummy.updateMatrix();
             instancedShips.setMatrixAt(i, dummy.matrix);
-            
-            // Définir la couleur
-            color.set(ship.color);
-            instancedShips.instanceColor.setXYZ(i, color.r, color.g, color.b);
         });
         
         // Mettre à jour le nombre d'instances visibles
         instancedShips.count = ships.length;
         instancedShips.instanceMatrix.needsUpdate = true;
-        instancedShips.instanceColor.needsUpdate = true;
         
         console.log(`🚢 ${ships.length} bateaux (Instanced Rendering)`);
     }
