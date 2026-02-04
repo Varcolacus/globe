@@ -1414,35 +1414,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 45.5, lng: 37.5 },   // Mer d'Azov (optionnel)
                 { lat: 44.0, lng: 38.5 },   // Mer Noire Nord-Est
                 { lat: 42.5, lng: 40.0 },   // Mer Noire Est
-                { lat: 41.5, lng: 41.5 },   // Mer Noire Sud-Est
-                { lat: 41.0, lng: 40.0 },   // Retour Mer Noire Sud-Est
-                { lat: 41.0, lng: 37.0 },   // Retour Mer Noire Sud
-                { lat: 41.0, lng: 34.0 },   // Retour Mer Noire Centre
-                { lat: 41.0, lng: 31.0 },   // Retour vers Bosphore
-                { lat: 41.0, lng: 29.5 },   // Retour Istanbul
-                { lat: 40.8, lng: 28.2 },   // Retour Bosphore
-                { lat: 40.5, lng: 27.0 },   // Retour Marmara
-                { lat: 40.0, lng: 26.2 },   // Retour Dardanelles
-                { lat: 39.5, lng: 25.0 },   // Mer Égée Centre
-                { lat: 38.5, lng: 23.0 },   // Cyclades
-                { lat: 37.5, lng: 21.5 },   // Péloponnèse Ouest
-                { lat: 37.0, lng: 20.0 },   // Mer Ionienne Centre
-                { lat: 36.5, lng: 18.0 },   // Sicile Est
-                { lat: 36.0, lng: 15.5 },   // Sicile Sud
-                { lat: 36.5, lng: 13.5 },   // Sicile Ouest
-                { lat: 37.0, lng: 12.0 },   // Palerme
-                { lat: 37.5, lng: 11.0 },   // Détroit Sicile Nord
-                { lat: 37.0, lng: 10.5 },   // Détroit Sicile
-                { lat: 36.8, lng: 10.2 },   // Tunis
-                { lat: 37.0, lng: 9.5 },    // Golfe Tunis
-                { lat: 37.5, lng: 8.5 },    // Sardaigne Sud
-                { lat: 38.5, lng: 8.3 },    // Sardaigne Ouest
-                { lat: 39.5, lng: 8.5 },    // Sardaigne Nord
-                { lat: 40.5, lng: 8.8 },    // Corse Sud
-                { lat: 41.5, lng: 9.0 },    // Corse Ouest
-                { lat: 42.5, lng: 8.7 },    // Corse Nord-Ouest
-                { lat: 43.0, lng: 7.5 },    // Côte d'Azur
-                { lat: 43.3, lng: 5.4 }     // Marseille (retour)
+                { lat: 41.5, lng: 41.5 }    // Mer Noire Sud-Est
             ],
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
@@ -1585,7 +1557,6 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 60.5, lng: 21.5 },   // Golfe de Botnie Sud
                 { lat: 61.5, lng: 21.5 },   // Golfe de Botnie Centre
                 { lat: 62.5, lng: 21.0 },   // Golfe de Botnie Nord
-                { lat: 61.5, lng: 22.0 },   // Retour Golfe de Botnie
                 { lat: 60.5, lng: 23.5 },   // Mer Baltique Est
                 { lat: 60.2, lng: 25.0 },   // Helsinki
                 { lat: 59.5, lng: 26.0 },   // Golfe de Finlande
