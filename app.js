@@ -1419,10 +1419,7 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        }
-        
-        /*
-        ,
+        },
         // Route Transpacifique (Asie ↔ USA)
         {
             name: 'Transpacific',
@@ -1458,11 +1455,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 40.5, lng: -158.0 }, // Pacifique Est
                 { lat: 40.0, lng: -154.5 }, // Entre Est-Approche Hawaï
                 { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
-         
-        */
-        
-        /*
-               { lat: 39.0, lng: -147.5 }, // Entre Hawaï-Pacifique NE
+                { lat: 39.0, lng: -147.5 }, // Entre Hawaï-Pacifique NE
                 { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
                 { lat: 38.0, lng: -140.5 }, // Entre NE-Approche USA
                 { lat: 37.5, lng: -137.0 }, // Approche USA
@@ -1476,7 +1469,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.transpacific, routePortWeights.transpacific),
             annualPassages: stats.transpacific,
             color: '#f39c12'
-        },
+        }
+        
+        /*
+        ,
         // Route Panama (Asie ↔ Europe via Panama)
         {
             name: 'Panama Route',
