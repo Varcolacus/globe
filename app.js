@@ -1419,6 +1419,58 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
+        },
+        // Route Transpacifique circulaire (boucle complète autour du Pacifique)
+        {
+            name: 'Transpacific Loop',
+            waypoints: [
+                // Départ Asie
+                { lat: 31.2, lng: 121.5 },   // Shanghai
+                { lat: 32.5, lng: 127.5 },   // Mer de Chine Est
+                { lat: 34.0, lng: 135.0 },   // Mer du Japon
+                { lat: 35.4, lng: 139.7 },   // Tokyo
+                // Traversée Pacifique Nord vers USA
+                { lat: 37.0, lng: 150.0 },   // Pacifique Nord-Ouest
+                { lat: 38.5, lng: 160.0 },   // Milieu Pacifique NO
+                { lat: 40.0, lng: 170.0 },   // Mid-Pacific Nord
+                { lat: 40.5, lng: 179.0 },   // Près ligne de date
+                { lat: 40.5, lng: -178.0 },  // Ligne de date
+                { lat: 40.0, lng: -165.0 },  // Pacifique Nord-Est
+                { lat: 39.0, lng: -150.0 },  // Approche Hawaï Nord
+                { lat: 38.0, lng: -140.0 },  // Vers USA
+                { lat: 37.8, lng: -122.4 },  // San Francisco
+                // Descente côte ouest américaine
+                { lat: 34.0, lng: -118.2 },  // Los Angeles
+                { lat: 30.0, lng: -115.0 },  // Basse Californie
+                { lat: 25.0, lng: -112.0 },  // Mexique Pacifique
+                { lat: 20.0, lng: -110.0 },  // Mexique Sud
+                { lat: 15.0, lng: -105.0 },  // Large Amérique Centrale
+                { lat: 10.0, lng: -100.0 },  // Équateur Pacifique Est
+                // Traversée Pacifique Sud vers Asie
+                { lat: 5.0, lng: -105.0 },   // Pacifique Équatorial
+                { lat: 0.0, lng: -115.0 },   // Équateur
+                { lat: -5.0, lng: -130.0 },  // Pacifique Sud-Est
+                { lat: -10.0, lng: -145.0 }, // Polynésie
+                { lat: -12.0, lng: -160.0 }, // Pacifique Sud Centre
+                { lat: -10.0, lng: -175.0 }, // Samoa
+                { lat: -8.0, lng: 180.0 },   // Ligne de date Sud
+                { lat: -8.0, lng: 170.0 },   // Fidji
+                { lat: -10.0, lng: 155.0 },  // Mélanésie
+                { lat: -8.0, lng: 145.0 },   // Papouasie
+                { lat: -4.0, lng: 135.0 },   // Mer d'Arafura
+                { lat: 0.0, lng: 130.0 },    // Moluques
+                { lat: 3.0, lng: 125.0 },    // Sulawesi
+                { lat: 6.0, lng: 120.0 },    // Mer de Sulu
+                { lat: 10.0, lng: 118.0 },   // Mer de Chine Sud
+                { lat: 15.0, lng: 117.0 },   // Philippines Ouest
+                { lat: 20.0, lng: 118.0 },   // Détroit de Luçon
+                { lat: 25.0, lng: 120.0 },   // Taiwan
+                { lat: 28.0, lng: 121.0 },   // Vers Shanghai
+                { lat: 31.2, lng: 121.5 }    // Retour Shanghai (boucle fermée)
+            ],
+            intensity: calculateIntensity(stats.transpacific, routePortWeights.transpacific),
+            annualPassages: stats.transpacific,
+            color: '#f39c12'
         }
         
         /*
