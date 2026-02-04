@@ -336,18 +336,15 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
             } else {
                 color = 'rgba(255, 107, 107, 0.4)';
             }
+        } else if (dataType === 'exports') {
+            // Exports: couleur bleue unique (flux sortant de France)
+            color = 'rgba(66, 135, 245, 0.5)'; // Bleu
+        } else if (dataType === 'imports') {
+            // Imports: couleur orange unique (flux entrant vers France)
+            color = 'rgba(255, 140, 50, 0.5)'; // Orange
         } else {
-            // Exports, Imports, Volume: gradient du bleu au rouge selon intensité
-            const normalized = (value - minValue) / (maxValue - minValue);
-            if (normalized > 0.75) {
-                color = 'rgba(255, 50, 50, 0.5)';   // Rouge intense
-            } else if (normalized > 0.5) {
-                color = 'rgba(255, 150, 50, 0.5)';  // Orange
-            } else if (normalized > 0.25) {
-                color = 'rgba(100, 200, 255, 0.5)'; // Bleu clair
-            } else {
-                color = 'rgba(100, 150, 255, 0.4)'; // Bleu
-            }
+            // Volume: couleur violette unique
+            color = 'rgba(150, 100, 255, 0.5)'; // Violet
         }
         
         // Épaisseur proportionnelle au volume (toujours basé sur le volume pour cohérence visuelle)
@@ -355,9 +352,10 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
         const minVol = Math.min(...volumes);
         const maxVol = Math.max(...volumes);
         const normalizedVolume = (countryData.volume - minVol) / (maxVol - minVol);
-        // Échelle logarithmique plus agressive pour accentuer les différences
-        const logScale = Math.log10(1 + normalizedVolume * 99) / 2; // Base 100 pour plus de contraste
-        const stroke = 0.2 + logScale * 4.5; // Plage élargie: 0.2 à 4.7 pixels
+        // Échelle logarithmique ultra-amplifiée pour un contraste extrême
+        // Exposant de 2.5 pour rendre les petites valeurs quasi-invisibles
+        const logScale = Math.pow(Math.log10(1 + normalizedVolume * 999) / 3, 2.5);
+        const stroke = 0.02 + logScale * 8; // Range: 0.02px à ~8px
         
         return {
             startLat: arcStartLat,
@@ -466,30 +464,24 @@ function updateLegend(dataType) {
     
     switch(dataType) {
         case 'exports':
-            title.textContent = 'Exports vers pays:';
+            title.textContent = 'Exportations (France → Pays):';
             content.innerHTML = `
-                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très élevé (>75%)<br>
-                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Élevé (50-75%)<br>
-                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Moyen (25-50%)<br>
-                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+                <span style="color: rgba(66, 135, 245, 0.8);">●</span> Flux sortant de France<br>
+                <small style="color: #999;">L'épaisseur de la ligne représente le volume</small>
             `;
             break;
         case 'imports':
-            title.textContent = 'Imports depuis pays:';
+            title.textContent = 'Importations (Pays → France):';
             content.innerHTML = `
-                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très élevé (>75%)<br>
-                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Élevé (50-75%)<br>
-                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Moyen (25-50%)<br>
-                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+                <span style="color: rgba(255, 140, 50, 0.8);">●</span> Flux entrant vers France<br>
+                <small style="color: #999;">L'épaisseur de la ligne représente le volume</small>
             `;
             break;
         case 'volume':
-            title.textContent = 'Volume total échanges:';
+            title.textContent = 'Volume total des échanges:';
             content.innerHTML = `
-                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très important (>75%)<br>
-                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Important (50-75%)<br>
-                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Modéré (25-50%)<br>
-                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+                <span style="color: rgba(150, 100, 255, 0.8);">●</span> Échanges bilatéraux<br>
+                <small style="color: #999;">L'épaisseur de la ligne représente le volume</small>
             `;
             break;
         case 'balance':
