@@ -2085,7 +2085,9 @@ async function initializeShips() {
     routes.forEach(route => {
         totalPassages += route.annualPassages;
         // Créer plusieurs bateaux par route selon l'intensité (basée sur stats réelles)
-        for (let i = 0; i < route.intensity; i++) {
+        // Diviser par 5 pour avoir ~2500 bateaux au total au lieu de 11000+
+        const adjustedIntensity = Math.ceil(route.intensity / 5);
+        for (let i = 0; i < adjustedIntensity; i++) {
             const speed = 60000 + Math.random() * 40000; // 60-100 secondes par route complète (2x plus lent)
             const offset = (i / route.intensity) * speed; // Distribution régulière
             
