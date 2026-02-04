@@ -1420,9 +1420,9 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
         },
-        // Route Transpacifique (Asie ↔ USA)
+        // Route Transpacifique (Asie → USA uniquement, pas de retour)
         {
-            name: 'Transpacific',
+            name: 'Transpacific East',
             waypoints: [
                 { lat: 31.2, lng: 121.5 },  // Shanghai
                 { lat: 31.6, lng: 123.25 }, // Entre Shanghai-Mer Chine
@@ -1466,8 +1466,58 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 37.65, lng: -123.2 },// Entre Large-San Francisco
                 { lat: 37.8, lng: -122.4 }  // San Francisco
             ],
-            intensity: calculateIntensity(stats.transpacific, routePortWeights.transpacific),
-            annualPassages: stats.transpacific,
+            intensity: Math.round(calculateIntensity(stats.transpacific, routePortWeights.transpacific) / 2), // Moitié des bateaux
+            annualPassages: Math.round(stats.transpacific / 2),
+            color: '#f39c12'
+        },
+        // Route Transpacifique retour (USA → Asie, même route inversée)
+        {
+            name: 'Transpacific West',
+            waypoints: [
+                { lat: 37.8, lng: -122.4 },  // San Francisco
+                { lat: 37.65, lng: -123.2 },// Entre San Francisco-Large
+                { lat: 37.5, lng: -124.0 }, // Large Californie
+                { lat: 37.25, lng: -127.0 },// Entre Californie-Large USA
+                { lat: 37.0, lng: -130.0 }, // Large USA Ouest
+                { lat: 37.25, lng: -133.5 },// Entre Large USA-Approche
+                { lat: 37.5, lng: -137.0 }, // Approche USA
+                { lat: 38.0, lng: -140.5 }, // Entre Approche-NE
+                { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
+                { lat: 39.0, lng: -147.5 }, // Entre NE-Hawaï
+                { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
+                { lat: 40.0, lng: -154.5 }, // Entre Hawaï-Est
+                { lat: 40.5, lng: -158.0 }, // Pacifique Est
+                { lat: 40.75, lng: -161.5 },// Entre Est-Centre
+                { lat: 41.0, lng: -165.0 }, // Pacifique Centre-Est
+                { lat: 41.0, lng: -168.5 }, // Entre Centre-E2
+                { lat: 41.0, lng: -172.0 }, // Mid-Pacific Est 2
+                { lat: 40.9, lng: -175.0 }, // Entre E2-Date
+                { lat: 40.8, lng: -178.0 }, // Date line
+                { lat: 40.65, lng: 179.0 }, // Entre Date-Mid
+                { lat: 40.5, lng: 176.0 },  // Mid-Pacific Est
+                { lat: 40.25, lng: 173.0 }, // Entre Mid-Pacific
+                { lat: 40.0, lng: 170.0 },  // Mid-Pacific
+                { lat: 39.5, lng: 167.0 },  // Entre Mid-O
+                { lat: 39.0, lng: 164.0 },  // Mid-Pacific Ouest
+                { lat: 38.5, lng: 160.5 },  // Entre O-NO
+                { lat: 38.0, lng: 157.0 },  // Pacifique Nord-Ouest
+                { lat: 37.5, lng: 153.5 },  // Entre NO-O
+                { lat: 37.0, lng: 150.0 },  // Pacifique Ouest
+                { lat: 36.5, lng: 146.5 },  // Entre Pacifique-Honshu
+                { lat: 36.0, lng: 143.0 },  // Est Honshu
+                { lat: 35.7, lng: 141.35 }, // Entre Honshu-Tokyo
+                { lat: 35.4, lng: 139.7 },  // Tokyo
+                { lat: 34.7, lng: 137.35 }, // Entre Tokyo-Mer Japon
+                { lat: 34.0, lng: 135.0 },  // Mer du Japon Sud
+                { lat: 33.5, lng: 132.5 },  // Entre Mer Japon-Kyushu
+                { lat: 33.0, lng: 130.0 },  // Kyushu
+                { lat: 32.5, lng: 127.5 },  // Entre Kyushu-Chine
+                { lat: 32.0, lng: 125.0 },  // Mer de Chine Est
+                { lat: 31.6, lng: 123.25 }, // Entre Mer Chine-Shanghai
+                { lat: 31.2, lng: 121.5 }   // Shanghai
+            ],
+            intensity: Math.round(calculateIntensity(stats.transpacific, routePortWeights.transpacific) / 2), // Moitié des bateaux
+            annualPassages: Math.round(stats.transpacific / 2),
             color: '#f39c12'
         }
         
