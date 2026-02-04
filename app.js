@@ -1348,7 +1348,7 @@ function animateShips() {
         worldMajorPorts.forEach((port, i) => {
             const phi = (90 - port.lat) * Math.PI / 180;
             const theta = (port.lng + 180) * Math.PI / 180;
-            const radius = 101.0; // Augmenté de 100.2 à 101.0
+            const radius = 100.0; // Exactement à la surface du globe
             
             dummy.position.set(
                 -radius * Math.sin(phi) * Math.cos(theta),
