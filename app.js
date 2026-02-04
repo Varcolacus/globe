@@ -1730,14 +1730,21 @@ function getMajorShippingRoutes(year) {
             color: '#9b59b6'
         },
         
-        // 45. Canada-Europe (Vancouver → Hamburg via Atlantic)
+        // 45. Canada-Europe (Vancouver → Panama → Hamburg)
         {
             name: 'Canada-Europe',
             waypoints: [
                 { lat: 49.28, lng: -123.12 },// Vancouver
-                { lat: 40.67, lng: -74.05 }, // New York (via terre conceptuel - simplifié)
-                { lat: 45.0, lng: -50.0 },   // Atlantique
-                { lat: 50.0, lng: -25.0 },   // Mid-Atlantic
+                { lat: 45.0, lng: -125.0 },  // Large Côte Ouest
+                { lat: 35.0, lng: -122.0 },  // Californie
+                { lat: 25.0, lng: -115.0 },  // Basse Californie
+                { lat: 15.0, lng: -105.0 },  // Large Mexique
+                { lat: 9.36, lng: -79.90 },  // Colon (Panama)
+                { lat: 15.0, lng: -70.0 },   // Caraïbes
+                { lat: 25.0, lng: -60.0 },   // Atlantique Ouest
+                { lat: 35.0, lng: -50.0 },   // Mid-Atlantic Ouest
+                { lat: 45.0, lng: -35.0 },   // Mid-Atlantic
+                { lat: 50.0, lng: -20.0 },   // Atlantique Est
                 { lat: 53.55, lng: 9.99 }    // Hamburg
             ],
             intensity: 150,
