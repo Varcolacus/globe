@@ -1590,16 +1590,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 60.2, lng: 25.0 },   // Helsinki
                 { lat: 59.5, lng: 26.0 },   // Golfe de Finlande
                 { lat: 59.9, lng: 27.5 },   // Golfe de Finlande Est
-                { lat: 59.9, lng: 30.3 },   // Saint-Pétersbourg
-                { lat: 59.5, lng: 28.0 },   // Retour Golfe de Finlande
-                { lat: 59.0, lng: 25.0 },   // Retour Baltique Est
-                { lat: 58.0, lng: 23.0 },   // Mer Baltique Centre-Est
-                { lat: 57.0, lng: 21.5 },   // Lettonie
-                { lat: 56.0, lng: 20.0 },   // Mer Baltique Centre
-                { lat: 55.5, lng: 18.0 },   // Mer Baltique Sud-Est
-                { lat: 55.0, lng: 15.0 },   // Retour Baltique Sud
-                { lat: 55.5, lng: 13.0 },   // Retour Copenhague
-                { lat: 55.7, lng: 12.6 }    // Copenhague (retour)
+                { lat: 59.9, lng: 30.3 }    // Saint-Pétersbourg
             ],
             intensity: calculateIntensity(stats.northEurope, routePortWeights.northEurope),
             annualPassages: stats.northEurope,
