@@ -1419,7 +1419,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        },
+        }
+        
+        /*
+        ,
         // Route Transpacifique (Asie → USA uniquement, pas de retour)
         {
             name: 'Transpacific East',
@@ -1520,8 +1523,8 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: Math.round(stats.transpacific / 2),
             color: '#f39c12'
         }
+        */
         
-        /*
         ,
         // Route Panama (Asie ↔ Europe via Panama)
         {
@@ -1562,11 +1565,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 11.0, lng: -72.0 },  // Caraïbes Colombie
                 { lat: 12.5, lng: -68.0 },  // Caraïbes Venezuela
                 { lat: 14.0, lng: -65.0 },  // Petites Antilles
-         
-        */
-        
-        /*
-               { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
+                { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
                 { lat: 17.0, lng: -57.0 },  // Caraïbes Est
                 { lat: 18.5, lng: -53.0 },  // Sortie Caraïbes
                 { lat: 20.0, lng: -48.0 },  // Atlantique Tropical Ouest
@@ -1584,103 +1583,7 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.panama, routePortWeights.panama),
             annualPassages: stats.panama,
             color: '#1abc9c'
-        },
-        // Route Le Havre ↔ UK ↔ Scandinavie
-        {
-            name: 'North Europe',
-            waypoints: [
-                { lat: 49.5, lng: 0.1 },    // Le Havre
-                { lat: 50.0, lng: 0.55 },   // Entre Le Havre-Manche
-                { lat: 50.5, lng: 1.0 },    // Manche
-                { lat: 51.0, lng: 1.2 },    // Entre Manche-Dover
-                { lat: 51.5, lng: 1.4 },    // Dover/Kent
-                { lat: 51.75, lng: 1.95 },  // Entre Dover-Mer Nord S
-                { lat: 52.0, lng: 2.5 },    // Mer du Nord Sud
-                { lat: 51.95, lng: 3.5 },   // Entre Mer Nord-Rotterdam
-                { lat: 51.9, lng: 4.5 },    // Rotterdam
-                { lat: 52.45, lng: 5.5 },   // Entre Rotterdam-Mer Nord
-                { lat: 53.0, lng: 6.5 },    // Mer du Nord
-                { lat: 53.3, lng: 8.2 },    // Entre Mer Nord-Hamburg
-         
-        */
-        
-        /*
-               { lat: 53.6, lng: 9.9 },    // Hamburg
-                { lat: 54.05, lng: 10.7 },  // Entre Hamburg-Kiel
-                { lat: 54.5, lng: 11.5 },   // Kiel
-                { lat: 55.1, lng: 12.05 },  // Entre Kiel-Copenhague
-                { lat: 55.7, lng: 12.6 },   // Copenhague
-                { lat: 56.2, lng: 13.5 },   // Détroit du Sund
-                { lat: 57.0, lng: 15.0 },   // Mer Baltique Sud-Ouest
-                { lat: 58.0, lng: 17.0 },   // Mer Baltique Ouest
-                { lat: 59.3, lng: 18.1 },   // Stockholm
-                { lat: 60.0, lng: 19.5 },   // Mer Baltique Nord-Ouest
-                { lat: 60.5, lng: 21.5 },   // Golfe de Botnie Sud
-                { lat: 61.5, lng: 21.5 },   // Golfe de Botnie Centre
-                { lat: 62.5, lng: 21.0 },   // Golfe de Botnie Nord
-                { lat: 60.5, lng: 23.5 },   // Mer Baltique Est
-                { lat: 60.2, lng: 25.0 },   // Helsinki
-                { lat: 59.5, lng: 26.0 },   // Golfe de Finlande
-                { lat: 59.9, lng: 27.5 },   // Golfe de Finlande Est
-                { lat: 59.9, lng: 30.3 }    // Saint-Pétersbourg
-            ],
-            intensity: calculateIntensity(stats.northEurope, routePortWeights.northEurope),
-            annualPassages: stats.northEurope,
-            color: '#34495e'
-        },
-        // Route Afrique de l'Ouest
-        {
-            name: 'West Africa',
-            waypoints: [
-                { lat: 43.3, lng: 5.4 },    // Marseille
-                { lat: 42.0, lng: 4.0 },    // Golfe du Lion
-                { lat: 41.0, lng: 2.5 },    // Barcelone
-                { lat: 39.5, lng: 1.0 },    // Baléares Nord
-                { lat: 38.0, lng: 0.0 },    // Baléares
-                { lat: 37.0, lng: -1.0 },   // Espagne Sud-Est
-                { lat: 36.5, lng: -2.5 },   // Almería
-                { lat: 36.2, lng: -4.0 },   // Málaga
-                { lat: 36.1, lng: -5.4 },   // Gibraltar
-                { lat: 35.5, lng: -6.5 },   // Détroit Gibraltar Ouest (encore plus au large)
-                { lat: 34.5, lng: -7.5 },   // Large Maroc Nord (encore plus à l'ouest)
-                { lat: 33.5, lng: -8.5 },   // Large Rabat (encore plus à l'ouest)
-                { lat: 32.5, lng: -9.8 },   // Large Casablanca (encore plus à l'ouest)
-                { lat: 31.0, lng: -11.0 },  // Large El Jadida (encore plus à l'ouest)
-                { lat: 29.5, lng: -12.0 },  // Large Essaouira (encore plus à l'ouest)
-                { lat: 28.5, lng: -13.0 },  // Large Agadir (encore plus à l'ouest)
-                { lat: 27.0, lng: -14.5 },  // Sahara Ouest Nord (très au large)
-                { lat: 25.5, lng: -16.0 },  // Sahara Ouest Centre (très au large)
-                { lat: 24.0, lng: -17.0 },  // Sahara Ouest Sud (très au large)
-                { lat: 22.5, lng: -17.8 },  // Cap Bojador (très au large)
-                { lat: 21.0, lng: -18.2 },  // Dakhla (très au large)
-                { lat: 20.0, lng: -18.5 },  // Mauritanie Nord (très au large)
-                { lat: 19.0, lng: -18.2 },  // Nouadhibou
-                { lat: 18.0, lng: -16.8 },  // Mauritanie Centre
-                { lat: 16.5, lng: -17.0 },  // Mauritanie Sud
-                { lat: 15.5, lng: -17.2 },  // Saint-Louis
-                { lat: 14.7, lng: -17.4 },  // Dakar
-                { lat: 13.5, lng: -17.0 },  // Sénégal Sud
-                { lat: 12.5, lng: -16.8 },  // Guinée-Bissau
-                { lat: 11.5, lng: -16.0 },  // Guinée Nord
-                { lat: 10.5, lng: -15.0 },  // Conakry
-                { lat: 9.5, lng: -14.0 },   // Guinée Sud
-                { lat: 8.5, lng: -13.2 },   // Sierra Leone
-                { lat: 7.5, lng: -12.5 },   // Liberia
-                { lat: 6.5, lng: -11.0 },   // Liberia Sud
-                { lat: 5.5, lng: -9.0 },    // Côte d'Ivoire Ouest
-                { lat: 5.3, lng: -4.0 },    // Abidjan
-                { lat: 5.2, lng: -2.5 },    // Côte d'Ivoire Est
-                { lat: 5.5, lng: 0.0 },     // Ghana Ouest
-                { lat: 5.6, lng: 0.2 },     // Accra
-                { lat: 6.0, lng: 1.0 },     // Togo
-                { lat: 6.3, lng: 2.4 },     // Cotonou
-                { lat: 6.5, lng: 3.4 }      // Lagos
-            ],
-            intensity: calculateIntensity(stats.westAfrica, routePortWeights.westAfrica),
-            annualPassages: stats.westAfrica,
-            color: '#e67e22'
         }
-        */
     ];
 }
 
