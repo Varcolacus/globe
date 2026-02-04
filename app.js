@@ -1075,7 +1075,7 @@ function updateLOD(cameraPosition) {
 function isInFrustum(lat, lng, alt, camera) {
     // Convertir lat/lng en position 3D
     const phi = (90 - lat) * Math.PI / 180;
-    const theta = (lng + 180) * Math.PI / 180;
+    const theta = lng * Math.PI / 180;
     const radius = 100 + alt;
     
     const x = -radius * Math.sin(phi) * Math.cos(theta);
@@ -1304,7 +1304,7 @@ function animateShips() {
         
         // Convertir lat/lng en position 3D
         const phi = (90 - position.lat) * Math.PI / 180;
-        const theta = (position.lng + 180) * Math.PI / 180;
+        const theta = position.lng * Math.PI / 180;
         const radius = 100 + alt;
         
         dummy.position.set(
@@ -1347,7 +1347,7 @@ function animateShips() {
     if (showPorts && instancedPorts) {
         worldMajorPorts.forEach((port, i) => {
             const phi = (90 - port.lat) * Math.PI / 180;
-            const theta = (port.lng + 180) * Math.PI / 180;
+            const theta = port.lng * Math.PI / 180;
             const radius = 100.0; // Exactement à la surface du globe
             
             dummy.position.set(
