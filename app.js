@@ -1990,10 +1990,21 @@ function animateShips() {
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
         let progress = currentTime / totalTime;
         
-        // IMPORTANT: Ne jamais dépasser 0.99 pour éviter le saut au début
-        // Quand on atteint la fin, on reste au dernier waypoint quelques frames
-        // puis on réapparaît naturellement au début grâce au modulo
-        progress = Math.min(progress, 0.99);
+        // IMPORTANT: Téléportation invisible pour éviter les sauts à travers le globe
+        // Si progress > 0.98, on cache le bateau (altitude négative)
+        // Il réapparaît naturellement au début au prochain cycle
+        if (progress > 0.98) {
+            return {
+                lat: 0,
+                lng: 0,
+                alt: -1, // Sous la surface = invisible
+                id: `ship-${i}`,
+                size: 0,
+                color: shipAnim.color,
+                heading: 0,
+                routeName: route.name
+            };
+        }
         
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
@@ -2003,7 +2014,7 @@ function animateShips() {
         const alt = 0.01 + waveEffect;
         
         // Calculer l'angle de direction pour orienter le bateau
-        const nextProgress = Math.min(progress + 0.005, 0.99);
+        const nextProgress = Math.min(progress + 0.005, 0.98);
         const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
         
