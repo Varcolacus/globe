@@ -1017,631 +1017,866 @@ function isEuropean(port) {
 }
 
 function isNorthAmerican(port) {
-    return ['USA', 'Canada', 'Mexico'].includes(port.country);
-}
-
-function isSouthAmerican(port) {
-    return ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia', 'Ecuador', 'Uruguay'].includes(port.country);
-}
-
-function isAfrican(port) {
-    return ['Egypt', 'Morocco', 'South Africa', 'Nigeria', 'Kenya', 'Tanzania', 'Ghana', 'Senegal', 'Côte d\'Ivoire'].includes(port.country);
-}
-
-// Générer des routes inter-ports basées sur les poids TEU réels
-function generatePortToPortRoutes(year = 2025) {
-    const totalTEU = getTotalWorldTEU();
-    const routes = [];
-    
-    // Définir les principaux corridors maritimes avec paires de ports
-    const corridors = [
-        // Asie-Europe (via Suez) - Top ports
-        { from: 'Shanghai', to: 'Rotterdam', multiplier: 1.5 },
-        { from: 'Shanghai', to: 'Hamburg', multiplier: 1.3 },
-        { from: 'Singapore', to: 'Rotterdam', multiplier: 1.4 },
-        { from: 'Ningbo-Zhoushan', to: 'Antwerp', multiplier: 1.2 },
-        { from: 'Shenzhen', to: 'Rotterdam', multiplier: 1.2 },
-        { from: 'Hong Kong', to: 'Hamburg', multiplier: 1.1 },
-        { from: 'Busan', to: 'Rotterdam', multiplier: 1.0 },
-        
-        // Asie-Méditerranée
-        { from: 'Shanghai', to: 'Piraeus', multiplier: 1.0 },
-        { from: 'Singapore', to: 'Valencia', multiplier: 0.9 },
-        { from: 'Port Klang', to: 'Algeciras', multiplier: 0.8 },
-        
-        // Transpacifique (Asie-Amérique Nord)
-        { from: 'Shanghai', to: 'Los Angeles', multiplier: 1.8 },
-        { from: 'Shanghai', to: 'Long Beach', multiplier: 1.6 },
-        { from: 'Ningbo-Zhoushan', to: 'Los Angeles', multiplier: 1.4 },
-        { from: 'Shenzhen', to: 'Los Angeles', multiplier: 1.3 },
-        { from: 'Hong Kong', to: 'Long Beach', multiplier: 1.2 },
-        { from: 'Busan', to: 'Seattle', multiplier: 1.0 },
-        { from: 'Tokyo', to: 'Los Angeles', multiplier: 0.9 },
-        { from: 'Yokohama', to: 'Vancouver', multiplier: 0.8 },
-        
-        // Atlantique Nord (Europe-USA)
-        { from: 'Rotterdam', to: 'New York/New Jersey', multiplier: 1.3 },
-        { from: 'Hamburg', to: 'New York/New Jersey', multiplier: 1.1 },
-        { from: 'Antwerp', to: 'Savannah', multiplier: 1.0 },
-        { from: 'Le Havre', to: 'New York/New Jersey', multiplier: 0.9 },
-        { from: 'Felixstowe', to: 'Charleston', multiplier: 0.8 },
-        
-        // Asie-Moyen-Orient
-        { from: 'Singapore', to: 'Dubai', multiplier: 1.5 },
-        { from: 'Shanghai', to: 'Dubai', multiplier: 1.3 },
-        { from: 'Port Klang', to: 'Jeddah', multiplier: 1.0 },
-        { from: 'Hong Kong', to: 'Dubai', multiplier: 0.9 },
-        
-        // Intra-Asie (commerce régional intense)
-        { from: 'Shanghai', to: 'Singapore', multiplier: 1.6 },
-        { from: 'Shanghai', to: 'Hong Kong', multiplier: 1.4 },
-        { from: 'Busan', to: 'Shanghai', multiplier: 1.2 },
-        { from: 'Singapore', to: 'Port Klang', multiplier: 1.1 },
-        { from: 'Tokyo', to: 'Shanghai', multiplier: 1.0 },
-        
-        // Europe-Amérique du Sud
-        { from: 'Rotterdam', to: 'Santos', multiplier: 0.9 },
-        { from: 'Hamburg', to: 'Santos', multiplier: 0.8 },
-        { from: 'Antwerp', to: 'Buenos Aires', multiplier: 0.7 },
-        
-        // Asie-Afrique
-        { from: 'Singapore', to: 'Durban', multiplier: 0.8 },
-        { from: 'Shanghai', to: 'Mombasa', multiplier: 0.7 },
-        { from: 'Dubai', to: 'Dar es Salaam', multiplier: 0.6 },
-        
-        // Intra-Europe (feeder routes)
-        { from: 'Rotterdam', to: 'Hamburg', multiplier: 1.0 },
-        { from: 'Rotterdam', to: 'Antwerp', multiplier: 0.9 },
-        { from: 'Hamburg', to: 'Bremerhaven', multiplier: 0.8 },
-        
-        // Canal zones (hubs)
-        { from: 'Singapore', to: 'Port Said', multiplier: 1.2 },
-        { from: 'Dubai', to: 'Suez', multiplier: 1.1 },
-        { from: 'Los Angeles', to: 'Colon', multiplier: 1.0 },
-        
-        // Mer Noire
-        { from: 'Istanbul', to: 'Constanta', multiplier: 0.7 },
-        { from: 'Piraeus', to: 'Istanbul', multiplier: 0.8 },
-        
-        // Baltique
-        { from: 'Hamburg', to: 'St. Petersburg', multiplier: 0.7 },
-        { from: 'Rotterdam', to: 'Gdansk', multiplier: 0.6 },
-    ];
-    
-    // Générer routes avec intensité basée sur TEU réels
-    corridors.forEach(corridor => {
-        const fromPort = worldMajorPorts.find(p => p.name === corridor.from);
-        const toPort = worldMajorPorts.find(p => p.name === corridor.to);
-        
-        if (fromPort && toPort) {
-            // Calculer intensité basée sur TEU moyens des 2 ports
-            const avgTEU = (fromPort.teu + toPort.teu) / 2;
-            const teuPercentage = avgTEU / totalTEU;
-            
-            // Appliquer multiplicateur de corridor (certaines routes plus actives)
-            const baseShips = Math.round(2600 * teuPercentage * corridor.multiplier);
-            const intensity = Math.max(5, Math.min(200, baseShips)); // Min 5, Max 200 bateaux
-            
-            routes.push({
-                name: `${corridor.from} → ${corridor.to}`,
-                waypoints: generateRouteWaypoints(fromPort, toPort),
-                intensity: intensity,
-                fromPort: corridor.from,
-                toPort: corridor.to,
-                teuWeight: avgTEU,
-                color: getRouteColorByRegion(fromPort, toPort)
-            });
-        }
-    });
-    
-    console.log(`📊 ${routes.length} routes port-à-port générées avec poids TEU réels`);
-    const totalShips = routes.reduce((sum, r) => sum + r.intensity, 0);
-    console.log(`🚢 Total bateaux: ${totalShips} (basé sur ${(totalTEU/1000000).toFixed(0)}M TEU)`);
-    
-    return routes;
-}
-
-// Couleur par type de corridor
-function getRouteColorByRegion(fromPort, toPort) {
-    const fromContinent = getPortContinent(fromPort.country);
-    const toContinent = getPortContinent(toPort.country);
-    
-    if (fromContinent === 'Asia' && toContinent === 'Europe') return '#3498db'; // Bleu - Asie-Europe
-    if (fromContinent === 'Asia' && toContinent === 'North America') return '#2ecc71'; // Vert - Transpacifique
-    if (fromContinent === 'Europe' && toContinent === 'North America') return '#e74c3c'; // Rouge - Atlantique
-    if (fromContinent === toContinent) return '#f39c12'; // Orange - Intra-régional
-    return '#9b59b6'; // Violet - Autres
-}
-
-function getPortContinent(country) {
-    const asiaCountries = ['China', 'Singapore', 'South Korea', 'Japan', 'Hong Kong', 'Taiwan', 'Malaysia', 'Thailand', 'Vietnam', 'Indonesia', 'Philippines', 'India', 'Pakistan', 'Bangladesh', 'Sri Lanka', 'Myanmar'];
-    const europeCountries = ['Netherlands', 'Belgium', 'Germany', 'UK', 'France', 'Italy', 'Spain', 'Greece', 'Poland', 'Russia', 'Finland', 'Sweden', 'Latvia', 'Romania', 'Ukraine', 'Turkey', 'Portugal', 'Israel', 'Lebanon'];
-    const americaCountries = ['USA', 'Canada', 'Mexico'];
-    
-    if (asiaCountries.includes(country)) return 'Asia';
-    if (europeCountries.includes(country)) return 'Europe';
-    if (americaCountries.includes(country)) return 'North America';
-    return 'Other';
-}
-
-// Helper function to calculate total TEU for a list of ports
-function calculateRouteTEUWeight(portNames) {
-    return portNames.reduce((sum, portName) => {
-        const port = worldMajorPorts.find(p => p.name === portName);
-        return sum + (port ? port.teu : 0);
-    }, 0);
-}
-
-// Principales routes maritimes mondiales avec statistiques réelles + ajustement TEU ports
-function getMajorShippingRoutes(year = 2025) {
-    const stats = maritimeTrafficStats[year] || maritimeTrafficStats[2025];
-    
-    // Calculer les poids TEU pour chaque route en fonction des ports desservis
-    const routePortWeights = {
-        suez: calculateRouteTEUWeight(['Shanghai', 'Singapore', 'Ningbo-Zhoushan', 'Shenzhen', 'Hong Kong', 'Rotterdam', 'Hamburg', 'Antwerp', 'Piraeus']),
-        atlantic: calculateRouteTEUWeight(['Rotterdam', 'Hamburg', 'Antwerp', 'Le Havre', 'New York/New Jersey', 'Savannah']),
-        transpacific: calculateRouteTEUWeight(['Shanghai', 'Ningbo-Zhoushan', 'Busan', 'Tokyo', 'Los Angeles', 'Long Beach', 'Seattle', 'Vancouver']),
-        mediterranean: calculateRouteTEUWeight(['Barcelona', 'Valencia', 'Marseille', 'Genoa', 'Piraeus', 'Istanbul', 'Port Said', 'Alexandria']),
-        cape: calculateRouteTEUWeight(['Shanghai', 'Singapore', 'Durban', 'Cape Town', 'Rotterdam']),
-        northEurope: calculateRouteTEUWeight(['Rotterdam', 'Hamburg', 'Antwerp', 'Bremerhaven', 'Gdansk', 'St. Petersburg']),
-        westAfrica: calculateRouteTEUWeight(['Tanger Med', 'Casablanca', 'Dakar', 'Abidjan', 'Lagos', 'Le Havre']),
-        panama: calculateRouteTEUWeight(['Los Angeles', 'Colon', 'Miami', 'Cartagena', 'Santos'])
-    };
-    
-    // Facteur de conversion ajusté : 1% des passages + bonus TEU
-    function calculateIntensity(annualPassages, teuWeight) {
-        const baseShips = Math.round(annualPassages * 0.01); // 1% des passages
-        const teuBonus = Math.round(teuWeight / 10000000); // +1 bateau par 10M TEU
-        return baseShips + teuBonus;
-    }
-    
     return [
-        // Route Europe → Asie via Suez (la plus importante)
+        
+        // ===== ASIE DE L'EST (Chine, Japon, Corée) - 8 routes =====
+        
+        // 1. Shanghai Hub North (Shanghai → Tianjin → Qingdao → Dalian)
         {
-            name: 'Europe-Asia (Suez)',
+            name: 'China North Coast',
             waypoints: [
-                { lat: 43.3, lng: 5.4 },    // Marseille
-                { lat: 41.65, lng: 7.2 },   // Entre Marseille-Sardaigne
-                { lat: 40.0, lng: 9.0 },    // Sardaigne
-                { lat: 38.4, lng: 9.6 },    // Entre Sardaigne-Tunisie
-                { lat: 36.8, lng: 10.2 },   // Tunisie
-                { lat: 35.4, lng: 14.1 },   // Entre Tunisie-Méditerranée Est
-                { lat: 34.0, lng: 18.0 },   // Méditerranée Est
-                { lat: 32.75, lng: 21.5 },  // Entre Méditerranée-Égypte
-                { lat: 31.5, lng: 25.0 },   // Approche Égypte
-                { lat: 31.35, lng: 28.65 }, // Entre Approche-Port Saïd
-                { lat: 31.2, lng: 32.3 },   // Port Saïd
-                { lat: 30.85, lng: 32.4 },  // Entrée Canal
-                { lat: 30.5, lng: 32.5 },   // Canal de Suez
-                { lat: 30.2, lng: 32.55 },  // Mi-canal
-                { lat: 29.9, lng: 32.6 },   // Suez Sud
-                { lat: 28.45, lng: 33.2 },  // Entre Suez-Mer Rouge Nord
-                { lat: 27.0, lng: 33.8 },   // Mer Rouge Nord
-                { lat: 23.5, lng: 35.9 },   // Entre Nord-Centre Mer Rouge
-                { lat: 20.0, lng: 38.0 },   // Mer Rouge Centre
-                { lat: 16.3, lng: 40.7 },   // Entre Centre-Détroit
-                { lat: 15.5, lng: 41.2 },   // Approche Bab-el-Mandeb (Érythrée)
-                { lat: 14.5, lng: 42.0 },   // Approche Détroit Nord (Djibouti)
-                { lat: 13.5, lng: 42.8 },   // Détroit Nord
-                { lat: 12.6, lng: 43.4 },   // Détroit de Bab-el-Mandeb
-                { lat: 12.0, lng: 44.2 },   // Sortie Détroit (Somaliland)
-                { lat: 11.7, lng: 45.2 },   // Golfe d'Aden Ouest début (large)
-                { lat: 11.5, lng: 46.2 },   // Golfe d'Aden Ouest (large)
-                { lat: 11.3, lng: 47.2 },   // Golfe d'Aden Ouest-Centre (large)
-                { lat: 11.2, lng: 48.2 },   // Golfe d'Aden Centre (large)
-                { lat: 11.1, lng: 49.2 },   // Golfe d'Aden Centre-Est 1 (large)
-                { lat: 11.0, lng: 50.2 },   // Golfe d'Aden Centre-Est 2 (large)
-                { lat: 10.9, lng: 51.0 },   // Golfe d'Aden Est (large)
-                { lat: 10.8, lng: 51.8 },   // Approche Cap Guardafui 1 (large)
-                { lat: 10.7, lng: 52.5 },   // Approche Cap Guardafui 2 (large)
-                { lat: 10.5, lng: 53.2 },   // Approche Cap Guardafui 3 (large)
-                { lat: 10.3, lng: 53.8 },   // Près Cap Guardafui (large)
-                { lat: 10.0, lng: 54.3 },   // Cap Guardafui Nord (large - début du virage)
-                { lat: 9.5, lng: 54.7 },    // Cap Guardafui (large - POINTE DE LA CORNE)
-                { lat: 9.0, lng: 55.0 },    // Cap Guardafui Sud 1 (large - après virage)
-                { lat: 8.5, lng: 55.2 },    // Cap Guardafui Sud 2 (large)
-                { lat: 8.0, lng: 55.5 },    // Début côte Est Somalie (large)
-                { lat: 7.5, lng: 55.8 },    // Côte Est Somalie 1 (large)
-                { lat: 7.0, lng: 56.2 },    // Côte Est Somalie 2 (large)
-                { lat: 6.5, lng: 56.6 },    // Côte Est Somalie 3 (large)
-                { lat: 6.0, lng: 57.0 },    // Côte Est Somalie 4 (large)
-                { lat: 5.5, lng: 57.5 },    // Côte Est Somalie 5 (large)
-                { lat: 5.0, lng: 58.0 },    // Côte Est Somalie 6 (large)
-                { lat: 4.5, lng: 58.5 },    // Côte Est Somalie 7 (large)
-                { lat: 4.0, lng: 59.0 },    // Côte Est Somalie 8 (large)
-                { lat: 3.5, lng: 59.5 },    // Côte Est Somalie 9 (large)
-                { lat: 3.0, lng: 60.0 },    // Côte Est Somalie Sud (large)
-                { lat: 2.5, lng: 61.0 },    // Large Kenya Nord (large)
-                { lat: 2.0, lng: 62.5 },    // Océan Indien Ouest 1 (large)
-                { lat: 1.5, lng: 64.0 },    // Océan Indien Ouest 2 (large)
-                { lat: 1.0, lng: 65.5 },    // Océan Indien Ouest 3 (large)
-                { lat: 1.5, lng: 67.0 },    // Océan Indien Centre-Ouest 1 (large)
-                { lat: 2.5, lng: 68.5 },    // Océan Indien Centre-Ouest 2 (large)
-                { lat: 3.5, lng: 70.0 },    // Océan Indien Centre-Ouest 3 (large)
-                { lat: 4.0, lng: 71.5 },    // Entre Océan-Sri Lanka (large)
-                { lat: 6.5, lng: 72.5 },    // Entre Océan-Sri Lanka
-                { lat: 5.0, lng: 80.0 },    // Sri Lanka
-                { lat: 4.0, lng: 87.5 },    // Entre Sri Lanka-Malacca
-                { lat: 3.0, lng: 95.0 },    // Approche Malacca
-                { lat: 2.15, lng: 99.4 },   // Entre Approche-Détroit
-                { lat: 1.3, lng: 103.8 },   // Détroit de Malacca
-                { lat: 3.15, lng: 106.9 },  // Entre Détroit-Mer Chine Sud
-                { lat: 5.0, lng: 110.0 },   // Mer de Chine Sud
-                { lat: 10.0, lng: 111.5 },  // Entre Sud-Chine
-                { lat: 15.0, lng: 113.0 },  // Mer de Chine
-                { lat: 18.65, lng: 113.6 }, // Entre Chine-Hong Kong
-                { lat: 22.3, lng: 114.2 },  // Hong Kong
-                { lat: 25.15, lng: 117.1 }, // Entre Hong Kong-Côte
-                { lat: 28.0, lng: 120.0 },  // Côte chinoise
-                { lat: 29.6, lng: 120.75 }, // Entre Côte-Shanghai
-                { lat: 31.2, lng: 121.5 }   // Shanghai
+                { lat: 31.23, lng: 121.47 }, // Shanghai
+                { lat: 32.5, lng: 121.0 },   // Intermédiaire
+                { lat: 34.0, lng: 120.5 },   // Intermédiaire
+                { lat: 36.07, lng: 120.38 }, // Qingdao
+                { lat: 37.5, lng: 119.5 },   // Intermédiaire
+                { lat: 39.13, lng: 117.20 }, // Tianjin
+                { lat: 39.0, lng: 120.0 },   // Intermédiaire
+                { lat: 38.91, lng: 121.60 }  // Dalian
             ],
-            intensity: calculateIntensity(stats.suez, routePortWeights.suez),
-            annualPassages: stats.suez,
-            color: '#3498db'
-        },
-        // Route Atlantique Nord (Europe ↔ USA)
-        {
-            name: 'North Atlantic',
-            waypoints: [
-                { lat: 51.5, lng: -0.1 },   // Londres
-                { lat: 51.0, lng: -2.05 },  // Entre Londres-Manche
-                { lat: 50.5, lng: -4.0 },   // Manche Ouest
-                { lat: 49.9, lng: -6.0 },   // Entre Manche-Irlande
-                { lat: 49.3, lng: -8.0 },   // Irlande Sud
-                { lat: 48.65, lng: -11.5 }, // Entre Irlande-Atlantique
-                { lat: 48.0, lng: -15.0 },  // Atlantique
-                { lat: 47.0, lng: -20.0 },  // Entre Atlantique-Mid
-                { lat: 46.0, lng: -25.0 },  // Mid-Atlantic
-                { lat: 45.0, lng: -30.0 },  // Entre Mid-Atlantic
-                { lat: 44.0, lng: -35.0 },  // Mid-Atlantic
-                { lat: 43.0, lng: -40.0 },  // Entre Mid-Approche
-                { lat: 42.0, lng: -45.0 },  // Approche Amérique
-                { lat: 41.35, lng: -50.0 }, // Entre Approche-Plateau
-                { lat: 40.7, lng: -55.0 },  // Plateau continental
-                { lat: 40.7, lng: -64.5 },  // Entre Plateau-New York
-                { lat: 40.7, lng: -74.0 }   // New York
-            ],
-            intensity: calculateIntensity(stats.atlantic, routePortWeights.atlantic),
-            annualPassages: stats.atlantic,
-            color: '#2ecc71'
-        },
-        // Route Europe → Cap (alternative à Suez)
-        {
-            name: 'Europe-Asia (Cape)',
-            waypoints: [
-                { lat: 43.3, lng: 5.4 },    // Marseille
-                { lat: 40.65, lng: 2.2 },   // Entre Marseille-Espagne
-                { lat: 38.0, lng: -1.0 },   // Espagne Sud
-                { lat: 37.05, lng: -3.2 },  // Entre Espagne-Gibraltar
-                { lat: 36.1, lng: -5.4 },   // Détroit Gibraltar
-                { lat: 33.05, lng: -7.7 },  // Entre Gibraltar-Afrique NO
-                { lat: 30.0, lng: -10.0 },  // Côte Afrique Nord-Ouest
-                { lat: 25.0, lng: -13.5 },  // Entre NO-Mauritanie
-                { lat: 20.0, lng: -17.0 },  // Côte Mauritanie
-                { lat: 15.0, lng: -16.0 },  // Entre Mauritanie-Guinée
-                { lat: 10.0, lng: -15.0 },  // Côte Guinée
-                { lat: 5.0, lng: -10.0 },   // Entre Guinée-Golfe
-                { lat: 0.0, lng: -5.0 },    // Golfe de Guinée
-                { lat: -5.0, lng: 0.0 },    // Entre Golfe-Angola
-                { lat: -10.0, lng: 5.0 },   // Côte Angola
-                { lat: -15.0, lng: 8.5 },   // Entre Angola-Namibie
-                { lat: -20.0, lng: 12.0 },  // Namibie
-                { lat: -21.0, lng: 12.5 },  // Namibie Centre-Sud
-                { lat: -22.5, lng: 13.0 },  // Namibie Sud
-                { lat: -24.0, lng: 13.5 },  // Namibie Sud-Ouest
-                { lat: -25.5, lng: 14.0 },  // Orange River
-                { lat: -27.0, lng: 14.5 },  // Côte Ouest SA Nord
-                { lat: -28.5, lng: 15.5 },  // Côte Ouest SA Centre
-                { lat: -30.0, lng: 16.0 },  // Côte Ouest SA Sud
-                { lat: -31.5, lng: 17.0 },  // Saldanha Bay (large)
-                { lat: -33.0, lng: 17.8 },  // Table Bay approche (large)
-                { lat: -33.8, lng: 18.2 },  // Cape Town (large)
-                { lat: -34.3, lng: 18.4 },  // Cap pointe Ouest
-                { lat: -34.5, lng: 18.5 },  // Cap de Bonne-Espérance
-                { lat: -34.7, lng: 18.7 },  // False Bay Ouest
-                { lat: -34.8, lng: 19.2 },  // False Bay Sud (au large)
-                { lat: -34.9, lng: 19.8 },  // Cape Agulhas approche (point le plus sud)
-                { lat: -34.9, lng: 20.5 },  // Cape Agulhas (point le plus sud d'Afrique)
-                { lat: -34.8, lng: 21.2 },  // Après Cape Agulhas
-                { lat: -34.6, lng: 22.0 },  // Mossel Bay (large)
-                { lat: -34.4, lng: 22.8 },  // Entre Mossel Bay-George
-                { lat: -34.2, lng: 23.6 },  // Plettenberg Bay (large)
-                { lat: -34.1, lng: 24.4 },  // Tsitsikamma (large)
-                { lat: -34.0, lng: 25.2 },  // Port Elizabeth Ouest (large)
-                { lat: -33.9, lng: 25.8 },  // Port Elizabeth (large)
-                { lat: -33.7, lng: 26.4 },  // Port Elizabeth Est (large)
-                { lat: -33.5, lng: 27.0 },  // Entre Port Elizabeth-East London
-                { lat: -33.3, lng: 27.5 },  // Approche East London (large)
-                { lat: -33.1, lng: 28.0 },  // East London (large)
-                { lat: -32.8, lng: 28.5 },  // East London Est (large)
-                { lat: -32.5, lng: 29.0 },  // Wild Coast Sud (large)
-                { lat: -32.2, lng: 29.5 },  // Wild Coast Centre (large)
-                { lat: -31.8, lng: 30.0 },  // Wild Coast Nord (large)
-                { lat: -31.4, lng: 30.5 },  // Port Shepstone (large)
-                { lat: -31.0, lng: 31.0 },  // Approche Durban Sud (large)
-                { lat: -30.5, lng: 31.5 },  // Durban Sud (large)
-                { lat: -30.0, lng: 31.8 },  // Durban (large)
-                { lat: -29.5, lng: 32.0 },  // Durban Nord (large)
-                { lat: -29.0, lng: 32.3 },  // KwaZulu-Natal Nord (large)
-                { lat: -28.5, lng: 32.5 },  // Frontière Mozambique (large)
-                { lat: -24.0, lng: 36.0 },  // Entre Mozambique-Canal
-                { lat: -20.0, lng: 40.0 },  // Canal Mozambique
-                { lat: -15.0, lng: 45.0 },  // Entre Canal-Madagascar
-                { lat: -10.0, lng: 50.0 },  // Madagascar Est
-                { lat: -5.0, lng: 60.0 },   // Entre Madagascar-Océan
-                { lat: 0.0, lng: 70.0 },    // Océan Indien
-                { lat: 2.5, lng: 80.0 },    // Entre Océan-Approche Malacca
-                { lat: 5.0, lng: 90.0 },    // Approche Malacca
-                { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
-                { lat: 1.3, lng: 103.8 }    // Singapour
-            ],
-            intensity: calculateIntensity(stats.cape, routePortWeights.cape),
-            annualPassages: stats.cape,
+            intensity: 280,
+            annualPassages: 5200,
             color: '#e74c3c'
         },
-        // Route Méditerranée (commerce intra-européen)
+        
+        // 2. Shanghai Hub South (Shanghai → Ningbo → Xiamen)
         {
-            name: 'Mediterranean',
+            name: 'China Central Coast',
             waypoints: [
-                { lat: 43.3, lng: 5.4 },    // Marseille
-                { lat: 43.0, lng: 6.5 },    // Nice
-                { lat: 42.8, lng: 8.0 },    // Corse Nord
-                { lat: 42.0, lng: 9.5 },    // Corse Est
-                { lat: 41.5, lng: 10.5 },   // Mer Tyrrhénienne
-                { lat: 41.9, lng: 12.5 },   // Civitavecchia (Rome)
-                { lat: 41.5, lng: 14.0 },   // Mer Tyrrhénienne Sud
-                { lat: 40.8, lng: 14.3 },   // Naples
-                { lat: 40.0, lng: 16.0 },   // Calabre
-                { lat: 39.0, lng: 17.5 },   // Calabre Sud
-                { lat: 38.2, lng: 18.5 },   // Détroit Messine
-                { lat: 37.5, lng: 19.5 },   // Mer Ionienne
-                { lat: 37.0, lng: 21.0 },   // Grèce Ouest
-                { lat: 37.5, lng: 22.5 },   // Péloponnèse
-                { lat: 37.9, lng: 23.7 },   // Pirée (Athènes)
-                { lat: 38.5, lng: 24.5 },   // Eubée
-                { lat: 39.0, lng: 25.2 },   // Mer Égée Nord
-                { lat: 39.5, lng: 26.0 },   // Lesbos
-                { lat: 40.2, lng: 26.8 },   // Dardanelles
-                { lat: 40.8, lng: 27.5 },   // Mer de Marmara
-                { lat: 41.0, lng: 28.5 },   // Bosphore
-                { lat: 41.0, lng: 29.0 },   // Istanbul
-                { lat: 41.2, lng: 29.5 },   // Sortie Bosphore Nord
-                { lat: 41.5, lng: 30.5 },   // Mer Noire Ouest
-                { lat: 42.0, lng: 32.0 },   // Mer Noire Centre-Ouest
-                { lat: 43.0, lng: 34.0 },   // Mer Noire Nord-Ouest
-                { lat: 44.5, lng: 36.0 },   // Mer Noire Nord (Crimée)
-                { lat: 45.5, lng: 37.5 },   // Mer d'Azov (optionnel)
-                { lat: 44.0, lng: 38.5 },   // Mer Noire Nord-Est
-                { lat: 42.5, lng: 40.0 },   // Mer Noire Est
-                { lat: 41.5, lng: 41.5 }    // Mer Noire Sud-Est
+                { lat: 31.23, lng: 121.47 }, // Shanghai
+                { lat: 30.5, lng: 121.5 },   // Intermédiaire
+                { lat: 29.87, lng: 121.55 }, // Ningbo-Zhoushan
+                { lat: 27.0, lng: 120.0 },   // Intermédiaire
+                { lat: 24.48, lng: 118.09 }  // Xiamen
             ],
-            intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
-            annualPassages: stats.mediterranean,
+            intensity: 300,
+            annualPassages: 5800,
+            color: '#e74c3c'
+        },
+        
+        // 3. Pearl River Delta (Xiamen → Shenzhen → Guangzhou → Hong Kong)
+        {
+            name: 'Pearl River Delta',
+            waypoints: [
+                { lat: 24.48, lng: 118.09 }, // Xiamen
+                { lat: 23.5, lng: 116.0 },   // Intermédiaire
+                { lat: 22.54, lng: 114.06 }, // Shenzhen
+                { lat: 22.8, lng: 113.7 },   // Intermédiaire
+                { lat: 23.13, lng: 113.26 }, // Guangzhou
+                { lat: 22.7, lng: 113.8 },   // Intermédiaire
+                { lat: 22.30, lng: 114.17 }  // Hong Kong
+            ],
+            intensity: 320,
+            annualPassages: 6200,
+            color: '#e74c3c'
+        },
+        
+        // 4. Korea-China Link (Shanghai → Busan)
+        {
+            name: 'China-Korea',
+            waypoints: [
+                { lat: 31.23, lng: 121.47 }, // Shanghai
+                { lat: 32.5, lng: 124.0 },   // Mer Jaune
+                { lat: 34.0, lng: 126.5 },   // Mer Jaune Centre
+                { lat: 35.18, lng: 129.08 }  // Busan
+            ],
+            intensity: 250,
+            annualPassages: 4800,
+            color: '#e67e22'
+        },
+        
+        // 5. Korea-Japan (Busan → Tokyo → Yokohama)
+        {
+            name: 'Korea-Japan',
+            waypoints: [
+                { lat: 35.18, lng: 129.08 }, // Busan
+                { lat: 35.0, lng: 132.0 },   // Mer du Japon
+                { lat: 35.2, lng: 135.0 },   // Intermédiaire
+                { lat: 35.62, lng: 139.78 }, // Tokyo
+                { lat: 35.5, lng: 139.7 },   // Intermédiaire
+                { lat: 35.44, lng: 139.64 }  // Yokohama
+            ],
+            intensity: 220,
+            annualPassages: 4200,
+            color: '#e67e22'
+        },
+        
+        // 6. Japan Coastal (Tokyo → Yokohama loop)
+        {
+            name: 'Tokyo Bay',
+            waypoints: [
+                { lat: 35.62, lng: 139.78 }, // Tokyo
+                { lat: 35.5, lng: 139.9 },   // Baie de Tokyo
+                { lat: 35.44, lng: 139.64 }, // Yokohama
+                { lat: 35.55, lng: 139.7 }   // Retour
+            ],
+            intensity: 180,
+            annualPassages: 3400,
+            color: '#3498db'
+        },
+        
+        // 7. Taiwan Circuit (Hong Kong → Kaohsiung → Xiamen)
+        {
+            name: 'Taiwan Strait',
+            waypoints: [
+                { lat: 22.30, lng: 114.17 }, // Hong Kong
+                { lat: 22.0, lng: 117.0 },   // Détroit de Taiwan
+                { lat: 22.61, lng: 120.30 }, // Kaohsiung
+                { lat: 23.5, lng: 119.5 },   // Côte Taiwan
+                { lat: 24.48, lng: 118.09 }  // Xiamen
+            ],
+            intensity: 240,
+            annualPassages: 4600,
             color: '#9b59b6'
-        }
+        },
         
-        /*
-        ,
-        // Route Transpacifique circulaire (boucle complète autour du Pacifique)
+        // 8. North Japan-Korea (Dalian → Busan → Tokyo)
         {
-            name: 'Transpacific Loop',
+            name: 'Northeast Asia',
             waypoints: [
-                // Départ Asie
-                { lat: 31.2, lng: 121.5 },   // Shanghai
-                { lat: 32.5, lng: 127.5 },   // Mer de Chine Est
-                { lat: 34.0, lng: 135.0 },   // Mer du Japon
-                { lat: 35.4, lng: 139.7 },   // Tokyo
-                // Traversée Pacifique Nord vers USA
-                { lat: 37.0, lng: 150.0 },   // Pacifique Nord-Ouest
-                { lat: 38.5, lng: 160.0 },   // Milieu Pacifique NO
-                { lat: 40.0, lng: 170.0 },   // Mid-Pacific Nord
-                { lat: 40.5, lng: 179.0 },   // Près ligne de date
-                { lat: 40.5, lng: -178.0 },  // Ligne de date
-                { lat: 40.0, lng: -165.0 },  // Pacifique Nord-Est
-                { lat: 39.0, lng: -150.0 },  // Approche Hawaï Nord
-                { lat: 38.0, lng: -140.0 },  // Vers USA
-                { lat: 37.8, lng: -122.4 },  // San Francisco
-                // Descente côte ouest américaine
-                { lat: 34.0, lng: -118.2 },  // Los Angeles
-                { lat: 30.0, lng: -115.0 },  // Basse Californie
-                { lat: 25.0, lng: -112.0 },  // Mexique Pacifique
-                { lat: 20.0, lng: -110.0 },  // Mexique Sud
-                { lat: 15.0, lng: -105.0 },  // Large Amérique Centrale
-                { lat: 10.0, lng: -100.0 },  // Équateur Pacifique Est
-                // Traversée Pacifique Sud vers Asie
-                { lat: 5.0, lng: -105.0 },   // Pacifique Équatorial
-                { lat: 0.0, lng: -115.0 },   // Équateur
-                { lat: -5.0, lng: -130.0 },  // Pacifique Sud-Est
-                { lat: -10.0, lng: -145.0 }, // Polynésie
-                { lat: -12.0, lng: -160.0 }, // Pacifique Sud Centre
-                { lat: -10.0, lng: -175.0 }, // Samoa
-                { lat: -8.0, lng: 180.0 },   // Ligne de date Sud
-                { lat: -8.0, lng: 170.0 },   // Fidji
-                { lat: -10.0, lng: 155.0 },  // Mélanésie
-                { lat: -8.0, lng: 145.0 },   // Papouasie
-                { lat: -4.0, lng: 135.0 },   // Mer d'Arafura
-                { lat: 0.0, lng: 130.0 },    // Moluques
-                { lat: 3.0, lng: 125.0 },    // Sulawesi
-                { lat: 6.0, lng: 120.0 },    // Mer de Sulu
-                { lat: 10.0, lng: 118.0 },   // Mer de Chine Sud
-                { lat: 15.0, lng: 117.0 },   // Philippines Ouest
-                { lat: 20.0, lng: 118.0 },   // Détroit de Luçon
-                { lat: 25.0, lng: 120.0 },   // Taiwan
-                { lat: 28.0, lng: 121.0 },   // Vers Shanghai
-                { lat: 31.2, lng: 121.5 }    // Retour Shanghai (boucle fermée)
+                { lat: 38.91, lng: 121.60 }, // Dalian
+                { lat: 37.5, lng: 125.0 },   // Mer Jaune
+                { lat: 35.18, lng: 129.08 }, // Busan
+                { lat: 35.3, lng: 134.0 },   // Mer du Japon
+                { lat: 35.62, lng: 139.78 }  // Tokyo
             ],
-            intensity: calculateIntensity(stats.transpacific, routePortWeights.transpacific),
-            annualPassages: stats.transpacific,
-            color: '#f39c12'
-        }
-        */
+            intensity: 200,
+            annualPassages: 3800,
+            color: '#1abc9c'
+        },
         
-        /*
-        ,
-        // Route Transpacifique (Asie → USA uniquement, pas de retour)
+        // ===== ASIE DU SUD-EST - 10 routes =====
+        
+        // 9. Singapore Hub North (Singapore → Port Klang → Penang)
         {
-            name: 'Transpacific East',
+            name: 'Malacca Strait West',
             waypoints: [
-                { lat: 31.2, lng: 121.5 },  // Shanghai
-                { lat: 31.6, lng: 123.25 }, // Entre Shanghai-Mer Chine
-                { lat: 32.0, lng: 125.0 },  // Mer de Chine Est
-                { lat: 32.5, lng: 127.5 },  // Entre Chine-Kyushu
-                { lat: 33.0, lng: 130.0 },  // Kyushu
-                { lat: 33.5, lng: 132.5 },  // Entre Kyushu-Mer Japon
-                { lat: 34.0, lng: 135.0 },  // Mer du Japon Sud
-                { lat: 34.7, lng: 137.35 }, // Entre Mer Japon-Tokyo
-                { lat: 35.4, lng: 139.7 },  // Tokyo
-                { lat: 35.7, lng: 141.35 }, // Entre Tokyo-Est Honshu
-                { lat: 36.0, lng: 143.0 },  // Est Honshu
-                { lat: 36.5, lng: 146.5 },  // Entre Honshu-Pacifique O
-                { lat: 37.0, lng: 150.0 },  // Pacifique Ouest
-                { lat: 37.5, lng: 153.5 },  // Entre Pacifique O-NO
-                { lat: 38.0, lng: 157.0 },  // Pacifique Nord-Ouest
-                { lat: 38.5, lng: 160.5 },  // Entre NO-Mid-Pacific O
-                { lat: 39.0, lng: 164.0 },  // Mid-Pacific Ouest
-                { lat: 39.5, lng: 167.0 },  // Entre Mid-Pacific O-Mid
-                { lat: 40.0, lng: 170.0 },  // Mid-Pacific
-                { lat: 40.25, lng: 173.0 }, // Entre Mid-Pacific-Date
-                { lat: 40.5, lng: 176.0 },  // Mid-Pacific Est
-                { lat: 40.65, lng: 179.0 }, // Entre Mid-Date line
-                { lat: 40.8, lng: -178.0 }, // Date line
-                { lat: 40.9, lng: -175.0 }, // Entre Date-Mid-Pacific E2
-                { lat: 41.0, lng: -172.0 }, // Mid-Pacific Est 2
-                { lat: 41.0, lng: -168.5 }, // Entre E2-Centre-Est
-                { lat: 41.0, lng: -165.0 }, // Pacifique Centre-Est
-                { lat: 40.75, lng: -161.5 },// Entre Centre-Est
-                { lat: 40.5, lng: -158.0 }, // Pacifique Est
-                { lat: 40.0, lng: -154.5 }, // Entre Est-Approche Hawaï
-                { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
-                { lat: 39.0, lng: -147.5 }, // Entre Hawaï-Pacifique NE
-                { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
-                { lat: 38.0, lng: -140.5 }, // Entre NE-Approche USA
-                { lat: 37.5, lng: -137.0 }, // Approche USA
-                { lat: 37.25, lng: -133.5 },// Entre Approche-Large USA
-                { lat: 37.0, lng: -130.0 }, // Large USA Ouest
-                { lat: 37.25, lng: -127.0 },// Entre Large-Californie
-                { lat: 37.5, lng: -124.0 }, // Large Californie
-                { lat: 37.65, lng: -123.2 },// Entre Large-San Francisco
-                { lat: 37.8, lng: -122.4 }  // San Francisco
+                { lat: 1.29, lng: 103.85 },  // Singapore
+                { lat: 1.8, lng: 103.0 },    // Détroit Malacca Sud
+                { lat: 2.99, lng: 101.39 },  // Port Klang
+                { lat: 4.0, lng: 100.8 },    // Intermédiaire
+                { lat: 5.42, lng: 100.34 }   // Penang
             ],
-            intensity: Math.round(calculateIntensity(stats.transpacific, routePortWeights.transpacific) / 2), // Moitié des bateaux
-            annualPassages: Math.round(stats.transpacific / 2),
+            intensity: 290,
+            annualPassages: 5600,
             color: '#f39c12'
         },
-        // Route Transpacifique retour (USA → Asie, même route inversée)
-        {
-            name: 'Transpacific West',
-            waypoints: [
-                { lat: 37.8, lng: -122.4 },  // San Francisco
-                { lat: 37.65, lng: -123.2 },// Entre San Francisco-Large
-                { lat: 37.5, lng: -124.0 }, // Large Californie
-                { lat: 37.25, lng: -127.0 },// Entre Californie-Large USA
-                { lat: 37.0, lng: -130.0 }, // Large USA Ouest
-                { lat: 37.25, lng: -133.5 },// Entre Large USA-Approche
-                { lat: 37.5, lng: -137.0 }, // Approche USA
-                { lat: 38.0, lng: -140.5 }, // Entre Approche-NE
-                { lat: 38.5, lng: -144.0 }, // Pacifique Nord-Est
-                { lat: 39.0, lng: -147.5 }, // Entre NE-Hawaï
-                { lat: 39.5, lng: -151.0 }, // Approche Hawaï Nord
-                { lat: 40.0, lng: -154.5 }, // Entre Hawaï-Est
-                { lat: 40.5, lng: -158.0 }, // Pacifique Est
-                { lat: 40.75, lng: -161.5 },// Entre Est-Centre
-                { lat: 41.0, lng: -165.0 }, // Pacifique Centre-Est
-                { lat: 41.0, lng: -168.5 }, // Entre Centre-E2
-                { lat: 41.0, lng: -172.0 }, // Mid-Pacific Est 2
-                { lat: 40.9, lng: -175.0 }, // Entre E2-Date
-                { lat: 40.8, lng: -178.0 }, // Date line
-                { lat: 40.65, lng: 179.0 }, // Entre Date-Mid
-                { lat: 40.5, lng: 176.0 },  // Mid-Pacific Est
-                { lat: 40.25, lng: 173.0 }, // Entre Mid-Pacific
-                { lat: 40.0, lng: 170.0 },  // Mid-Pacific
-                { lat: 39.5, lng: 167.0 },  // Entre Mid-O
-                { lat: 39.0, lng: 164.0 },  // Mid-Pacific Ouest
-                { lat: 38.5, lng: 160.5 },  // Entre O-NO
-                { lat: 38.0, lng: 157.0 },  // Pacifique Nord-Ouest
-                { lat: 37.5, lng: 153.5 },  // Entre NO-O
-                { lat: 37.0, lng: 150.0 },  // Pacifique Ouest
-                { lat: 36.5, lng: 146.5 },  // Entre Pacifique-Honshu
-                { lat: 36.0, lng: 143.0 },  // Est Honshu
-                { lat: 35.7, lng: 141.35 }, // Entre Honshu-Tokyo
-                { lat: 35.4, lng: 139.7 },  // Tokyo
-                { lat: 34.7, lng: 137.35 }, // Entre Tokyo-Mer Japon
-                { lat: 34.0, lng: 135.0 },  // Mer du Japon Sud
-                { lat: 33.5, lng: 132.5 },  // Entre Mer Japon-Kyushu
-                { lat: 33.0, lng: 130.0 },  // Kyushu
-                { lat: 32.5, lng: 127.5 },  // Entre Kyushu-Chine
-                { lat: 32.0, lng: 125.0 },  // Mer de Chine Est
-                { lat: 31.6, lng: 123.25 }, // Entre Mer Chine-Shanghai
-                { lat: 31.2, lng: 121.5 }   // Shanghai
-            ],
-            intensity: Math.round(calculateIntensity(stats.transpacific, routePortWeights.transpacific) / 2), // Moitié des bateaux
-            annualPassages: Math.round(stats.transpacific / 2),
-            color: '#f39c12'
-        }
-        */
         
-        /*
-        ,
-        // Route Panama (Asie ↔ Europe via Panama)
+        // 10. Singapore-Thailand (Singapore → Tanjung Pelepas → Laem Chabang)
         {
-            name: 'Panama Route',
+            name: 'Singapore-Thailand',
             waypoints: [
-                { lat: 1.3, lng: 103.8 },   // Singapour
-                { lat: 0.5, lng: 108.0 },   // Mer de Chine Sud
-                { lat: 0.0, lng: 115.0 },   // Bornéo Sud
-                { lat: -1.0, lng: 120.0 },  // Sulawesi
-                { lat: -2.5, lng: 125.0 },  // Mer de Banda Ouest
-                { lat: -4.0, lng: 130.0 },  // Mer de Banda
-                { lat: -6.0, lng: 135.0 },  // Mer d'Arafura
-                { lat: -8.0, lng: 142.0 },  // Papouasie Sud
-                { lat: -9.0, lng: 148.0 },  // Papouasie Sud-Est
-                { lat: -10.0, lng: 155.0 }, // Mer de Corail
-                { lat: -10.5, lng: 162.0 }, // Pacifique Sud-Ouest
-                { lat: -10.0, lng: 170.0 }, // Pacifique Sud
-                { lat: -9.0, lng: 178.0 },  // Pacifique Sud Centre
-                { lat: -8.0, lng: -178.0 }, // Date line Sud
-                { lat: -7.0, lng: -170.0 }, // Pacifique Sud-Centre
-                { lat: -5.5, lng: -160.0 }, // Pacifique Sud-Est
-                { lat: -4.0, lng: -150.0 }, // Approche Équateur
-                { lat: -2.0, lng: -140.0 }, // Équateur Pacifique
-                { lat: 0.0, lng: -135.0 },  // Équateur
-                { lat: 1.0, lng: -130.0 },  // Pacifique Équatorial Est
-                { lat: 2.0, lng: -125.0 },  // Large Mexique Sud-Ouest
-                { lat: 3.0, lng: -120.0 },  // Pacifique Tropical Est
-                { lat: 4.0, lng: -115.0 },  // Large Mexique Sud
-                { lat: 5.0, lng: -110.0 },  // Pacifique Est
-                { lat: 6.0, lng: -105.0 },  // Large Amérique Centrale Ouest
-                { lat: 7.0, lng: -100.0 },  // Large Amérique Centrale
-                { lat: 7.8, lng: -95.0 },   // Large Mexique/Guatemala
-                { lat: 8.5, lng: -90.0 },   // Large Guatemala
-                { lat: 9.0, lng: -85.0 },   // Costa Rica Ouest
-                { lat: 9.1, lng: -79.4 },   // Canal de Panama
-                { lat: 9.5, lng: -78.0 },   // Sortie Canal (Caraïbes)
-                { lat: 10.0, lng: -75.0 },  // Caraïbes Ouest
-                { lat: 11.0, lng: -72.0 },  // Caraïbes Colombie
-                { lat: 12.5, lng: -68.0 },  // Caraïbes Venezuela
-                { lat: 14.0, lng: -65.0 },  // Petites Antilles
-                { lat: 15.5, lng: -61.0 },  // Caraïbes Centre-Est
-                { lat: 17.0, lng: -57.0 },  // Caraïbes Est
-                { lat: 18.5, lng: -53.0 },  // Sortie Caraïbes
-                { lat: 20.0, lng: -48.0 },  // Atlantique Tropical Ouest
-                { lat: 22.0, lng: -43.0 },  // Atlantique Tropical
-                { lat: 24.0, lng: -38.0 },  // Mid-Atlantic Ouest
-                { lat: 26.0, lng: -33.0 },  // Mid-Atlantic
-                { lat: 28.0, lng: -28.0 },  // Mid-Atlantic Centre
-                { lat: 30.0, lng: -23.0 },  // Mid-Atlantic Est
-                { lat: 32.0, lng: -18.0 },  // Approche Europe
-                { lat: 34.0, lng: -13.0 },  // Large Portugal
-                { lat: 35.5, lng: -9.0 },   // Portugal
-                { lat: 36.5, lng: -6.5 },   // Approche Gibraltar
-                { lat: 36.1, lng: -5.4 }    // Gibraltar
+                { lat: 1.29, lng: 103.85 },  // Singapore
+                { lat: 1.32, lng: 103.7 },   // Intermédiaire
+                { lat: 1.36, lng: 103.55 },  // Tanjung Pelepas
+                { lat: 3.0, lng: 102.5 },    // Golfe de Thaïlande Sud
+                { lat: 6.0, lng: 101.5 },    // Golfe de Thaïlande
+                { lat: 10.0, lng: 101.0 },   // Approche Laem Chabang
+                { lat: 13.08, lng: 100.88 }  // Laem Chabang
             ],
-            intensity: calculateIntensity(stats.panama, routePortWeights.panama),
-            annualPassages: stats.panama,
+            intensity: 270,
+            annualPassages: 5200,
+            color: '#f39c12'
+        },
+        
+        // 11. Vietnam Coast (Ho Chi Minh → Hai Phong)
+        {
+            name: 'Vietnam Coast',
+            waypoints: [
+                { lat: 10.77, lng: 106.70 }, // Ho Chi Minh City
+                { lat: 13.0, lng: 107.5 },   // Centre Vietnam
+                { lat: 16.0, lng: 108.0 },   // Da Nang
+                { lat: 19.0, lng: 107.0 },   // Nord Vietnam
+                { lat: 20.86, lng: 106.68 }  // Hai Phong
+            ],
+            intensity: 210,
+            annualPassages: 4000,
+            color: '#16a085'
+        },
+        
+        // 12. Indochina Link (Laem Chabang → Ho Chi Minh → Manila)
+        {
+            name: 'Indochina-Philippines',
+            waypoints: [
+                { lat: 13.08, lng: 100.88 }, // Laem Chabang
+                { lat: 12.0, lng: 103.5 },   // Golfe Thaïlande Est
+                { lat: 10.77, lng: 106.70 }, // Ho Chi Minh City
+                { lat: 11.5, lng: 110.0 },   // Mer de Chine Sud
+                { lat: 13.0, lng: 115.0 },   // Approche Philippines
+                { lat: 14.59, lng: 120.98 }  // Manila
+            ],
+            intensity: 230,
+            annualPassages: 4400,
+            color: '#16a085'
+        },
+        
+        // 13. Philippines-Taiwan (Manila → Kaohsiung → Hong Kong)
+        {
+            name: 'Philippines-Taiwan',
+            waypoints: [
+                { lat: 14.59, lng: 120.98 }, // Manila
+                { lat: 18.0, lng: 121.0 },   // Nord Luzon
+                { lat: 21.0, lng: 120.5 },   // Approche Taiwan
+                { lat: 22.61, lng: 120.30 }, // Kaohsiung
+                { lat: 22.4, lng: 117.0 },   // Détroit Taiwan
+                { lat: 22.30, lng: 114.17 }  // Hong Kong
+            ],
+            intensity: 200,
+            annualPassages: 3800,
+            color: '#8e44ad'
+        },
+        
+        // 14. Indonesia West (Singapore → Jakarta → Penang)
+        {
+            name: 'Indonesia-Malaysia',
+            waypoints: [
+                { lat: 1.29, lng: 103.85 },  // Singapore
+                { lat: -2.0, lng: 105.0 },   // Détroit Sunda
+                { lat: -6.10, lng: 106.88 }, // Jakarta
+                { lat: -3.0, lng: 104.0 },   // Côte Sumatra
+                { lat: 1.0, lng: 102.0 },    // Détroit Malacca
+                { lat: 5.42, lng: 100.34 }   // Penang
+            ],
+            intensity: 220,
+            annualPassages: 4200,
+            color: '#27ae60'
+        },
+        
+        // 15. Myanmar-Thailand (Yangon → Laem Chabang)
+        {
+            name: 'Myanmar-Thailand',
+            waypoints: [
+                { lat: 16.78, lng: 96.16 },  // Yangon
+                { lat: 14.0, lng: 97.5 },    // Golfe Martaban
+                { lat: 11.5, lng: 99.0 },    // Golfe Thaïlande Ouest
+                { lat: 13.08, lng: 100.88 }  // Laem Chabang
+            ],
+            intensity: 150,
+            annualPassages: 2800,
+            color: '#27ae60'
+        },
+        
+        // 16. China-Vietnam (Hong Kong → Hai Phong → Ho Chi Minh)
+        {
+            name: 'China-Vietnam',
+            waypoints: [
+                { lat: 22.30, lng: 114.17 }, // Hong Kong
+                { lat: 21.0, lng: 110.0 },   // Golfe Tonkin
+                { lat: 20.86, lng: 106.68 }, // Hai Phong
+                { lat: 16.0, lng: 108.0 },   // Centre Vietnam
+                { lat: 10.77, lng: 106.70 }  // Ho Chi Minh City
+            ],
+            intensity: 190,
+            annualPassages: 3600,
+            color: '#c0392b'
+        },
+        
+        // 17. Bangkok-Singapore Express
+        {
+            name: 'Thailand-Singapore Express',
+            waypoints: [
+                { lat: 13.08, lng: 100.88 }, // Laem Chabang
+                { lat: 8.0, lng: 100.5 },    // Isthme de Kra
+                { lat: 5.42, lng: 100.34 },  // Penang
+                { lat: 2.99, lng: 101.39 },  // Port Klang
+                { lat: 1.29, lng: 103.85 }   // Singapore
+            ],
+            intensity: 260,
+            annualPassages: 5000,
+            color: '#d35400'
+        },
+        
+        // 18. Indonesia East (Jakarta → Manila)
+        {
+            name: 'Indonesia-Philippines',
+            waypoints: [
+                { lat: -6.10, lng: 106.88 }, // Jakarta
+                { lat: -2.0, lng: 110.0 },   // Mer de Java
+                { lat: 2.0, lng: 115.0 },    // Bornéo Sud
+                { lat: 6.0, lng: 118.0 },    // Mer de Sulu
+                { lat: 10.0, lng: 120.0 },   // Approche Manila
+                { lat: 14.59, lng: 120.98 }  // Manila
+            ],
+            intensity: 170,
+            annualPassages: 3200,
+            color: '#2c3e50'
+        },
+        
+        // ===== ASIE DU SUD & OCÉAN INDIEN - 6 routes =====
+        
+        // 19. India West Coast (Mundra → Jawaharlal Nehru)
+        {
+            name: 'India West Coast',
+            waypoints: [
+                { lat: 22.84, lng: 69.72 },  // Mundra
+                { lat: 21.0, lng: 71.0 },    // Golfe de Kutch
+                { lat: 18.95, lng: 72.95 }   // Jawaharlal Nehru (Mumbai)
+            ],
+            intensity: 240,
+            annualPassages: 4600,
+            color: '#16a085'
+        },
+        
+        // 20. India East Coast (Chennai → Calcutta → Chittagong)
+        {
+            name: 'Bay of Bengal',
+            waypoints: [
+                { lat: 13.08, lng: 80.27 },  // Chennai
+                { lat: 17.0, lng: 84.0 },    // Côte Est Inde
+                { lat: 22.57, lng: 88.36 },  // Calcutta
+                { lat: 22.4, lng: 90.0 },    // Intermédiaire
+                { lat: 22.36, lng: 91.78 }   // Chittagong
+            ],
+            intensity: 180,
+            annualPassages: 3400,
+            color: '#16a085'
+        },
+        
+        // 21. Sri Lanka Hub (Colombo → Chennai → Jawaharlal Nehru)
+        {
+            name: 'India-Sri Lanka',
+            waypoints: [
+                { lat: 6.93, lng: 79.85 },   // Colombo
+                { lat: 10.0, lng: 79.5 },    // Intermédiaire
+                { lat: 13.08, lng: 80.27 },  // Chennai
+                { lat: 16.0, lng: 76.0 },    // Côte Inde Ouest
+                { lat: 18.95, lng: 72.95 }   // Jawaharlal Nehru
+            ],
+            intensity: 220,
+            annualPassages: 4200,
+            color: '#27ae60'
+        },
+        
+        // 22. Pakistan-India (Karachi → Mundra → Jawaharlal Nehru)
+        {
+            name: 'Pakistan-India',
+            waypoints: [
+                { lat: 24.86, lng: 67.02 },  // Karachi
+                { lat: 23.5, lng: 68.5 },    // Côte Pakistan
+                { lat: 22.84, lng: 69.72 },  // Mundra
+                { lat: 20.5, lng: 71.5 },    // Côte Gujarat
+                { lat: 18.95, lng: 72.95 }   // Jawaharlal Nehru
+            ],
+            intensity: 160,
+            annualPassages: 3000,
+            color: '#e67e22'
+        },
+        
+        // 23. Colombo-Singapore (via Malacca)
+        {
+            name: 'Indian Ocean Crossing',
+            waypoints: [
+                { lat: 6.93, lng: 79.85 },   // Colombo
+                { lat: 5.0, lng: 85.0 },     // Océan Indien
+                { lat: 4.0, lng: 92.0 },     // Approche Malacca
+                { lat: 3.0, lng: 98.0 },     // Détroit Malacca
+                { lat: 1.29, lng: 103.85 }   // Singapore
+            ],
+            intensity: 280,
+            annualPassages: 5400,
+            color: '#3498db'
+        },
+        
+        // 24. Mumbai-Middle East (Jawaharlal Nehru → Dubai → Salalah)
+        {
+            name: 'India-Middle East',
+            waypoints: [
+                { lat: 18.95, lng: 72.95 },  // Jawaharlal Nehru
+                { lat: 22.0, lng: 66.0 },    // Mer d'Arabie
+                { lat: 25.28, lng: 55.33 },  // Dubai
+                { lat: 21.0, lng: 58.0 },    // Golfe d'Oman
+                { lat: 16.95, lng: 54.00 }   // Salalah
+            ],
+            intensity: 230,
+            annualPassages: 4400,
+            color: '#9b59b6'
+        },
+        
+        // ===== MOYEN-ORIENT & MER ROUGE - 4 routes =====
+        
+        // 25. Gulf Route (Dubai → Salalah → Jeddah)
+        {
+            name: 'Arabian Gulf',
+            waypoints: [
+                { lat: 25.28, lng: 55.33 },  // Dubai
+                { lat: 23.0, lng: 58.0 },    // Golfe d'Oman
+                { lat: 19.0, lng: 58.0 },    // Mer d'Arabie
+                { lat: 16.95, lng: 54.00 },  // Salalah
+                { lat: 15.0, lng: 48.0 },    // Golfe d'Aden
+                { lat: 16.0, lng: 42.0 },    // Mer Rouge Sud
+                { lat: 21.54, lng: 39.17 }   // Jeddah
+            ],
+            intensity: 210,
+            annualPassages: 4000,
+            color: '#e74c3c'
+        },
+        
+        // 26. Red Sea Route (Jeddah → Suez → Port Said)
+        {
+            name: 'Red Sea',
+            waypoints: [
+                { lat: 21.54, lng: 39.17 },  // Jeddah
+                { lat: 25.0, lng: 37.0 },    // Mer Rouge Centre
+                { lat: 28.0, lng: 34.5 },    // Mer Rouge Nord
+                { lat: 29.97, lng: 32.55 },  // Suez Canal
+                { lat: 31.26, lng: 32.30 }   // Port Said
+            ],
+            intensity: 260,
+            annualPassages: 5000,
+            color: '#c0392b'
+        },
+        
+        // 27. Suez-Mediterranean (Port Said → Alexandria → Piraeus)
+        {
+            name: 'Eastern Mediterranean',
+            waypoints: [
+                { lat: 31.26, lng: 32.30 },  // Port Said
+                { lat: 31.23, lng: 30.0 },   // Intermédiaire
+                { lat: 31.20, lng: 29.92 },  // Alexandria
+                { lat: 34.0, lng: 27.0 },    // Mer Méditerranée Est
+                { lat: 37.95, lng: 23.65 }   // Piraeus
+            ],
+            intensity: 200,
+            annualPassages: 3800,
+            color: '#3498db'
+        },
+        
+        // 28. Colombo-Suez (Main Suez feeder)
+        {
+            name: 'Suez Feeder Route',
+            waypoints: [
+                { lat: 6.93, lng: 79.85 },   // Colombo
+                { lat: 10.0, lng: 72.0 },    // Océan Indien
+                { lat: 12.0, lng: 60.0 },    // Approche Golfe Aden
+                { lat: 13.0, lng: 50.0 },    // Golfe d'Aden
+                { lat: 13.5, lng: 43.3 },    // Bab el-Mandeb
+                { lat: 16.0, lng: 40.0 },    // Mer Rouge Sud
+                { lat: 22.0, lng: 37.0 },    // Mer Rouge Centre
+                { lat: 29.97, lng: 32.55 }   // Suez
+            ],
+            intensity: 290,
+            annualPassages: 5600,
+            color: '#8e44ad'
+        },
+        
+        // ===== EUROPE DU NORD - 6 routes =====
+        
+        // 29. North Range (Rotterdam → Antwerp → Hamburg → Bremerhaven)
+        {
+            name: 'North Sea Range',
+            waypoints: [
+                { lat: 51.92, lng: 4.48 },   // Rotterdam
+                { lat: 51.6, lng: 4.4 },     // Intermédiaire
+                { lat: 51.27, lng: 4.41 },   // Antwerp
+                { lat: 52.0, lng: 5.5 },     // Mer du Nord Sud
+                { lat: 53.55, lng: 9.99 },   // Hamburg
+                { lat: 53.54, lng: 8.58 }    // Bremerhaven
+            ],
+            intensity: 280,
+            annualPassages: 5400,
+            color: '#2ecc71'
+        },
+        
+        // 30. UK-Benelux (Felixstowe → Rotterdam → Antwerp)
+        {
+            name: 'UK-Benelux',
+            waypoints: [
+                { lat: 51.96, lng: 1.35 },   // Felixstowe
+                { lat: 51.9, lng: 3.0 },     // Mer du Nord
+                { lat: 51.92, lng: 4.48 },   // Rotterdam
+                { lat: 51.6, lng: 4.4 },     // Intermédiaire
+                { lat: 51.27, lng: 4.41 }    // Antwerp
+            ],
+            intensity: 240,
+            annualPassages: 4600,
+            color: '#3498db'
+        },
+        
+        // 31. Channel Route (Le Havre → Rotterdam → Hamburg)
+        {
+            name: 'Channel-North Sea',
+            waypoints: [
+                { lat: 49.49, lng: 0.12 },   // Le Havre
+                { lat: 51.0, lng: 1.5 },     // Manche
+                { lat: 51.92, lng: 4.48 },   // Rotterdam
+                { lat: 52.5, lng: 7.0 },     // Mer du Nord
+                { lat: 53.55, lng: 9.99 }    // Hamburg
+            ],
+            intensity: 220,
+            annualPassages: 4200,
+            color: '#9b59b6'
+        },
+        
+        // 32. Baltic Route (Hamburg → Gdansk → Helsinki → St. Petersburg)
+        {
+            name: 'Baltic Sea',
+            waypoints: [
+                { lat: 53.55, lng: 9.99 },   // Hamburg
+                { lat: 54.5, lng: 13.0 },    // Mer Baltique Ouest
+                { lat: 54.35, lng: 18.65 },  // Gdansk
+                { lat: 57.0, lng: 20.0 },    // Mer Baltique Centre
+                { lat: 60.17, lng: 24.94 },  // Helsinki
+                { lat: 60.0, lng: 27.5 },    // Golfe de Finlande
+                { lat: 59.94, lng: 30.31 }   // St. Petersburg
+            ],
+            intensity: 180,
+            annualPassages: 3400,
+            color: '#16a085'
+        },
+        
+        // 33. Scandinavia Route (Gothenburg → Hamburg → Gdansk)
+        {
+            name: 'Scandinavia',
+            waypoints: [
+                { lat: 57.71, lng: 11.97 },  // Gothenburg
+                { lat: 56.0, lng: 12.5 },    // Cattégat
+                { lat: 54.5, lng: 12.0 },    // Mer Baltique
+                { lat: 53.55, lng: 9.99 },   // Hamburg
+                { lat: 54.0, lng: 14.0 },    // Retour Baltique
+                { lat: 54.35, lng: 18.65 }   // Gdansk
+            ],
+            intensity: 150,
+            annualPassages: 2800,
+            color: '#e67e22'
+        },
+        
+        // 34. Nordic-Baltic (Helsinki → Riga → Gdansk)
+        {
+            name: 'Nordic-Baltic',
+            waypoints: [
+                { lat: 60.17, lng: 24.94 },  // Helsinki
+                { lat: 59.0, lng: 23.5 },    // Golfe de Finlande Sud
+                { lat: 56.95, lng: 24.11 },  // Riga
+                { lat: 55.5, lng: 21.0 },    // Mer Baltique
+                { lat: 54.35, lng: 18.65 }   // Gdansk
+            ],
+            intensity: 130,
+            annualPassages: 2400,
+            color: '#95a5a6'
+        },
+        
+        // ===== MÉDITERRANÉE - 6 routes =====
+        
+        // 35. West Mediterranean (Barcelona → Valencia → Algeciras)
+        {
+            name: 'Spain East Coast',
+            waypoints: [
+                { lat: 41.35, lng: 2.17 },   // Barcelona
+                { lat: 40.0, lng: 0.5 },     // Intermédiaire
+                { lat: 39.47, lng: -0.38 },  // Valencia
+                { lat: 37.5, lng: -2.0 },    // Méditerranée Sud Espagne
+                { lat: 36.13, lng: -5.45 }   // Algeciras
+            ],
+            intensity: 210,
+            annualPassages: 4000,
+            color: '#e74c3c'
+        },
+        
+        // 36. Gibraltar-Italy (Algeciras → Marseille → Genoa)
+        {
+            name: 'West Med Main',
+            waypoints: [
+                { lat: 36.13, lng: -5.45 },  // Algeciras
+                { lat: 39.0, lng: 0.0 },     // Baléares
+                { lat: 43.30, lng: 5.37 },   // Marseille
+                { lat: 43.8, lng: 7.5 },     // Côte d'Azur
+                { lat: 44.41, lng: 8.93 }    // Genoa
+            ],
+            intensity: 240,
+            annualPassages: 4600,
+            color: '#3498db'
+        },
+        
+        // 37. Tyrrhenian Route (Genoa → Gioia Tauro → Piraeus)
+        {
+            name: 'Italy-Greece',
+            waypoints: [
+                { lat: 44.41, lng: 8.93 },   // Genoa
+                { lat: 42.0, lng: 11.0 },    // Mer Tyrrhénienne
+                { lat: 38.43, lng: 15.90 },  // Gioia Tauro
+                { lat: 37.5, lng: 19.0 },    // Mer Ionienne
+                { lat: 37.95, lng: 23.65 }   // Piraeus
+            ],
+            intensity: 220,
+            annualPassages: 4200,
+            color: '#9b59b6'
+        },
+        
+        // 38. Adriatic Route (Piraeus → Barcelona via Italy)
+        {
+            name: 'Adriatic-West Med',
+            waypoints: [
+                { lat: 37.95, lng: 23.65 },  // Piraeus
+                { lat: 38.0, lng: 18.0 },    // Mer Ionienne
+                { lat: 38.43, lng: 15.90 },  // Gioia Tauro
+                { lat: 40.0, lng: 12.0 },    // Mer Tyrrhénienne
+                { lat: 41.35, lng: 2.17 }    // Barcelona
+            ],
+            intensity: 190,
+            annualPassages: 3600,
             color: '#1abc9c'
+        },
+        
+        // 39. Black Sea Route (Istanbul → Constanta → Odessa)
+        {
+            name: 'Black Sea',
+            waypoints: [
+                { lat: 41.02, lng: 28.97 },  // Istanbul
+                { lat: 42.0, lng: 29.5 },    // Mer Noire Ouest
+                { lat: 44.17, lng: 28.65 },  // Constanta
+                { lat: 45.5, lng: 30.0 },    // Mer Noire Nord
+                { lat: 46.48, lng: 30.73 }   // Odessa
+            ],
+            intensity: 170,
+            annualPassages: 3200,
+            color: '#34495e'
+        },
+        
+        // 40. Turkey Route (Istanbul → Izmir → Piraeus)
+        {
+            name: 'Turkey-Greece',
+            waypoints: [
+                { lat: 41.02, lng: 28.97 },  // Istanbul
+                { lat: 40.0, lng: 27.5 },    // Mer de Marmara
+                { lat: 38.42, lng: 27.14 },  // Izmir
+                { lat: 38.0, lng: 25.0 },    // Mer Égée
+                { lat: 37.95, lng: 23.65 }   // Piraeus
+            ],
+            intensity: 180,
+            annualPassages: 3400,
+            color: '#f39c12'
+        },
+        
+        // ===== AMÉRIQUE DU NORD - 6 routes =====
+        
+        // 41. US West Coast (Seattle → Vancouver → Los Angeles → Long Beach)
+        {
+            name: 'US West Coast',
+            waypoints: [
+                { lat: 49.28, lng: -123.12 },// Vancouver
+                { lat: 48.0, lng: -123.5 },  // Puget Sound
+                { lat: 47.60, lng: -122.33 },// Seattle
+                { lat: 40.0, lng: -124.0 },  // Côte Oregon/Californie
+                { lat: 35.0, lng: -121.0 },  // Californie Centre
+                { lat: 33.74, lng: -118.27 },// Los Angeles
+                { lat: 33.76, lng: -118.23 },// Intermédiaire
+                { lat: 33.75, lng: -118.19 } // Long Beach
+            ],
+            intensity: 260,
+            annualPassages: 5000,
+            color: '#e74c3c'
+        },
+        
+        // 42. US East Coast North (New York → Savannah → Charleston)
+        {
+            name: 'US East Coast',
+            waypoints: [
+                { lat: 40.67, lng: -74.05 }, // New York/New Jersey
+                { lat: 38.0, lng: -75.0 },   // Atlantique
+                { lat: 32.78, lng: -79.93 }, // Charleston
+                { lat: 32.4, lng: -80.5 },   // Intermédiaire
+                { lat: 32.03, lng: -81.09 }  // Savannah
+            ],
+            intensity: 240,
+            annualPassages: 4600,
+            color: '#2ecc71'
+        },
+        
+        // 43. Gulf Coast (Houston → Colon)
+        {
+            name: 'US Gulf-Panama',
+            waypoints: [
+                { lat: 29.73, lng: -95.27 }, // Houston
+                { lat: 27.0, lng: -92.0 },   // Golfe Mexique
+                { lat: 22.0, lng: -86.0 },   // Yucatan
+                { lat: 17.0, lng: -82.0 },   // Mer Caraïbes Ouest
+                { lat: 12.0, lng: -80.0 },   // Approche Panama
+                { lat: 9.36, lng: -79.90 }   // Colon (Panama)
+            ],
+            intensity: 200,
+            annualPassages: 3800,
+            color: '#3498db'
+        },
+        
+        // 44. Trans-Atlantic Main (New York → Rotterdam)
+        {
+            name: 'North Atlantic Main',
+            waypoints: [
+                { lat: 40.67, lng: -74.05 }, // New York
+                { lat: 42.0, lng: -65.0 },   // Large USA
+                { lat: 44.0, lng: -50.0 },   // Atlantique Ouest
+                { lat: 47.0, lng: -35.0 },   // Mid-Atlantic
+                { lat: 49.0, lng: -20.0 },   // Atlantique Est
+                { lat: 50.5, lng: -5.0 },    // Manche Approche
+                { lat: 51.92, lng: 4.48 }    // Rotterdam
+            ],
+            intensity: 270,
+            annualPassages: 5200,
+            color: '#9b59b6'
+        },
+        
+        // 45. Canada-Europe (Vancouver → Hamburg via Atlantic)
+        {
+            name: 'Canada-Europe',
+            waypoints: [
+                { lat: 49.28, lng: -123.12 },// Vancouver
+                { lat: 40.67, lng: -74.05 }, // New York (via terre conceptuel - simplifié)
+                { lat: 45.0, lng: -50.0 },   // Atlantique
+                { lat: 50.0, lng: -25.0 },   // Mid-Atlantic
+                { lat: 53.55, lng: 9.99 }    // Hamburg
+            ],
+            intensity: 150,
+            annualPassages: 2800,
+            color: '#16a085'
+        },
+        
+        // 46. East Coast-Mediterranean (New York → Algeciras)
+        {
+            name: 'US-Mediterranean',
+            waypoints: [
+                { lat: 40.67, lng: -74.05 }, // New York
+                { lat: 38.0, lng: -60.0 },   // Atlantique
+                { lat: 36.0, lng: -40.0 },   // Mid-Atlantic Sud
+                { lat: 36.0, lng: -20.0 },   // Atlantique Est
+                { lat: 36.0, lng: -8.0 },    // Approche Gibraltar
+                { lat: 36.13, lng: -5.45 }   // Algeciras
+            ],
+            intensity: 190,
+            annualPassages: 3600,
+            color: '#e67e22'
+        },
+        
+        // ===== AMÉRIQUE DU SUD & CARAÏBES - 4 routes =====
+        
+        // 47. Caribbean Route (Colon → Cartagena → Santos)
+        {
+            name: 'Caribbean-Brazil',
+            waypoints: [
+                { lat: 9.36, lng: -79.90 },  // Colon
+                { lat: 10.39, lng: -75.51 }, // Cartagena
+                { lat: 5.0, lng: -60.0 },    // Atlantique Tropical
+                { lat: -5.0, lng: -40.0 },   // Côte Brésil Nord
+                { lat: -15.0, lng: -38.0 },  // Côte Brésil
+                { lat: -23.96, lng: -46.33 } // Santos
+            ],
+            intensity: 180,
+            annualPassages: 3400,
+            color: '#f39c12'
+        },
+        
+        // 48. South America West Coast (Callao → Colon)
+        {
+            name: 'Pacific South America',
+            waypoints: [
+                { lat: -12.05, lng: -77.15 },// Callao (Lima)
+                { lat: -5.0, lng: -81.0 },   // Équateur
+                { lat: 2.0, lng: -80.0 },    // Colombie Pacifique
+                { lat: 9.36, lng: -79.90 }   // Colon
+            ],
+            intensity: 140,
+            annualPassages: 2600,
+            color: '#1abc9c'
+        },
+        
+        // 49. South Atlantic (Santos → Buenos Aires → Cape Town)
+        {
+            name: 'South Atlantic',
+            waypoints: [
+                { lat: -23.96, lng: -46.33 },// Santos
+                { lat: -30.0, lng: -50.0 },  // Large Brésil Sud
+                { lat: -34.61, lng: -58.37 },// Buenos Aires
+                { lat: -35.0, lng: -40.0 },  // Atlantique Sud
+                { lat: -34.0, lng: -20.0 },  // Approche Afrique
+                { lat: -33.93, lng: 18.42 }  // Cape Town
+            ],
+            intensity: 120,
+            annualPassages: 2200,
+            color: '#8e44ad'
+        },
+        
+        // 50. US East-South America (New York → Santos)
+        {
+            name: 'North-South America',
+            waypoints: [
+                { lat: 40.67, lng: -74.05 }, // New York
+                { lat: 32.03, lng: -81.09 }, // Savannah
+                { lat: 20.0, lng: -65.0 },   // Caraïbes
+                { lat: 5.0, lng: -50.0 },    // Atlantique Équatorial
+                { lat: -10.0, lng: -40.0 },  // Côte Brésil
+                { lat: -23.96, lng: -46.33 } // Santos
+            ],
+            intensity: 160,
+            annualPassages: 3000,
+            color: '#27ae60'
+        },
+        
+        // ===== AFRIQUE - 4 routes bonus =====
+        
+        // 51. North Africa (Tanger Med → Algeciras → Casablanca → Dakar)
+        {
+            name: 'North-West Africa',
+            waypoints: [
+                { lat: 35.88, lng: -5.57 },  // Tanger Med
+                { lat: 36.0, lng: -5.5 },    // Détroit Gibraltar
+                { lat: 36.13, lng: -5.45 },  // Algeciras
+                { lat: 35.0, lng: -6.5 },    // Côte Maroc
+                { lat: 33.59, lng: -7.62 },  // Casablanca
+                { lat: 20.0, lng: -17.0 },   // Côte Atlantique Afrique
+                { lat: 14.69, lng: -17.44 }  // Dakar
+            ],
+            intensity: 150,
+            annualPassages: 2800,
+            color: '#d35400'
+        },
+        
+        // 52. West Africa (Dakar → Abidjan → Lagos → Tema)
+        {
+            name: 'West Africa Coast',
+            waypoints: [
+                { lat: 14.69, lng: -17.44 }, // Dakar
+                { lat: 10.0, lng: -15.0 },   // Côte Guinée
+                { lat: 5.31, lng: -4.01 },   // Abidjan
+                { lat: 5.62, lng: -0.02 },   // Tema
+                { lat: 6.0, lng: 2.0 },      // Golfe Guinée
+                { lat: 6.44, lng: 3.40 }     // Lagos
+            ],
+            intensity: 130,
+            annualPassages: 2400,
+            color: '#c0392b'
+        },
+        
+        // 53. East Africa (Durban → Mombasa → Dar es Salaam)
+        {
+            name: 'East Africa Coast',
+            waypoints: [
+                { lat: -29.86, lng: 31.04 }, // Durban
+                { lat: -20.0, lng: 35.0 },   // Canal Mozambique
+                { lat: -6.80, lng: 39.28 },  // Dar es Salaam
+                { lat: -5.0, lng: 39.5 },    // Intermédiaire
+                { lat: -4.04, lng: 39.67 }   // Mombasa
+            ],
+            intensity: 140,
+            annualPassages: 2600,
+            color: '#16a085'
+        },
+        
+        // 54. Cape-Suez (Cape Town → Durban → Mombasa → Suez)
+        {
+            name: 'Africa East Coast-Suez',
+            waypoints: [
+                { lat: -33.93, lng: 18.42 }, // Cape Town
+                { lat: -29.86, lng: 31.04 }, // Durban
+                { lat: -15.0, lng: 40.0 },   // Canal Mozambique
+                { lat: -4.04, lng: 39.67 },  // Mombasa
+                { lat: 5.0, lng: 45.0 },     // Océan Indien Ouest
+                { lat: 13.0, lng: 45.0 },    // Golfe Aden
+                { lat: 20.0, lng: 38.0 },    // Mer Rouge
+                { lat: 29.97, lng: 32.55 }   // Suez
+            ],
+            intensity: 170,
+            annualPassages: 3200,
+            color: '#2c3e50'
         }
-        */
     ];
 }
 
