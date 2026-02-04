@@ -1525,6 +1525,7 @@ function getMajorShippingRoutes(year = 2025) {
         }
         */
         
+        /*
         ,
         // Route Panama (Asie ↔ Europe via Panama)
         {
@@ -1584,6 +1585,7 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.panama,
             color: '#1abc9c'
         }
+        */
     ];
 }
 
