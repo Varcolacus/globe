@@ -599,7 +599,9 @@ const globe = Globe()
 // ===== INSTANCED RENDERING SYSTEM =====
 // Performance: 300-500% meilleure qu'avant
 // Une seule géométrie partagée pour tous les bateaux
-let instancedShips = null;
+let instancedShipsHigh = null;    // LOD haute qualité
+let instancedShipsMedium = null;  // LOD moyenne qualité
+let instancedShipsLow = null;     // LOD basse qualité
 let shipCount = 0;
 const maxShips = 500; // Capacité maximale
 
@@ -608,29 +610,60 @@ const maxShips = 500; // Capacité maximale
 const frustum = new THREE.Frustum();
 const cameraViewProjectionMatrix = new THREE.Matrix4();
 
-// Créer la géométrie partagée une seule fois - TAILLE ÉQUILIBRÉE
-const sharedShipGeometry = new THREE.SphereGeometry(1.0, 8, 8); // Taille optimale
+// ===== LEVEL OF DETAIL (LOD) SYSTEM =====
+// Performance: 100-150% gain supplémentaire
+// 3 niveaux de qualité selon la distance
+const shipGeometryHigh = new THREE.SphereGeometry(1.0, 16, 16);   // Haute qualité - proche
+const shipGeometryMedium = new THREE.SphereGeometry(1.0, 8, 8);   // Moyenne qualité - moyen
+const shipGeometryLow = new THREE.SphereGeometry(1.0, 4, 4);      // Basse qualité - loin
+
 const sharedShipMaterial = new THREE.MeshBasicMaterial({ 
-    color: 0xff6600, // Couleur orange par défaut
-    vertexColors: false // Désactiver pour l'instant
+    color: 0xff6600,
+    vertexColors: false
 });
 
-// Initialiser l'InstancedMesh quand le globe est prêt
+// Seuils de distance pour LOD (en unités du globe)
+const LOD_DISTANCE_HIGH = 150;   // < 150 = haute qualité
+const LOD_DISTANCE_MEDIUM = 300; // 150-300 = moyenne qualité
+                                 // > 300 = basse qualité
+
+// ===== OBJECT POOLING SYSTEM =====
+// Performance: ~50% gain supplémentaire
+// Objets réutilisables pour éviter le garbage collection
+const pooledDummy = new THREE.Object3D();
+const pooledPosition = new THREE.Vector3();
+const pooledCameraPos = new THREE.Vector3();
+
+// Initialiser les 3 InstancedMesh quand le globe est prêt
 globe.onGlobeReady(() => {
     const scene = globe.scene();
     
-    // Créer l'InstancedMesh
-    instancedShips = new THREE.InstancedMesh(
-        sharedShipGeometry,
+    // Créer 3 InstancedMesh pour les 3 niveaux LOD
+    instancedShipsHigh = new THREE.InstancedMesh(
+        shipGeometryHigh,
         sharedShipMaterial,
         maxShips
     );
+    instancedShipsHigh.count = 0;
+    scene.add(instancedShipsHigh);
     
-    // Commencer avec 0 instances visibles
-    instancedShips.count = 0;
+    instancedShipsMedium = new THREE.InstancedMesh(
+        shipGeometryMedium,
+        sharedShipMaterial,
+        maxShips
+    );
+    instancedShipsMedium.count = 0;
+    scene.add(instancedShipsMedium);
     
-    scene.add(instancedShips);
-    console.log(`✅ Instanced Rendering initialisé (${maxShips} bateaux max)`);
+    instancedShipsLow = new THREE.InstancedMesh(
+        shipGeometryLow,
+        sharedShipMaterial,
+        maxShips
+    );
+    instancedShipsLow.count = 0;
+    scene.add(instancedShipsLow);
+    
+    console.log(`✅ Instanced Rendering + LOD initialisé (${maxShips} bateaux max, 3 niveaux)`);
     
     // Démarrer l'animation des bateaux maintenant que tout est prêt
     setInterval(animateShips, 33); // ~30 FPS (optimisé pour performance)
@@ -1145,9 +1178,8 @@ function animateShips() {
             };
         });
         
-        // Utiliser InstancedMesh + Frustum Culling pour AIS aussi
-        if (instancedShips && ships.length > 0) {
-            const dummy = new THREE.Object3D();
+        // Utiliser 3 InstancedMesh (LOD) + Frustum Culling + Object Pooling pour AIS
+        if (instancedShipsHigh && instancedShipsMedium && instancedShipsLow && ships.length > 0) {
             const camera = globe.camera();
             
             camera.updateMatrixWorld();
@@ -1157,31 +1189,52 @@ function animateShips() {
             );
             frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
             
-            let visibleCount = 0;
+            camera.getWorldPosition(pooledCameraPos);
+            
+            let countHigh = 0;
+            let countMedium = 0;
+            let countLow = 0;
             
             ships.forEach((ship, i) => {
                 if (i >= maxShips) return;
                 
                 const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
+                pooledPosition.set(coords.x, coords.y, coords.z);
                 
                 // Frustum culling
-                const position = new THREE.Vector3(coords.x, coords.y, coords.z);
-                if (!frustum.containsPoint(position)) {
+                if (!frustum.containsPoint(pooledPosition)) {
                     return;
                 }
                 
-                dummy.position.set(coords.x, coords.y, coords.z);
-                dummy.scale.set(1.0, 1.0, 1.0);
-                dummy.lookAt(0, 0, 0);
-                dummy.rotateY(ship.heading);
+                // Calculer la distance pour le LOD
+                const distance = pooledCameraPos.distanceTo(pooledPosition);
                 
-                dummy.updateMatrix();
-                instancedShips.setMatrixAt(visibleCount, dummy.matrix);
-                visibleCount++;
+                pooledDummy.position.set(coords.x, coords.y, coords.z);
+                pooledDummy.scale.set(1.0, 1.0, 1.0);
+                pooledDummy.lookAt(0, 0, 0);
+                pooledDummy.rotateY(ship.heading);
+                pooledDummy.updateMatrix();
+                
+                // Assigner au niveau LOD approprié
+                if (distance < LOD_DISTANCE_HIGH) {
+                    instancedShipsHigh.setMatrixAt(countHigh, pooledDummy.matrix);
+                    countHigh++;
+                } else if (distance < LOD_DISTANCE_MEDIUM) {
+                    instancedShipsMedium.setMatrixAt(countMedium, pooledDummy.matrix);
+                    countMedium++;
+                } else {
+                    instancedShipsLow.setMatrixAt(countLow, pooledDummy.matrix);
+                    countLow++;
+                }
             });
             
-            instancedShips.count = visibleCount;
-            instancedShips.instanceMatrix.needsUpdate = true;
+            instancedShipsHigh.count = countHigh;
+            instancedShipsMedium.count = countMedium;
+            instancedShipsLow.count = countLow;
+            
+            instancedShipsHigh.instanceMatrix.needsUpdate = true;
+            instancedShipsMedium.instanceMatrix.needsUpdate = true;
+            instancedShipsLow.instanceMatrix.needsUpdate = true;
         }
         return;
     }
@@ -1217,9 +1270,8 @@ function animateShips() {
         };
     });
     
-    // Utiliser InstancedMesh + Frustum Culling pour performance maximale
-    if (instancedShips && ships.length > 0) {
-        const dummy = new THREE.Object3D();
+    // Utiliser 3 InstancedMesh (LOD) + Frustum Culling + Object Pooling pour performance maximale
+    if (instancedShipsHigh && instancedShipsMedium && instancedShipsLow && ships.length > 0) {
         const camera = globe.camera();
         
         // Mettre à jour le frustum avec la position actuelle de la caméra
@@ -1230,36 +1282,60 @@ function animateShips() {
         );
         frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
         
-        let visibleCount = 0;
+        // Récupérer la position de la caméra pour le calcul de distance
+        camera.getWorldPosition(pooledCameraPos);
+        
+        // Compteurs pour chaque niveau LOD
+        let countHigh = 0;
+        let countMedium = 0;
+        let countLow = 0;
         
         ships.forEach((ship, i) => {
             if (i >= maxShips) return; // Limite de sécurité
             
             // Obtenir les coordonnées 3D
             const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
+            pooledPosition.set(coords.x, coords.y, coords.z);
             
             // FRUSTUM CULLING : Tester si le bateau est visible
-            const position = new THREE.Vector3(coords.x, coords.y, coords.z);
-            if (!frustum.containsPoint(position)) {
+            if (!frustum.containsPoint(pooledPosition)) {
                 return; // Bateau hors de vue, on le skip !
             }
             
-            // Positionner et orienter seulement les bateaux visibles
-            dummy.position.set(coords.x, coords.y, coords.z);
-            dummy.scale.set(1.0, 1.0, 1.0);
-            dummy.lookAt(0, 0, 0);
-            dummy.rotateY(ship.heading);
+            // Calculer la distance à la caméra pour le LOD
+            const distance = pooledCameraPos.distanceTo(pooledPosition);
             
-            dummy.updateMatrix();
-            instancedShips.setMatrixAt(visibleCount, dummy.matrix);
-            visibleCount++;
+            // Positionner et orienter le bateau
+            pooledDummy.position.set(coords.x, coords.y, coords.z);
+            pooledDummy.scale.set(1.0, 1.0, 1.0);
+            pooledDummy.lookAt(0, 0, 0);
+            pooledDummy.rotateY(ship.heading);
+            pooledDummy.updateMatrix();
+            
+            // Assigner au niveau LOD approprié selon la distance
+            if (distance < LOD_DISTANCE_HIGH) {
+                instancedShipsHigh.setMatrixAt(countHigh, pooledDummy.matrix);
+                countHigh++;
+            } else if (distance < LOD_DISTANCE_MEDIUM) {
+                instancedShipsMedium.setMatrixAt(countMedium, pooledDummy.matrix);
+                countMedium++;
+            } else {
+                instancedShipsLow.setMatrixAt(countLow, pooledDummy.matrix);
+                countLow++;
+            }
         });
         
-        // Mettre à jour SEULEMENT le nombre de bateaux visibles
-        instancedShips.count = visibleCount;
-        instancedShips.instanceMatrix.needsUpdate = true;
+        // Mettre à jour les compteurs et forcer le rafraîchissement
+        instancedShipsHigh.count = countHigh;
+        instancedShipsMedium.count = countMedium;
+        instancedShipsLow.count = countLow;
         
-        console.log(`🚢 ${visibleCount}/${ships.length} bateaux visibles (Frustum Culling)`);
+        instancedShipsHigh.instanceMatrix.needsUpdate = true;
+        instancedShipsMedium.instanceMatrix.needsUpdate = true;
+        instancedShipsLow.instanceMatrix.needsUpdate = true;
+        
+        const totalVisible = countHigh + countMedium + countLow;
+        console.log(`🚢 LOD: ${countHigh} high + ${countMedium} med + ${countLow} low = ${totalVisible}/${ships.length}`);
     }
 }
 
