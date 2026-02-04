@@ -911,16 +911,16 @@ const worldMajorPorts = [
     { name: 'Singapore', lat: 1.29, lng: 103.85, country: 'Singapore', teu: 37200000 },
     { name: 'Ningbo-Zhoushan', lat: 29.87, lng: 121.55, country: 'China', teu: 33350000 },
     { name: 'Shenzhen', lat: 22.54, lng: 114.06, country: 'China', teu: 30330000 },
-    { name: 'Guangzhou', lat: 23.13, lng: 113.26, country: 'China', teu: 24180000 },
+    { name: 'Guangzhou', lat: 23.11, lng: 113.38, country: 'China', teu: 24180000 },
     { name: 'Qingdao', lat: 36.07, lng: 120.38, country: 'China', teu: 24010000 },
     { name: 'Busan', lat: 35.18, lng: 129.08, country: 'South Korea', teu: 22710000 },
-    { name: 'Tianjin', lat: 39.13, lng: 117.20, country: 'China', teu: 20270000 },
+    { name: 'Tianjin', lat: 38.98, lng: 117.71, country: 'China', teu: 20270000 },
     { name: 'Hong Kong', lat: 22.30, lng: 114.17, country: 'Hong Kong', teu: 18360000 },
     { name: 'Port Klang', lat: 2.99, lng: 101.39, country: 'Malaysia', teu: 13580000 },
     { name: 'Kaohsiung', lat: 22.61, lng: 120.30, country: 'Taiwan', teu: 10260000 },
-    { name: 'Tokyo', lat: 35.62, lng: 139.78, country: 'Japan', teu: 9630000 },
+    { name: 'Tokyo', lat: 35.65, lng: 139.77, country: 'Japan', teu: 9630000 },
     { name: 'Xiamen', lat: 24.48, lng: 118.09, country: 'China', teu: 12200000 },
-    { name: 'Dalian', lat: 38.91, lng: 121.60, country: 'China', teu: 9770000 },
+    { name: 'Dalian', lat: 38.87, lng: 121.64, country: 'China', teu: 9770000 },
     { name: 'Tanjung Pelepas', lat: 1.36, lng: 103.55, country: 'Malaysia', teu: 10840000 },
     
     // Moyen-Orient
@@ -931,14 +931,14 @@ const worldMajorPorts = [
     // Europe
     { name: 'Rotterdam', lat: 51.92, lng: 4.48, country: 'Netherlands', teu: 14350000 },
     { name: 'Antwerp', lat: 51.27, lng: 4.41, country: 'Belgium', teu: 12040000 },
-    { name: 'Hamburg', lat: 53.55, lng: 9.99, country: 'Germany', teu: 8730000 },
+    { name: 'Hamburg', lat: 53.54, lng: 9.97, country: 'Germany', teu: 8730000 },
     { name: 'Piraeus', lat: 37.95, lng: 23.65, country: 'Greece', teu: 5440000 },
     { name: 'Valencia', lat: 39.47, lng: -0.38, country: 'Spain', teu: 5440000 },
     { name: 'Algeciras', lat: 36.13, lng: -5.45, country: 'Spain', teu: 5130000 },
     { name: 'Felixstowe', lat: 51.96, lng: 1.35, country: 'UK', teu: 4000000 },
     { name: 'Le Havre', lat: 49.49, lng: 0.12, country: 'France', teu: 2850000 },
     { name: 'Marseille', lat: 43.30, lng: 5.37, country: 'France', teu: 1450000 },
-    { name: 'Genoa', lat: 44.41, lng: 8.93, country: 'Italy', teu: 2620000 },
+    { name: 'Genoa', lat: 44.41, lng: 8.92, country: 'Italy', teu: 2620000 },
     { name: 'Barcelona', lat: 41.35, lng: 2.17, country: 'Spain', teu: 3610000 },
     { name: 'Gioia Tauro', lat: 38.43, lng: 15.90, country: 'Italy', teu: 2850000 },
     
@@ -948,14 +948,14 @@ const worldMajorPorts = [
     { name: 'New York/New Jersey', lat: 40.67, lng: -74.05, country: 'USA', teu: 8300000 },
     { name: 'Savannah', lat: 32.03, lng: -81.09, country: 'USA', teu: 5760000 },
     { name: 'Vancouver', lat: 49.28, lng: -123.12, country: 'Canada', teu: 3570000 },
-    { name: 'Houston', lat: 29.73, lng: -95.27, country: 'USA', teu: 3200000 },
+    { name: 'Houston', lat: 29.69, lng: -95.05, country: 'USA', teu: 3200000 },
     { name: 'Charleston', lat: 32.78, lng: -79.93, country: 'USA', teu: 2610000 },
     { name: 'Seattle', lat: 47.60, lng: -122.33, country: 'USA', teu: 3840000 },
     
     // Amérique du Sud
     { name: 'Santos', lat: -23.96, lng: -46.33, country: 'Brazil', teu: 4440000 },
     { name: 'Callao', lat: -12.05, lng: -77.15, country: 'Peru', teu: 2340000 },
-    { name: 'Buenos Aires', lat: -34.61, lng: -58.37, country: 'Argentina', teu: 1500000 },
+    { name: 'Buenos Aires', lat: -34.60, lng: -58.36, country: 'Argentina', teu: 1500000 },
     { name: 'Cartagena', lat: 10.39, lng: -75.51, country: 'Colombia', teu: 3260000 },
     
     // Afrique
@@ -1004,9 +1004,13 @@ function initializeInstancedRendering(scene) {
     console.log('🔧 Création des instances...', { maxShips, maxPorts });
     
     // Géométrie partagée pour tous les bateaux (instancing)
-    const shipMaterial = new THREE.MeshBasicMaterial({ 
+    const shipMaterial = new THREE.MeshStandardMaterial({ 
         vertexColors: true,
-        side: THREE.DoubleSide
+        side: THREE.DoubleSide,
+        emissive: 0x2277ff,
+        emissiveIntensity: 0.5,
+        metalness: 0.3,
+        roughness: 0.4
     });
     
     instancedShips = new THREE.InstancedMesh(
@@ -1024,12 +1028,15 @@ function initializeInstancedRendering(scene) {
     scene.add(instancedShips);
     console.log('✅ InstancedShips ajouté à la scène');
     
-    // Ports en instances également
-    const portMaterial = new THREE.MeshBasicMaterial({ 
+    // Ports en instances également - SUPER VISIBLES
+    const portMaterial = new THREE.MeshStandardMaterial({ 
         color: 0xFFD700,
+        emissive: 0xFFD700,
+        emissiveIntensity: 0.8,
         side: THREE.DoubleSide,
-        transparent: true,
-        opacity: 0.9
+        transparent: false,
+        metalness: 0.5,
+        roughness: 0.2
     });
     
     instancedPorts = new THREE.InstancedMesh(
