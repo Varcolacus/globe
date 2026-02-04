@@ -993,8 +993,15 @@ const shipGeometryLOD = [
 const portGeometry = new THREE.CircleGeometry(0.3, 8);
 
 function initializeInstancedRendering(scene) {
+    if (!scene) {
+        console.error('❌ Scene non disponible pour instanced rendering');
+        return false;
+    }
+    
     const maxShips = 500; // Capacité max
     const maxPorts = 100;
+    
+    console.log('🔧 Création des instances...', { maxShips, maxPorts });
     
     // Géométrie partagée pour tous les bateaux (instancing)
     const shipMaterial = new THREE.MeshBasicMaterial({ 
@@ -1015,6 +1022,7 @@ function initializeInstancedRendering(scene) {
     instancedShips.count = 0; // Commencer avec 0 instances visibles
     
     scene.add(instancedShips);
+    console.log('✅ InstancedShips ajouté à la scène');
     
     // Ports en instances également
     const portMaterial = new THREE.MeshBasicMaterial({ 
@@ -1033,8 +1041,10 @@ function initializeInstancedRendering(scene) {
     instancedPorts.count = 0;
     
     scene.add(instancedPorts);
+    console.log('✅ InstancedPorts ajouté à la scène');
     
     console.log('🚀 Instanced Rendering initialisé (max:', maxShips, 'bateaux,', maxPorts, 'ports)');
+    return true;
 }
 
 // Fonction d'optimisation LOD - choisir la géométrie selon distance caméra
@@ -1251,9 +1261,17 @@ function animateShips() {
     }
     
     // Mode simulation optimisé avec Instanced Rendering + Frustum Culling
-    if (!instancedShips) return;
+    if (!instancedShips) {
+        console.warn('⚠️ instancedShips non initialisé, skipping animation');
+        return;
+    }
     
     const camera = globe.camera();
+    if (!camera) {
+        console.warn('⚠️ Camera non disponible');
+        return;
+    }
+    
     updateLOD(camera.position);
     
     let visibleCount = 0;
@@ -1312,6 +1330,10 @@ function animateShips() {
     instancedShips.instanceMatrix.needsUpdate = true;
     if (instancedShips.instanceColor) {
         instancedShips.instanceColor.needsUpdate = true;
+    }
+    
+    if (visibleCount > 0 && now % 5000 < 100) {
+        console.log(`🚢 ${visibleCount} bateaux visibles`);
     }
     
     // Mettre à jour les ports si affichés
@@ -1771,28 +1793,54 @@ console.log('💾 100% OFFLINE - Aucune connexion requise');
 console.log('🇫🇷 Commerce international de la France visualisé');
 
 // Initialiser et démarrer l'animation des bateaux après le chargement du globe
-console.log('🚢 Démarrage du système de bateaux...');
+console.log('🚢 Démarrage du système de bateaux optimisé...');
 
-// D'abord démarrer l'animation qui va appeler initializeShips
-setInterval(animateShips, 33); // ~30 FPS (optimisé pour performance)
-
-// Puis initialiser explicitement les bateaux
+// Initialiser explicitement les bateaux
 initializeShips().then(() => {
     console.log('✅ Bateaux initialisés avec succès');
     console.log(`📊 Nombre de bateaux: ${shipAnimations.length}`);
     
-    // Afficher les ports par défaut
-    globe.htmlElementsData(worldMajorPorts);
-    console.log(`🏭 ${worldMajorPorts.length} ports majeurs affichés`);
+    // Initialiser le système d'instanced rendering
+    const scene = globe.scene();
+    console.log('🔍 Scene du globe:', scene ? 'OK' : 'ERREUR');
     
-    // Test immédiat: forcer un appel à animateShips
-    setTimeout(() => {
-        console.log('🧪 Test de positionnement des bateaux...');
-        if (shipAnimations.length > 0) {
-            const testShip = shipAnimations[0];
-            console.log('Premier bateau:', testShip);
+    const success = initializeInstancedRendering(scene);
+    console.log('🔍 Instanced rendering:', success ? 'OK' : 'ERREUR');
+console.log('🇫🇷 Commerce international de la France visualisé');
+
+// Initialiser et démarrer l'animation des bateaux après le chargement du globe
+console.log('🚢 Démarrage du système de bateaux...');
+
+// Initialiser explicitement les bateaux
+initializeShips().then(() => {
+    console.log('✅ Bateaux initialisés avec succès');
+    console.log(`📊 Nombre de bateaux: ${shipAnimations.length}`);
+    
+    // Initialiser le système d'instanced rendering
+    const scene = globe.scene();
+    initializeInstancedRendering(scene);
+    
+    console.log(`🏭 ${worldMajorPorts.length} ports majeurs prêts`);
+    
+    // Démarrer l'animation optimisée avec requestAnimationFrame
+    let lastFrameTime = Date.now();
+    const targetFPS = 60;
+    const frameInterval = 1000 / targetFPS;
+    
+    function optimizedAnimationLoop() {
+        const now = Date.now();
+        const delta = now - lastFrameTime;
+        
+        if (delta >= frameInterval) {
+            animateShips();
+            lastFrameTime = now - (delta % frameInterval);
         }
-    }, 1000);
+        
+        requestAnimationFrame(optimizedAnimationLoop);
+    }
+    
+    optimizedAnimationLoop();
+    console.log('🚀 Animation optimisée démarrée (Instanced Rendering + LOD + Frustum Culling)');
     
     // Rafraîchir les données VesselFinder toutes les 2 minutes si activé
     setInterval(async () => {
