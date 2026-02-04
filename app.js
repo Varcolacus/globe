@@ -1419,10 +1419,7 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        }
-        
-        /*
-        ,
+        },
         // Route Transpacifique (Asie ↔ USA)
         {
             name: 'Transpacific',
@@ -1473,7 +1470,6 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.transpacific,
             color: '#f39c12'
         }
-        */
         
         /*
         ,
@@ -1995,9 +1991,9 @@ function animateShips() {
         let progress = currentTime / totalTime;
         
         // IMPORTANT: Téléportation invisible pour éviter les sauts à travers le globe
-        // Si progress > 0.98, on cache le bateau (altitude négative)
+        // Si progress > 0.95, on cache le bateau (altitude négative)
         // Il réapparaît naturellement au début au prochain cycle
-        if (progress > 0.98) {
+        if (progress > 0.95) {
             return {
                 lat: 0,
                 lng: 0,
@@ -2018,7 +2014,7 @@ function animateShips() {
         const alt = 0.01 + waveEffect;
         
         // Calculer l'angle de direction pour orienter le bateau
-        const nextProgress = Math.min(progress + 0.005, 0.98);
+        const nextProgress = Math.min(progress + 0.005, 0.95);
         const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
         
