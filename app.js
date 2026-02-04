@@ -986,11 +986,11 @@ const cameraViewProjectionMatrix = new THREE.Matrix4();
 
 // Créer les géométries partagées (réutilisées pour toutes les instances)
 const shipGeometryLOD = [
-    new THREE.SphereGeometry(0.5, 16, 16), // Haute qualité (proche)
-    new THREE.SphereGeometry(0.5, 8, 8),   // Moyenne qualité
-    new THREE.SphereGeometry(0.5, 4, 4)    // Basse qualité (loin)
+    new THREE.SphereGeometry(2.0, 16, 16), // Haute qualité (proche) - 4x plus gros
+    new THREE.SphereGeometry(2.0, 8, 8),   // Moyenne qualité
+    new THREE.SphereGeometry(2.0, 4, 4)    // Basse qualité (loin)
 ];
-const portGeometry = new THREE.CircleGeometry(0.3, 8);
+const portGeometry = new THREE.CircleGeometry(1.5, 8); // 5x plus gros
 
 function initializeInstancedRendering(scene) {
     if (!scene) {
@@ -1291,9 +1291,9 @@ function animateShips() {
             return; // Ne pas calculer ce bateau
         }
         
-        // Altitude légèrement au-dessus de l'eau avec effet de vague
-        const waveEffect = Math.sin(progress * Math.PI * 6 + now * 0.001) * 0.0008;
-        const alt = 0.01 + waveEffect;
+        // Altitude au-dessus de l'eau avec effet de vague (augmentée pour visibilité)
+        const waveEffect = Math.sin(progress * Math.PI * 6 + now * 0.001) * 0.005;
+        const alt = 0.5 + waveEffect; // Augmenté de 0.01 à 0.5
         
         // Convertir lat/lng en position 3D
         const phi = (90 - position.lat) * Math.PI / 180;
@@ -1312,8 +1312,8 @@ function animateShips() {
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
         dummy.rotation.set(0, heading, 0);
         
-        // Taille variable
-        const scale = shipAnim.size * 1.5;
+        // Taille variable (augmentée pour visibilité)
+        const scale = shipAnim.size * 8.0; // Augmenté de 1.5 à 8.0
         dummy.scale.set(scale, scale, scale);
         
         dummy.updateMatrix();
@@ -1341,7 +1341,7 @@ function animateShips() {
         worldMajorPorts.forEach((port, i) => {
             const phi = (90 - port.lat) * Math.PI / 180;
             const theta = (port.lng + 180) * Math.PI / 180;
-            const radius = 100.2;
+            const radius = 101.0; // Augmenté de 100.2 à 101.0
             
             dummy.position.set(
                 -radius * Math.sin(phi) * Math.cos(theta),
@@ -1349,7 +1349,7 @@ function animateShips() {
                 radius * Math.sin(phi) * Math.sin(theta)
             );
             
-            const size = Math.min(0.3 + (port.teu / 10000000) * 0.4, 1.0);
+            const size = Math.min(2.0 + (port.teu / 10000000) * 3.0, 8.0); // Beaucoup plus gros
             dummy.scale.set(size, size, 1);
             dummy.lookAt(0, 0, 0);
             
@@ -1806,19 +1806,6 @@ initializeShips().then(() => {
     
     const success = initializeInstancedRendering(scene);
     console.log('🔍 Instanced rendering:', success ? 'OK' : 'ERREUR');
-console.log('🇫🇷 Commerce international de la France visualisé');
-
-// Initialiser et démarrer l'animation des bateaux après le chargement du globe
-console.log('🚢 Démarrage du système de bateaux...');
-
-// Initialiser explicitement les bateaux
-initializeShips().then(() => {
-    console.log('✅ Bateaux initialisés avec succès');
-    console.log(`📊 Nombre de bateaux: ${shipAnimations.length}`);
-    
-    // Initialiser le système d'instanced rendering
-    const scene = globe.scene();
-    initializeInstancedRendering(scene);
     
     console.log(`🏭 ${worldMajorPorts.length} ports majeurs prêts`);
     
