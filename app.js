@@ -2076,6 +2076,8 @@ async function initializeShips() {
     const currentYear = parseInt(document.getElementById('year-selector').value) || 2025;
     const routes = getMajorShippingRoutes(currentYear);
     
+    console.log(`📋 Nombre de routes récupérées: ${routes.length}`);
+    
     let totalShips = 0;
     let totalPassages = 0;
     routes.forEach(route => {
@@ -2100,6 +2102,7 @@ async function initializeShips() {
     
     console.log(`✅ ${totalShips} bateaux initialisés sur ${routes.length} routes (année ${currentYear})`);
     console.log(`📊 Basé sur ${totalPassages.toLocaleString()} passages annuels réels`);
+    console.log(`🚢 Premier bateau:`, shipAnimations[0]);
 }
 
 // Interpolation Catmull-Rom Spline pour des trajectoires fluides et précises
@@ -2248,6 +2251,11 @@ function animateShips() {
         const totalTime = shipAnim.speed;
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
         let progress = currentTime / totalTime;
+        
+        // Debug: log premier bateau
+        if (i === 0 && Date.now() % 5000 < 100) {
+            console.log(`🚢 Bateau 0: progress=${progress.toFixed(3)}, route=${route.name}`);
+        }
         
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
