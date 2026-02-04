@@ -1990,20 +1990,11 @@ function animateShips() {
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
         let progress = currentTime / totalTime;
         
-        // IMPORTANT: Téléportation invisible pour éviter les sauts à travers le globe
-        // Si progress > 0.95, on cache le bateau (altitude négative)
-        // Il réapparaît naturellement au début au prochain cycle
+        // IMPORTANT: Pour les routes avec grand écart géographique (ex: Transpacific)
+        // Ne pas faire de transition visible. Quand progress approche 1, reset proprement.
         if (progress > 0.95) {
-            return {
-                lat: 0,
-                lng: 0,
-                alt: -1, // Sous la surface = invisible
-                id: `ship-${i}`,
-                size: 0,
-                color: shipAnim.color,
-                heading: 0,
-                routeName: route.name
-            };
+            // Forcer le bateau au début de la route (comme s'il venait de commencer)
+            progress = 0;
         }
         
         // Interpoler le long de la route
@@ -2052,9 +2043,6 @@ function animateShips() {
         
         ships.forEach((ship, i) => {
             if (i >= maxShips) return; // Limite de sécurité
-            
-            // TELEPORTATION: Skip les bateaux en transition (altitude négative)
-            if (ship.alt < 0) return;
             
             // Obtenir les coordonnées 3D
             const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
