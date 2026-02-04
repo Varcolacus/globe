@@ -1419,7 +1419,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        },
+        }
+        
+        /*
+        ,
         // Route Transpacifique (Asie ↔ USA)
         {
             name: 'Transpacific',
@@ -1470,6 +1473,7 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.transpacific,
             color: '#f39c12'
         }
+        */
         
         /*
         ,
@@ -2052,6 +2056,9 @@ function animateShips() {
         
         ships.forEach((ship, i) => {
             if (i >= maxShips) return; // Limite de sécurité
+            
+            // TELEPORTATION: Skip les bateaux en transition (altitude négative)
+            if (ship.alt < 0) return;
             
             // Obtenir les coordonnées 3D
             const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
