@@ -1017,6 +1017,19 @@ function isEuropean(port) {
 }
 
 function isNorthAmerican(port) {
+    return ['USA', 'Canada', 'Mexico'].includes(port.country);
+}
+
+function isSouthAmerican(port) {
+    return ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia', 'Ecuador', 'Uruguay'].includes(port.country);
+}
+
+function isAfrican(port) {
+    return ['Egypt', 'Morocco', 'South Africa', 'Nigeria', 'Kenya', 'Tanzania', 'Ghana', 'Senegal', 'Côte d\'Ivoire'].includes(port.country);
+}
+
+// Fonction pour obtenir les routes maritimes majeures
+function getMajorShippingRoutes(year) {
     return [
         
         // ===== ASIE DE L'EST (Chine, Japon, Corée) - 8 routes =====
