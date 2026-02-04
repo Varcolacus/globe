@@ -1305,10 +1305,7 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.atlantic, routePortWeights.atlantic),
             annualPassages: stats.atlantic,
             color: '#2ecc71'
-        }
-        
-        /*
-        ,
+        },
         // Route Europe → Cap (alternative à Suez)
         {
             name: 'Europe-Asia (Cape)',
@@ -1386,7 +1383,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.cape, routePortWeights.cape),
             annualPassages: stats.cape,
             color: '#e74c3c'
-        },
+        }
+        
+        /*
+        ,
         // Route Méditerranée (commerce intra-européen)
         {
             name: 'Mediterranean',
