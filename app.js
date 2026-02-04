@@ -613,12 +613,12 @@ const cameraViewProjectionMatrix = new THREE.Matrix4();
 // ===== LEVEL OF DETAIL (LOD) SYSTEM =====
 // Performance: 100-150% gain supplémentaire
 // 3 niveaux de qualité selon la distance
-const shipGeometryHigh = new THREE.SphereGeometry(5.0, 16, 16);   // Haute qualité - proche (5x plus grand)
-const shipGeometryMedium = new THREE.SphereGeometry(5.0, 8, 8);   // Moyenne qualité - moyen
-const shipGeometryLow = new THREE.SphereGeometry(5.0, 4, 4);      // Basse qualité - loin
+const shipGeometryHigh = new THREE.SphereGeometry(0.4, 16, 16);   // Haute qualité - proche
+const shipGeometryMedium = new THREE.SphereGeometry(0.4, 8, 8);   // Moyenne qualité - moyen
+const shipGeometryLow = new THREE.SphereGeometry(0.4, 4, 4);      // Basse qualité - loin
 
 const sharedShipMaterial = new THREE.MeshBasicMaterial({ 
-    color: 0x00ff00,  // Vert vif pour visibilité
+    color: 0xff6600,  // Orange pour les bateaux
     transparent: false,
     opacity: 1.0,
     side: THREE.DoubleSide
@@ -2102,7 +2102,7 @@ async function initializeShips() {
                 route: route,
                 speed: speed,
                 offset: offset,
-                size: 0.5 + Math.random() * 0.5, // Taille ÉNORME pour être absolument visible
+                size: 0.08 + Math.random() * 0.04, // Taille petite mais visible
                 color: route.color,
                 direction: 1, // Unidirectionnel - les routes sont divisées en Est/Ouest
                 isReal: false
