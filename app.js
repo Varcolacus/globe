@@ -1,41 +1,41 @@
-// Toutes les capitales du monde
+// Centres géographiques des pays
 const countries = [
-    { lat: 48.8566, lng: 2.3522, name: 'France', capital: 'Paris', flag: '🇫🇷' },
-    { lat: 35.6762, lng: 139.6503, name: 'Afghanistan', capital: 'Kabul', flag: '🇦🇫' },
-    { lat: 41.3275, lng: 19.8187, name: 'Albanie', capital: 'Tirana', flag: '🇦🇱' },
-    { lat: 36.7538, lng: 3.0588, name: 'Algérie', capital: 'Alger', flag: '🇩🇿' },
+    { lat: 46.2276, lng: 2.2137, name: 'France', capital: 'Paris', flag: '🇫🇷' },
+    { lat: 33.9391, lng: 67.7100, name: 'Afghanistan', capital: 'Kabul', flag: '🇦🇫' },
+    { lat: 41.1533, lng: 20.1683, name: 'Albanie', capital: 'Tirana', flag: '🇦🇱' },
+    { lat: 28.0339, lng: 1.6596, name: 'Algérie', capital: 'Alger', flag: '🇩🇿' },
     { lat: 42.5063, lng: 1.5218, name: 'Andorre', capital: 'Andorre-la-Vieille', flag: '🇦🇩' },
-    { lat: -8.8383, lng: 13.2344, name: 'Angola', capital: 'Luanda', flag: '🇦🇴' },
-    { lat: -34.6037, lng: -58.3816, name: 'Argentine', capital: 'Buenos Aires', flag: '🇦🇷' },
-    { lat: 40.1792, lng: 44.4991, name: 'Arménie', capital: 'Erevan', flag: '🇦🇲' },
-    { lat: -35.2809, lng: 149.1300, name: 'Australie', capital: 'Canberra', flag: '🇦🇺' },
-    { lat: 48.2082, lng: 16.3738, name: 'Autriche', capital: 'Vienne', flag: '🇦🇹' },
-    { lat: 40.4093, lng: 49.8671, name: 'Azerbaïdjan', capital: 'Bakou', flag: '🇦🇿' },
+    { lat: -11.2027, lng: 17.8739, name: 'Angola', capital: 'Luanda', flag: '🇦🇴' },
+    { lat: -38.4161, lng: -63.6167, name: 'Argentine', capital: 'Buenos Aires', flag: '🇦🇷' },
+    { lat: 40.0691, lng: 45.0382, name: 'Arménie', capital: 'Erevan', flag: '🇦🇲' },
+    { lat: -25.2744, lng: 133.7751, name: 'Australie', capital: 'Canberra', flag: '🇦🇺' },
+    { lat: 47.5162, lng: 14.5501, name: 'Autriche', capital: 'Vienne', flag: '🇦🇹' },
+    { lat: 40.1431, lng: 47.5769, name: 'Azerbaïdjan', capital: 'Bakou', flag: '🇦🇿' },
     { lat: 25.0343, lng: -77.3963, name: 'Bahamas', capital: 'Nassau', flag: '🇧🇸' },
     { lat: 26.0667, lng: 50.5577, name: 'Bahreïn', capital: 'Manama', flag: '🇧🇭' },
-    { lat: 23.8103, lng: 90.4125, name: 'Bangladesh', capital: 'Dhaka', flag: '🇧🇩' },
-    { lat: 13.0969, lng: -59.6145, name: 'Barbade', capital: 'Bridgetown', flag: '🇧🇧' },
-    { lat: 53.9045, lng: 27.5615, name: 'Biélorussie', capital: 'Minsk', flag: '🇧🇾' },
-    { lat: 50.8503, lng: 4.3517, name: 'Belgique', capital: 'Bruxelles', flag: '🇧🇪' },
-    { lat: 17.2510, lng: -88.7590, name: 'Belize', capital: 'Belmopan', flag: '🇧🇿' },
-    { lat: 6.4969, lng: 2.6289, name: 'Bénin', capital: 'Porto-Novo', flag: '🇧🇯' },
-    { lat: 27.4728, lng: 89.6390, name: 'Bhoutan', capital: 'Thimphou', flag: '🇧🇹' },
-    { lat: -16.5000, lng: -68.1500, name: 'Bolivie', capital: 'La Paz', flag: '🇧🇴' },
-    { lat: 43.8563, lng: 18.4131, name: 'Bosnie-Herzégovine', capital: 'Sarajevo', flag: '🇧🇦' },
-    { lat: -24.6282, lng: 25.9231, name: 'Botswana', capital: 'Gaborone', flag: '🇧🇼' },
-    { lat: -15.8267, lng: -47.9218, name: 'Brésil', capital: 'Brasília', flag: '🇧🇷' },
-    { lat: 4.8895, lng: 114.9422, name: 'Brunei', capital: 'Bandar Seri Begawan', flag: '🇧🇳' },
-    { lat: 42.6977, lng: 23.3219, name: 'Bulgarie', capital: 'Sofia', flag: '🇧🇬' },
-    { lat: 12.3714, lng: -1.5197, name: 'Burkina Faso', capital: 'Ouagadougou', flag: '🇧🇫' },
+    { lat: 23.6850, lng: 90.3563, name: 'Bangladesh', capital: 'Dhaka', flag: '🇧🇩' },
+    { lat: 13.1939, lng: -59.5432, name: 'Barbade', capital: 'Bridgetown', flag: '🇧🇧' },
+    { lat: 53.7098, lng: 27.9534, name: 'Biélorussie', capital: 'Minsk', flag: '🇧🇾' },
+    { lat: 50.5039, lng: 4.4699, name: 'Belgique', capital: 'Bruxelles', flag: '🇧🇪' },
+    { lat: 17.1899, lng: -88.4976, name: 'Belize', capital: 'Belmopan', flag: '🇧🇿' },
+    { lat: 9.3077, lng: 2.3158, name: 'Bénin', capital: 'Porto-Novo', flag: '🇧🇯' },
+    { lat: 27.5142, lng: 90.4336, name: 'Bhoutan', capital: 'Thimphou', flag: '🇧🇹' },
+    { lat: -16.2902, lng: -63.5887, name: 'Bolivie', capital: 'La Paz', flag: '🇧🇴' },
+    { lat: 43.9159, lng: 17.6791, name: 'Bosnie-Herzégovine', capital: 'Sarajevo', flag: '🇧🇦' },
+    { lat: -22.3285, lng: 24.6849, name: 'Botswana', capital: 'Gaborone', flag: '🇧🇼' },
+    { lat: -14.2350, lng: -51.9253, name: 'Brésil', capital: 'Brasília', flag: '🇧🇷' },
+    { lat: 4.5353, lng: 114.7277, name: 'Brunei', capital: 'Bandar Seri Begawan', flag: '🇧🇳' },
+    { lat: 42.7339, lng: 25.4858, name: 'Bulgarie', capital: 'Sofia', flag: '🇧🇬' },
+    { lat: 12.2383, lng: -1.5616, name: 'Burkina Faso', capital: 'Ouagadougou', flag: '🇧🇫' },
     { lat: -3.3731, lng: 29.9189, name: 'Burundi', capital: 'Gitega', flag: '🇧🇮' },
     { lat: 11.5564, lng: 104.9282, name: 'Cambodge', capital: 'Phnom Penh', flag: '🇰🇭' },
     { lat: 3.8480, lng: 11.5021, name: 'Cameroun', capital: 'Yaoundé', flag: '🇨🇲' },
-    { lat: 45.4215, lng: -75.6972, name: 'Canada', capital: 'Ottawa', flag: '🇨🇦' },
+    { lat: 56.1304, lng: -106.3468, name: 'Canada', capital: 'Ottawa', flag: '🇨🇦' },
     { lat: 14.9333, lng: -23.5133, name: 'Cap-Vert', capital: 'Praia', flag: '🇨🇻' },
     { lat: 4.3947, lng: 18.5582, name: 'Centrafrique', capital: 'Bangui', flag: '🇨🇫' },
     { lat: 12.1348, lng: 15.0557, name: 'Tchad', capital: "N'Djamena", flag: '🇹🇩' },
     { lat: -33.4489, lng: -70.6693, name: 'Chili', capital: 'Santiago', flag: '🇨🇱' },
-    { lat: 39.9042, lng: 116.4074, name: 'Chine', capital: 'Beijing', flag: '🇨🇳' },
+    { lat: 35.8617, lng: 104.1954, name: 'Chine', capital: 'Beijing', flag: '🇨🇳' },
     { lat: 4.7110, lng: -74.0721, name: 'Colombie', capital: 'Bogotá', flag: '🇨🇴' },
     { lat: -11.7022, lng: 43.2551, name: 'Comores', capital: 'Moroni', flag: '🇰🇲' },
     { lat: -4.3217, lng: 15.3125, name: 'Congo', capital: 'Brazzaville', flag: '🇨🇬' },
@@ -62,7 +62,7 @@ const countries = [
     { lat: 0.3901, lng: 9.4544, name: 'Gabon', capital: 'Libreville', flag: '🇬🇦' },
     { lat: 13.4549, lng: -16.5790, name: 'Gambie', capital: 'Banjul', flag: '🇬🇲' },
     { lat: 41.7151, lng: 44.8271, name: 'Géorgie', capital: 'Tbilissi', flag: '🇬🇪' },
-    { lat: 52.5200, lng: 13.4050, name: 'Allemagne', capital: 'Berlin', flag: '🇩🇪' },
+    { lat: 51.1657, lng: 10.4515, name: 'Allemagne', capital: 'Berlin', flag: '🇩🇪' },
     { lat: 5.6037, lng: -0.1870, name: 'Ghana', capital: 'Accra', flag: '🇬🇭' },
     { lat: 37.9838, lng: 23.7275, name: 'Grèce', capital: 'Athènes', flag: '🇬🇷' },
     { lat: 12.0561, lng: -61.7488, name: 'Grenade', capital: "Saint-George's", flag: '🇬🇩' },
@@ -74,16 +74,16 @@ const countries = [
     { lat: 14.0723, lng: -87.1921, name: 'Honduras', capital: 'Tegucigalpa', flag: '🇭🇳' },
     { lat: 47.4979, lng: 19.0402, name: 'Hongrie', capital: 'Budapest', flag: '🇭🇺' },
     { lat: 64.1466, lng: -21.9426, name: 'Islande', capital: 'Reykjavik', flag: '🇮🇸' },
-    { lat: 28.6139, lng: 77.2090, name: 'Inde', capital: 'New Delhi', flag: '🇮🇳' },
+    { lat: 20.5937, lng: 78.9629, name: 'Inde', capital: 'New Delhi', flag: '🇮🇳' },
     { lat: -6.2088, lng: 106.8456, name: 'Indonésie', capital: 'Jakarta', flag: '🇮🇩' },
     { lat: 35.6892, lng: 51.3890, name: 'Iran', capital: 'Téhéran', flag: '🇮🇷' },
     { lat: 33.3128, lng: 44.3615, name: 'Irak', capital: 'Bagdad', flag: '🇮🇶' },
     { lat: 53.3498, lng: -6.2603, name: 'Irlande', capital: 'Dublin', flag: '🇮🇪' },
     { lat: 31.7683, lng: 35.2137, name: 'Israël', capital: 'Jérusalem', flag: '🇮🇱' },
-    { lat: 41.9028, lng: 12.4964, name: 'Italie', capital: 'Rome', flag: '🇮🇹' },
+    { lat: 41.8719, lng: 12.5674, name: 'Italie', capital: 'Rome', flag: '🇮🇹' },
     { lat: 6.9271, lng: -1.2350, name: 'Côte d\'Ivoire', capital: 'Yamoussoukro', flag: '🇨🇮' },
     { lat: 18.0179, lng: -76.8099, name: 'Jamaïque', capital: 'Kingston', flag: '🇯🇲' },
-    { lat: 35.6762, lng: 139.6503, name: 'Japon', capital: 'Tokyo', flag: '🇯🇵' },
+    { lat: 36.2048, lng: 138.2529, name: 'Japon', capital: 'Tokyo', flag: '🇯🇵' },
     { lat: 31.9454, lng: 35.9284, name: 'Jordanie', capital: 'Amman', flag: '🇯🇴' },
     { lat: 51.1694, lng: 71.4491, name: 'Kazakhstan', capital: 'Astana', flag: '🇰🇿' },
     { lat: -1.2921, lng: 36.8219, name: 'Kenya', capital: 'Nairobi', flag: '🇰🇪' },
@@ -140,7 +140,7 @@ const countries = [
     { lat: 38.7223, lng: -9.1393, name: 'Portugal', capital: 'Lisbonne', flag: '🇵🇹' },
     { lat: 25.3548, lng: 51.1839, name: 'Qatar', capital: 'Doha', flag: '🇶🇦' },
     { lat: 44.4268, lng: 26.1025, name: 'Roumanie', capital: 'Bucarest', flag: '🇷🇴' },
-    { lat: 55.7558, lng: 37.6173, name: 'Russie', capital: 'Moscou', flag: '🇷🇺' },
+    { lat: 61.5240, lng: 105.3188, name: 'Russie', capital: 'Moscou', flag: '🇷🇺' },
     { lat: -1.9403, lng: 29.8739, name: 'Rwanda', capital: 'Kigali', flag: '🇷🇼' },
     { lat: 17.3578, lng: -62.7830, name: 'Saint-Christophe-et-Niévès', capital: 'Basseterre', flag: '🇰🇳' },
     { lat: 13.9094, lng: -60.9789, name: 'Sainte-Lucie', capital: 'Castries', flag: '🇱🇨' },
@@ -161,7 +161,7 @@ const countries = [
     { lat: -25.7479, lng: 28.2293, name: 'Afrique du Sud', capital: 'Pretoria', flag: '🇿🇦' },
     { lat: 37.5665, lng: 126.9780, name: 'Corée du Sud', capital: 'Séoul', flag: '🇰🇷' },
     { lat: 4.8594, lng: 31.5713, name: 'Soudan du Sud', capital: 'Djouba', flag: '🇸🇸' },
-    { lat: 40.4168, lng: -3.7038, name: 'Espagne', capital: 'Madrid', flag: '🇪🇸' },
+    { lat: 40.4637, lng: -3.7492, name: 'Espagne', capital: 'Madrid', flag: '🇪🇸' },
     { lat: 6.9271, lng: 79.8612, name: 'Sri Lanka', capital: 'Sri Jayawardenapura Kotte', flag: '🇱🇰' },
     { lat: 15.5007, lng: 32.5599, name: 'Soudan', capital: 'Khartoum', flag: '🇸🇩' },
     { lat: 5.8520, lng: -55.2038, name: 'Suriname', capital: 'Paramaribo', flag: '🇸🇷' },
@@ -182,8 +182,8 @@ const countries = [
     { lat: 0.3136, lng: 32.5811, name: 'Ouganda', capital: 'Kampala', flag: '🇺🇬' },
     { lat: 50.4501, lng: 30.5234, name: 'Ukraine', capital: 'Kiev', flag: '🇺🇦' },
     { lat: 24.4539, lng: 54.3773, name: 'Émirats arabes unis', capital: 'Abou Dabi', flag: '🇦🇪' },
-    { lat: 51.5074, lng: -0.1278, name: 'Royaume-Uni', capital: 'Londres', flag: '🇬🇧' },
-    { lat: 38.9072, lng: -77.0369, name: 'États-Unis', capital: 'Washington DC', flag: '🇺🇸' },
+    { lat: 55.3781, lng: -3.4360, name: 'Royaume-Uni', capital: 'Londres', flag: '🇬🇧' },
+    { lat: 37.0902, lng: -95.7129, name: 'États-Unis', capital: 'Washington DC', flag: '🇺🇸' },
     { lat: -34.9011, lng: -56.1645, name: 'Uruguay', capital: 'Montevideo', flag: '🇺🇾' },
     { lat: 41.2995, lng: 69.2401, name: 'Ouzbékistan', capital: 'Tachkent', flag: '🇺🇿' },
     { lat: -17.7333, lng: 168.3273, name: 'Vanuatu', capital: 'Port-Vila', flag: '🇻🇺' },
@@ -202,6 +202,184 @@ const connections = countries
         from: 'France',
         to: country.name
     }));
+
+// Charger les données de la balance des paiements depuis l'API
+let balanceData = [];
+let currentDataType = 'balance'; // balance, exports, imports, volume
+let currentYear = 2025;
+
+async function loadBalanceData(year = currentYear) {
+    try {
+        currentYear = year;
+        balanceData = await API_CONFIG.fetchBalancePaiements(year);
+        console.log(`✅ Données ${year} chargées:`, balanceData.length, 'pays');
+        updateGlobeWithBalanceData(currentDataType);
+    } catch (error) {
+        console.error('❌ Erreur chargement données:', error);
+    }
+}
+
+function updateGlobeWithBalanceData(dataType = 'balance') {
+    currentDataType = dataType;
+    
+    // Filtrer les pays avec du commerce réel (volume > 0)
+    const countriesWithTrade = balanceData.filter(c => c.volume > 0 && c.name !== 'France');
+    
+    // Calculer les valeurs min/max selon le type de données
+    let values, minValue, maxValue;
+    
+    switch(dataType) {
+        case 'exports':
+            values = countriesWithTrade.map(c => c.exports);
+            break;
+        case 'imports':
+            values = countriesWithTrade.map(c => c.imports);
+            break;
+        case 'volume':
+            values = countriesWithTrade.map(c => c.volume);
+            break;
+        case 'balance':
+        default:
+            values = countriesWithTrade.map(c => c.balance);
+            break;
+    }
+    
+    minValue = Math.min(...values);
+    maxValue = Math.max(...values);
+    
+    console.log(`📊 ${countriesWithTrade.length} pays - ${dataType}: min ${(minValue/1000).toFixed(1)}Md€, max ${(maxValue/1000).toFixed(1)}Md€`);
+    
+    // Mettre à jour la légende
+    updateLegend(dataType);
+    
+    // Créer les arcs uniquement pour les pays avec commerce
+    const updatedArcs = countriesWithTrade.map(countryData => {
+        const startCountry = countries.find(c => c.name === 'France');
+        const endCountry = countries.find(c => c.name === countryData.name);
+        
+        if (!startCountry || !endCountry) return null;
+        
+        // Obtenir la valeur selon le type
+        let value;
+        switch(dataType) {
+            case 'exports':
+                value = countryData.exports;
+                break;
+            case 'imports':
+                value = countryData.imports;
+                break;
+            case 'volume':
+                value = countryData.volume;
+                break;
+            case 'balance':
+            default:
+                value = countryData.balance;
+                break;
+        }
+        
+        // Déterminer la direction de l'animation
+        let arcStartLat, arcStartLng, arcEndLat, arcEndLng;
+        
+        switch(dataType) {
+            case 'exports':
+                // Exports : France → Pays (sortie de France)
+                arcStartLat = startCountry.lat;
+                arcStartLng = startCountry.lng;
+                arcEndLat = endCountry.lat;
+                arcEndLng = endCountry.lng;
+                break;
+                
+            case 'imports':
+                // Imports : Pays → France (entrée en France)
+                arcStartLat = endCountry.lat;
+                arcStartLng = endCountry.lng;
+                arcEndLat = startCountry.lat;
+                arcEndLng = startCountry.lng;
+                break;
+                
+            case 'balance':
+                // Balance : si positif (excédent) France → Pays, si négatif (déficit) Pays → France
+                if (value >= 0) {
+                    arcStartLat = startCountry.lat;
+                    arcStartLng = startCountry.lng;
+                    arcEndLat = endCountry.lat;
+                    arcEndLng = endCountry.lng;
+                } else {
+                    arcStartLat = endCountry.lat;
+                    arcStartLng = endCountry.lng;
+                    arcEndLat = startCountry.lat;
+                    arcEndLng = startCountry.lng;
+                }
+                break;
+                
+            case 'volume':
+            default:
+                // Volume : France → Pays (par défaut)
+                arcStartLat = startCountry.lat;
+                arcStartLng = startCountry.lng;
+                arcEndLat = endCountry.lat;
+                arcEndLng = endCountry.lng;
+                break;
+        }
+        
+        // Couleur selon le type de données et la valeur
+        let color;
+        
+        if (dataType === 'balance') {
+            // Balance: vert pour excédent, rouge pour déficit
+            if (value > 5000) {
+                color = 'rgba(0, 255, 136, 0.4)';
+            } else if (value > 0) {
+                color = 'rgba(136, 255, 136, 0.4)';
+            } else if (value > -5000) {
+                color = 'rgba(255, 170, 136, 0.4)';
+            } else {
+                color = 'rgba(255, 107, 107, 0.4)';
+            }
+        } else {
+            // Exports, Imports, Volume: gradient du bleu au rouge selon intensité
+            const normalized = (value - minValue) / (maxValue - minValue);
+            if (normalized > 0.75) {
+                color = 'rgba(255, 50, 50, 0.5)';   // Rouge intense
+            } else if (normalized > 0.5) {
+                color = 'rgba(255, 150, 50, 0.5)';  // Orange
+            } else if (normalized > 0.25) {
+                color = 'rgba(100, 200, 255, 0.5)'; // Bleu clair
+            } else {
+                color = 'rgba(100, 150, 255, 0.4)'; // Bleu
+            }
+        }
+        
+        // Épaisseur proportionnelle au volume (toujours basé sur le volume pour cohérence visuelle)
+        const volumes = countriesWithTrade.map(c => c.volume);
+        const minVol = Math.min(...volumes);
+        const maxVol = Math.max(...volumes);
+        const normalizedVolume = (countryData.volume - minVol) / (maxVol - minVol);
+        // Échelle logarithmique plus agressive pour accentuer les différences
+        const logScale = Math.log10(1 + normalizedVolume * 99) / 2; // Base 100 pour plus de contraste
+        const stroke = 0.2 + logScale * 4.5; // Plage élargie: 0.2 à 4.7 pixels
+        
+        return {
+            startLat: arcStartLat,
+            startLng: arcStartLng,
+            endLat: arcEndLat,
+            endLng: arcEndLng,
+            color: color,
+            stroke: stroke,
+            balance: countryData.balance,
+            exports: countryData.exports,
+            imports: countryData.imports,
+            volume: countryData.volume,
+            currentValue: value
+        };
+    }).filter(arc => arc !== null);
+    
+    // Trier par épaisseur pour afficher les petites lignes en premier
+    updatedArcs.sort((a, b) => a.stroke - b.stroke);
+    
+    globe.arcsData(updatedArcs);
+    console.log('🌍 Globe mis à jour avec', updatedArcs.length, 'connexions -', dataType);
+}
 
 // Créer les données d'arcs (commerce France -> monde)
 const arcsData = connections.map(conn => {
@@ -245,8 +423,21 @@ const globe = Globe()
     .arcColor('color')
     .arcDashLength(0.4)
     .arcDashGap(0.2)
-    .arcDashAnimateTime(2000)
+    .arcDashAnimateTime(10000)
     .arcStroke(d => d.stroke)
+    .arcLabel(d => `
+        <div style="background: rgba(0,0,0,0.9); padding: 12px; border-radius: 8px; border: 1px solid ${d.color};">
+            <div style="font-size: 16px; font-weight: bold; color: ${d.color}; margin-bottom: 8px;">
+                Balance des paiements
+            </div>
+            <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
+                💰 Solde: ${(d.balance / 1000).toFixed(1)}Md€<br>
+                📤 Exports: ${(d.exports / 1000).toFixed(1)}Md€<br>
+                📥 Imports: ${(d.imports / 1000).toFixed(1)}Md€<br>
+                📊 Volume total: ${(d.volume / 1000).toFixed(1)}Md€
+            </div>
+        </div>
+    `)
     .arcsTransitionDuration(0);
 
 // Charger les frontières des pays depuis un GeoJSON public
@@ -264,6 +455,254 @@ fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
         console.log('🗺️ Frontières chargées:', countries.length, 'pays');
     })
     .catch(err => console.error('❌ Erreur frontières:', err));
+
+// Charger les données de balance des paiements
+loadBalanceData();
+
+// Fonction pour mettre à jour la légende
+function updateLegend(dataType) {
+    const title = document.getElementById('legend-title');
+    const content = document.getElementById('legend-content');
+    
+    switch(dataType) {
+        case 'exports':
+            title.textContent = 'Exports vers pays:';
+            content.innerHTML = `
+                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très élevé (>75%)<br>
+                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Élevé (50-75%)<br>
+                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Moyen (25-50%)<br>
+                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+            `;
+            break;
+        case 'imports':
+            title.textContent = 'Imports depuis pays:';
+            content.innerHTML = `
+                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très élevé (>75%)<br>
+                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Élevé (50-75%)<br>
+                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Moyen (25-50%)<br>
+                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+            `;
+            break;
+        case 'volume':
+            title.textContent = 'Volume total échanges:';
+            content.innerHTML = `
+                <span style="color: rgba(255, 50, 50, 0.5);">●</span> Très important (>75%)<br>
+                <span style="color: rgba(255, 150, 50, 0.5);">●</span> Important (50-75%)<br>
+                <span style="color: rgba(100, 200, 255, 0.5);">●</span> Modéré (25-50%)<br>
+                <span style="color: rgba(100, 150, 255, 0.4);">●</span> Faible (<25%)
+            `;
+            break;
+        case 'balance':
+        default:
+            title.textContent = 'Balance des paiements:';
+            content.innerHTML = `
+                <span style="color: #00ff88;">●</span> Fort excédent (>5Md€)<br>
+                <span style="color: #88ff88;">●</span> Excédent<br>
+                <span style="color: #ffaa88;">●</span> Déficit léger<br>
+                <span style="color: #ff6b6b;">●</span> Fort déficit (>5Md€)
+            `;
+            break;
+    }
+}
+
+// Gestion des boutons radio pour changer le type de données
+document.querySelectorAll('input[name="dataType"]').forEach(radio => {
+    radio.addEventListener('change', (e) => {
+        updateGlobeWithBalanceData(e.target.value);
+    });
+});
+
+// Gestion du bouton d'affichage des données
+document.getElementById('show-data').addEventListener('click', () => {
+    showDataTable();
+});
+
+document.getElementById('year-selector').addEventListener('change', (e) => {
+    const selectedYear = parseInt(e.target.value);
+    console.log(`📅 Changement d'année: ${selectedYear}`);
+    loadBalanceData(selectedYear);
+});
+
+document.getElementById('modal-year-selector').addEventListener('change', (e) => {
+    const selectedYear = parseInt(e.target.value);
+    console.log(`📅 Changement d'année (modal): ${selectedYear}`);
+    // Synchroniser avec le sélecteur principal
+    document.getElementById('year-selector').value = selectedYear.toString();
+    // Charger les données et rafraîchir le tableau
+    loadBalanceData(selectedYear).then(() => {
+        showDataTable();
+    });
+});
+
+document.getElementById('close-modal').addEventListener('click', () => {
+    document.getElementById('data-modal').style.display = 'none';
+});
+
+document.getElementById('download-csv').addEventListener('click', () => {
+    downloadCSV();
+});
+
+// Fermer le modal en cliquant en dehors
+document.getElementById('data-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'data-modal') {
+        document.getElementById('data-modal').style.display = 'none';
+    }
+});
+
+function showDataTable() {
+    const modal = document.getElementById('data-modal');
+    const tbody = document.getElementById('data-table-body');
+    const metadataDiv = document.getElementById('metadata-info');
+    const modalYearSelector = document.getElementById('modal-year-selector');
+    
+    // Synchroniser le sélecteur d'année du modal avec l'année courante
+    modalYearSelector.value = currentYear.toString();
+    
+    // Filtrer les pays avec commerce et trier par volume
+    const tradingCountries = balanceData
+        .filter(c => c.volume > 0 && c.name !== 'France')
+        .sort((a, b) => b.volume - a.volume);
+    
+    // Calculer les totaux
+    const totalExports = tradingCountries.reduce((sum, c) => sum + c.exports, 0);
+    const totalImports = tradingCountries.reduce((sum, c) => sum + c.imports, 0);
+    const totalBalance = totalExports - totalImports;
+    const totalVolume = totalExports + totalImports;
+    
+    // Afficher les métadonnées
+    const lastUpdate = new Date().toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    
+    metadataDiv.innerHTML = `
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+            <div>
+                <strong>📊 Source:</strong> Banque de France (Webstat API)<br>
+                <small>https://webstat.banque-france.fr</small>
+            </div>
+            <div>
+                <strong>📅 Année:</strong> ${currentYear}<br>
+                <small>Dernière extraction: ${lastUpdate}</small>
+            </div>
+            <div>
+                <strong>🌍 Pays avec commerce:</strong><br>
+                ${tradingCountries.length} pays
+            </div>
+            <div>
+                <strong>💰 Volume total:</strong><br>
+                ${totalVolume.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+            </div>
+        </div>
+        <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
+            ℹ️ Données en millions d'euros (M€). Les pourcentages indiquent la part de chaque pays dans le commerce total de la France.
+        </div>
+    `;
+    
+    // Générer les lignes du tableau
+    tbody.innerHTML = tradingCountries.map((country, index) => {
+        const soldeColor = country.balance > 0 ? '#00aa44' : '#dd0000';
+        const rowBg = index % 2 === 0 ? '#f9f9f9' : 'white';
+        
+        return `
+            <tr style="background: ${rowBg};">
+                <td style="padding: 10px; border: 1px solid #ddd; color: #333;">
+                    ${country.flag} ${country.name}
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333;">
+                    ${country.exports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333;">
+                    ${country.imports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: ${soldeColor}; font-weight: bold;">
+                    ${country.balance > 0 ? '+' : ''}${country.balance.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                </td>
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333; font-weight: bold;">
+                    ${country.volume.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    // Ajouter une ligne de total
+    tbody.innerHTML += `
+        <tr style="background: #667eea; color: white; font-weight: bold;">
+            <td style="padding: 12px; border: 1px solid #ddd;">
+                TOTAL
+            </td>
+            <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
+                ${totalExports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+            </td>
+            <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
+                ${totalImports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+            </td>
+            <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
+                ${totalBalance > 0 ? '+' : ''}${totalBalance.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+            </td>
+            <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
+                ${totalVolume.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+            </td>
+        </tr>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+function downloadCSV() {
+    // Filtrer et trier les données
+    const tradingCountries = balanceData
+        .filter(c => c.volume > 0 && c.name !== 'France')
+        .sort((a, b) => b.volume - a.volume);
+    
+    // Calculer les totaux
+    const totalExports = tradingCountries.reduce((sum, c) => sum + c.exports, 0);
+    const totalImports = tradingCountries.reduce((sum, c) => sum + c.imports, 0);
+    const totalBalance = totalExports - totalImports;
+    const totalVolume = totalExports + totalImports;
+    
+    // En-tête du CSV avec métadonnées
+    const lastUpdate = new Date().toISOString().split('T')[0];
+    let csv = `"Balance des Paiements - France"\n`;
+    csv += `"Source: Banque de France (Webstat API)"\n`;
+    csv += `"Année: ${currentYear}"\n`;
+    csv += `"Date d'extraction: ${lastUpdate}"\n`;
+    csv += `"Nombre de pays: ${tradingCountries.length}"\n`;
+    csv += `"Montants en millions d'euros (M€)"\n\n`;
+    
+    // En-tête des colonnes
+    csv += `"Pays","Latitude","Longitude","Exportations (M€)","% Exports","Importations (M€)","% Imports","Solde (M€)","Volume Total (M€)","% Volume"\n`;
+    
+    // Données des pays
+    tradingCountries.forEach(country => {
+        const exportPct = ((country.exports / totalExports) * 100).toFixed(2);
+        const importPct = ((country.imports / totalImports) * 100).toFixed(2);
+        const volumePct = ((country.volume / totalVolume) * 100).toFixed(2);
+        
+        csv += `"${country.name}",${country.lat},${country.lng},`;
+        csv += `${country.exports.toFixed(0)},${exportPct},`;
+        csv += `${country.imports.toFixed(0)},${importPct},`;
+        csv += `${country.balance.toFixed(0)},`;
+        csv += `${country.volume.toFixed(0)},${volumePct}\n`;
+    });
+    
+    // Ligne de total
+    csv += `\n"TOTAL","","",${totalExports.toFixed(0)},100.00,${totalImports.toFixed(0)},100.00,${totalBalance.toFixed(0)},${totalVolume.toFixed(0)},100.00\n`;
+    
+    // Créer un blob et télécharger
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `balance_paiements_france_${currentYear}_${lastUpdate}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
 
 // Configuration de la caméra pour vue globale
 globe.pointOfView({ altitude: 2.5 }, 0);
