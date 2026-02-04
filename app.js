@@ -418,7 +418,8 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
             exports: countryData.exports,
             imports: countryData.imports,
             volume: countryData.volume,
-            currentValue: value
+            currentValue: value,
+            countryName: countryData.name
         };
     }).filter(arc => arc !== null);
     
@@ -556,11 +557,14 @@ const globe = Globe()
     .arcColor('color')
     .arcDashLength(0.4)
     .arcDashGap(0.2)
-    .arcDashAnimateTime(10000)
+    .arcDashAnimateTime(20000)
     .arcStroke(d => d.stroke)
     .arcLabel(d => `
         <div style="background: rgba(0,0,0,0.9); padding: 12px; border-radius: 8px; border: 1px solid ${d.color};">
-            <div style="font-size: 16px; font-weight: bold; color: ${d.color}; margin-bottom: 8px;">
+            <div style="font-size: 18px; font-weight: bold; color: #fff; margin-bottom: 4px;">
+                ${d.countryName}
+            </div>
+            <div style="font-size: 14px; font-weight: bold; color: ${d.color}; margin-bottom: 8px; border-bottom: 1px solid ${d.color}; padding-bottom: 6px;">
                 Balance des paiements
             </div>
             <div style="font-size: 13px; color: #ccc; line-height: 1.6;">
