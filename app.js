@@ -925,8 +925,8 @@ const worldMajorPorts = [
     
     // Moyen-Orient
     { name: 'Dubai', lat: 25.28, lng: 55.33, country: 'UAE', teu: 14110000 },
-    { name: 'Jeddah', lat: 21.54, lng: 39.17, country: 'Saudi Arabia', teu: 4150000 },
-    { name: 'Salalah', lat: 16.95, lng: 54.00, country: 'Oman', teu: 5200000 },
+    { name: 'Jeddah', lat: 21.49, lng: 39.18, country: 'Saudi Arabia', teu: 4150000 },
+    { name: 'Salalah', lat: 16.94, lng: 54.00, country: 'Oman', teu: 5200000 },
     
     // Europe
     { name: 'Rotterdam', lat: 51.92, lng: 4.48, country: 'Netherlands', teu: 14350000 },
@@ -953,18 +953,18 @@ const worldMajorPorts = [
     { name: 'Seattle', lat: 47.60, lng: -122.33, country: 'USA', teu: 3840000 },
     
     // Amérique du Sud
-    { name: 'Santos', lat: -23.96, lng: -46.33, country: 'Brazil', teu: 4440000 },
-    { name: 'Callao', lat: -12.05, lng: -77.15, country: 'Peru', teu: 2340000 },
+    { name: 'Santos', lat: -23.96, lng: -46.31, country: 'Brazil', teu: 4440000 },
+    { name: 'Callao', lat: -12.05, lng: -77.14, country: 'Peru', teu: 2340000 },
     { name: 'Buenos Aires', lat: -34.60, lng: -58.36, country: 'Argentina', teu: 1500000 },
-    { name: 'Cartagena', lat: 10.39, lng: -75.51, country: 'Colombia', teu: 3260000 },
+    { name: 'Cartagena', lat: 10.40, lng: -75.55, country: 'Colombia', teu: 3260000 },
     
     // Afrique
     { name: 'Port Said', lat: 31.26, lng: 32.30, country: 'Egypt', teu: 4000000 },
     { name: 'Tanger Med', lat: 35.88, lng: -5.57, country: 'Morocco', teu: 7200000 },
-    { name: 'Durban', lat: -29.86, lng: 31.04, country: 'South Africa', teu: 2730000 },
-    { name: 'Lagos', lat: 6.44, lng: 3.40, country: 'Nigeria', teu: 1800000 },
+    { name: 'Durban', lat: -29.87, lng: 31.03, country: 'South Africa', teu: 2730000 },
+    { name: 'Lagos', lat: 6.43, lng: 3.39, country: 'Nigeria', teu: 1800000 },
     { name: 'Mombasa', lat: -4.04, lng: 39.67, country: 'Kenya', teu: 1440000 },
-    { name: 'Abidjan', lat: 5.31, lng: -4.01, country: 'Côte d\'Ivoire', teu: 870000 },
+    { name: 'Abidjan', lat: 5.26, lng: -3.93, country: 'Côte d\'Ivoire', teu: 870000 },
     
     // Canal zones
     { name: 'Colon', lat: 9.36, lng: -79.90, country: 'Panama', teu: 4300000 },
