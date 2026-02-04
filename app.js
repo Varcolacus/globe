@@ -1976,7 +1976,12 @@ function animateShips() {
         const route = shipAnim.route;
         const totalTime = shipAnim.speed;
         const currentTime = (Date.now() + shipAnim.offset) % totalTime;
-        const progress = currentTime / totalTime;
+        let progress = currentTime / totalTime;
+        
+        // IMPORTANT: Ne jamais dépasser 0.99 pour éviter le saut au début
+        // Quand on atteint la fin, on reste au dernier waypoint quelques frames
+        // puis on réapparaît naturellement au début grâce au modulo
+        progress = Math.min(progress, 0.99);
         
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
@@ -1986,7 +1991,7 @@ function animateShips() {
         const alt = 0.01 + waveEffect;
         
         // Calculer l'angle de direction pour orienter le bateau
-        const nextProgress = Math.min(progress + 0.005, 1);
+        const nextProgress = Math.min(progress + 0.005, 0.99);
         const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
         
