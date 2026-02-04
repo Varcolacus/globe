@@ -907,14 +907,14 @@ function getMajorShippingRoutes(year = 2025) {
 // Top 50 ports mondiaux par volume de conteneurs
 const worldMajorPorts = [
     // Asie-Pacifique
-    { name: 'Shanghai', lat: 31.23, lng: 121.47, country: 'China', teu: 47030000 },
+    { name: 'Shanghai', lat: 30.63, lng: 122.08, country: 'China', teu: 47030000 },
     { name: 'Singapore', lat: 1.29, lng: 103.85, country: 'Singapore', teu: 37200000 },
     { name: 'Ningbo-Zhoushan', lat: 29.87, lng: 121.55, country: 'China', teu: 33350000 },
-    { name: 'Shenzhen', lat: 22.54, lng: 114.06, country: 'China', teu: 30330000 },
-    { name: 'Guangzhou', lat: 23.11, lng: 113.38, country: 'China', teu: 24180000 },
+    { name: 'Shenzhen', lat: 22.53, lng: 114.09, country: 'China', teu: 30330000 },
+    { name: 'Guangzhou', lat: 22.77, lng: 113.59, country: 'China', teu: 24180000 },
     { name: 'Qingdao', lat: 36.07, lng: 120.38, country: 'China', teu: 24010000 },
     { name: 'Busan', lat: 35.18, lng: 129.08, country: 'South Korea', teu: 22710000 },
-    { name: 'Tianjin', lat: 38.98, lng: 117.71, country: 'China', teu: 20270000 },
+    { name: 'Tianjin', lat: 38.98, lng: 117.79, country: 'China', teu: 20270000 },
     { name: 'Hong Kong', lat: 22.30, lng: 114.17, country: 'Hong Kong', teu: 18360000 },
     { name: 'Port Klang', lat: 2.99, lng: 101.39, country: 'Malaysia', teu: 13580000 },
     { name: 'Kaohsiung', lat: 22.61, lng: 120.30, country: 'Taiwan', teu: 10260000 },
@@ -924,14 +924,14 @@ const worldMajorPorts = [
     { name: 'Tanjung Pelepas', lat: 1.36, lng: 103.55, country: 'Malaysia', teu: 10840000 },
     
     // Moyen-Orient
-    { name: 'Dubai', lat: 25.28, lng: 55.33, country: 'UAE', teu: 14110000 },
+    { name: 'Dubai', lat: 25.01, lng: 55.09, country: 'UAE', teu: 14110000 },
     { name: 'Jeddah', lat: 21.49, lng: 39.18, country: 'Saudi Arabia', teu: 4150000 },
     { name: 'Salalah', lat: 16.94, lng: 54.00, country: 'Oman', teu: 5200000 },
     
     // Europe
-    { name: 'Rotterdam', lat: 51.92, lng: 4.48, country: 'Netherlands', teu: 14350000 },
+    { name: 'Rotterdam', lat: 51.95, lng: 4.14, country: 'Netherlands', teu: 14350000 },
     { name: 'Antwerp', lat: 51.27, lng: 4.41, country: 'Belgium', teu: 12040000 },
-    { name: 'Hamburg', lat: 53.54, lng: 9.97, country: 'Germany', teu: 8730000 },
+    { name: 'Hamburg', lat: 53.54, lng: 9.98, country: 'Germany', teu: 8730000 },
     { name: 'Piraeus', lat: 37.95, lng: 23.65, country: 'Greece', teu: 5440000 },
     { name: 'Valencia', lat: 39.47, lng: -0.38, country: 'Spain', teu: 5440000 },
     { name: 'Algeciras', lat: 36.13, lng: -5.45, country: 'Spain', teu: 5130000 },
@@ -948,7 +948,7 @@ const worldMajorPorts = [
     { name: 'New York/New Jersey', lat: 40.67, lng: -74.05, country: 'USA', teu: 8300000 },
     { name: 'Savannah', lat: 32.03, lng: -81.09, country: 'USA', teu: 5760000 },
     { name: 'Vancouver', lat: 49.28, lng: -123.12, country: 'Canada', teu: 3570000 },
-    { name: 'Houston', lat: 29.69, lng: -95.05, country: 'USA', teu: 3200000 },
+    { name: 'Houston', lat: 29.73, lng: -95.00, country: 'USA', teu: 3200000 },
     { name: 'Charleston', lat: 32.78, lng: -79.93, country: 'USA', teu: 2610000 },
     { name: 'Seattle', lat: 47.60, lng: -122.33, country: 'USA', teu: 3840000 },
     
