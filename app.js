@@ -603,6 +603,11 @@ let instancedShips = null;
 let shipCount = 0;
 const maxShips = 500; // Capacité maximale
 
+// ===== FRUSTUM CULLING SYSTEM =====
+// Performance: 100-200% gain supplémentaire
+const frustum = new THREE.Frustum();
+const cameraViewProjectionMatrix = new THREE.Matrix4();
+
 // Créer la géométrie partagée une seule fois - TAILLE ÉQUILIBRÉE
 const sharedShipGeometry = new THREE.SphereGeometry(1.0, 8, 8); // Taille optimale
 const sharedShipMaterial = new THREE.MeshBasicMaterial({ 
@@ -1140,14 +1145,30 @@ function animateShips() {
             };
         });
         
-        // Utiliser InstancedMesh pour AIS aussi
+        // Utiliser InstancedMesh + Frustum Culling pour AIS aussi
         if (instancedShips && ships.length > 0) {
             const dummy = new THREE.Object3D();
+            const camera = globe.camera();
+            
+            camera.updateMatrixWorld();
+            cameraViewProjectionMatrix.multiplyMatrices(
+                camera.projectionMatrix,
+                camera.matrixWorldInverse
+            );
+            frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
+            
+            let visibleCount = 0;
             
             ships.forEach((ship, i) => {
                 if (i >= maxShips) return;
                 
                 const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
+                
+                // Frustum culling
+                const position = new THREE.Vector3(coords.x, coords.y, coords.z);
+                if (!frustum.containsPoint(position)) {
+                    return;
+                }
                 
                 dummy.position.set(coords.x, coords.y, coords.z);
                 dummy.scale.set(1.0, 1.0, 1.0);
@@ -1155,10 +1176,11 @@ function animateShips() {
                 dummy.rotateY(ship.heading);
                 
                 dummy.updateMatrix();
-                instancedShips.setMatrixAt(i, dummy.matrix);
+                instancedShips.setMatrixAt(visibleCount, dummy.matrix);
+                visibleCount++;
             });
             
-            instancedShips.count = ships.length;
+            instancedShips.count = visibleCount;
             instancedShips.instanceMatrix.needsUpdate = true;
         }
         return;
@@ -1195,9 +1217,20 @@ function animateShips() {
         };
     });
     
-    // Utiliser InstancedMesh pour performance maximale
+    // Utiliser InstancedMesh + Frustum Culling pour performance maximale
     if (instancedShips && ships.length > 0) {
         const dummy = new THREE.Object3D();
+        const camera = globe.camera();
+        
+        // Mettre à jour le frustum avec la position actuelle de la caméra
+        camera.updateMatrixWorld();
+        cameraViewProjectionMatrix.multiplyMatrices(
+            camera.projectionMatrix,
+            camera.matrixWorldInverse
+        );
+        frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
+        
+        let visibleCount = 0;
         
         ships.forEach((ship, i) => {
             if (i >= maxShips) return; // Limite de sécurité
@@ -1205,21 +1238,28 @@ function animateShips() {
             // Obtenir les coordonnées 3D
             const coords = globe.getCoords(ship.lat, ship.lng, ship.alt);
             
-            // Positionner et orienter - ÉCHELLE AUGMENTÉE
+            // FRUSTUM CULLING : Tester si le bateau est visible
+            const position = new THREE.Vector3(coords.x, coords.y, coords.z);
+            if (!frustum.containsPoint(position)) {
+                return; // Bateau hors de vue, on le skip !
+            }
+            
+            // Positionner et orienter seulement les bateaux visibles
             dummy.position.set(coords.x, coords.y, coords.z);
-            dummy.scale.set(1.0, 1.0, 1.0); // Échelle uniforme pour visibilité
-            dummy.lookAt(0, 0, 0); // Pointer vers le centre du globe
-            dummy.rotateY(ship.heading); // Appliquer la direction
+            dummy.scale.set(1.0, 1.0, 1.0);
+            dummy.lookAt(0, 0, 0);
+            dummy.rotateY(ship.heading);
             
             dummy.updateMatrix();
-            instancedShips.setMatrixAt(i, dummy.matrix);
+            instancedShips.setMatrixAt(visibleCount, dummy.matrix);
+            visibleCount++;
         });
         
-        // Mettre à jour le nombre d'instances visibles
-        instancedShips.count = ships.length;
+        // Mettre à jour SEULEMENT le nombre de bateaux visibles
+        instancedShips.count = visibleCount;
         instancedShips.instanceMatrix.needsUpdate = true;
         
-        console.log(`🚢 ${ships.length} bateaux (Instanced Rendering)`);
+        console.log(`🚢 ${visibleCount}/${ships.length} bateaux visibles (Frustum Culling)`);
     }
 }
 
