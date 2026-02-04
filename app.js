@@ -2087,6 +2087,19 @@ function animateShips() {
         instancedShipsMedium.count = countMedium;
         instancedShipsLow.count = countLow;
         
+        // IMPORTANT: Effacer les instances inutilisées en les mettant hors de vue
+        // Cela évite les "trails" fantômes d'anciennes positions
+        const invisibleMatrix = new THREE.Matrix4().makeScale(0, 0, 0);
+        for (let i = countHigh; i < maxShips; i++) {
+            instancedShipsHigh.setMatrixAt(i, invisibleMatrix);
+        }
+        for (let i = countMedium; i < maxShips; i++) {
+            instancedShipsMedium.setMatrixAt(i, invisibleMatrix);
+        }
+        for (let i = countLow; i < maxShips; i++) {
+            instancedShipsLow.setMatrixAt(i, invisibleMatrix);
+        }
+        
         instancedShipsHigh.instanceMatrix.needsUpdate = true;
         instancedShipsMedium.instanceMatrix.needsUpdate = true;
         instancedShipsLow.instanceMatrix.needsUpdate = true;
