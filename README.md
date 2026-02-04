@@ -1,119 +1,296 @@
-# 🌍 Globe Interactif 3D
+# 🌍 Globe Interactif 3D - Commerce International de la France
 
-Une visualisation interactive de la Terre en 3D avec des villes principales et des connexions animées entre elles.
+Une visualisation 3D interactive du commerce international de la France avec plus de 195 pays, basée sur les données de la Banque de France.
+
+![Globe Screenshot](screenshot.png)
 
 ## ✨ Fonctionnalités
 
-- **Globe 3D réaliste** avec textures de la Terre (jour/nuit)
-- **15 villes majeures** du monde entier affichées comme points interactifs
-- **Connexions animées** entre les villes sous forme d'arcs
-- **Rotation automatique** avec possibilité de pause
-- **Zoom et navigation** fluides (souris/molette)
-- **Tooltips informatifs** au survol des villes
-- **Design moderne** avec effets visuels et dégradés
-- **Responsive** et optimisé pour tous les écrans
+### 🎨 Quatre modes de visualisation
+1. **Balance commerciale (Solde)** : Visualise l'équilibre entre exportations et importations
+   - Vert pour les excédents commerciaux
+   - Rouge pour les déficits commerciaux
+   - Coloration des surfaces des pays selon leur balance
+   
+2. **Exportations** : Flux sortant de la France vers ses partenaires
+   - Lignes bleues animées depuis la France
+   - Coloration bleue des surfaces selon le volume d'exportations
+   
+3. **Importations** : Flux entrant vers la France
+   - Lignes orange animées vers la France
+   - Coloration orange des surfaces selon le volume d'importations
+   
+4. **Volume total** : Commerce total (exports + imports)
+   - Lignes violettes bidirectionnelles
+   - Coloration violette des surfaces selon le volume total
 
-## 🚀 Démarrage rapide
+### 🗺️ Coloration heatmap des pays
+Les surfaces des pays sont colorées selon leurs données commerciales :
+- **Dégradés dynamiques** pour exports, imports et volume (du transparent au plein)
+- **Seuils fixes** pour la balance (vert excédent / rouge déficit)
+- **Opacité variable** (15-40%) selon l'intensité des échanges
+- **Mise à jour automatique** lors du changement de mode ou de filtre
 
-### Option 1 : Ouvrir directement dans le navigateur
-```bash
-# Ouvrir le fichier HTML dans votre navigateur par défaut
-open index.html  # macOS
-xdg-open index.html  # Linux
-start index.html  # Windows
-```
+### 📊 Système de filtrage avancé
+Cinq types de filtres disponibles :
+1. **Tous les pays** : Vue complète de tous les partenaires commerciaux
+2. **Par région** (5 régions) :
+   - Europe
+   - Asie
+   - Afrique
+   - Amériques
+   - Océanie
+3. **Par niveau de revenu** (4 groupes, classification Banque Mondiale) :
+   - Revenu élevé
+   - Revenu intermédiaire supérieur
+   - Revenu intermédiaire inférieur
+   - Faible revenu
+4. **Par groupe économique** (9 groupes) :
+   - G7 (7 pays)
+   - G20 (20 pays)
+   - BRICS (5 pays)
+   - Union Européenne (27 pays)
+   - Zone Euro (21 pays, incluant la Bulgarie depuis janvier 2025)
+   - OPEP (13 pays)
+   - ASEAN (10 pays)
+   - Golfe (6 pays)
+   - Maghreb (5 pays)
+5. **Par pays individuel** : Sélection parmi 194 pays (liste alphabétique avec drapeaux)
 
-### Option 2 : Utiliser un serveur local (recommandé)
-```bash
-# Avec Python 3
-python3 -m http.server 8000
+### 📅 Données historiques multi-années
+- Sélecteur d'années : **2013 à 2025** (13 années)
+- Simulation de croissance : facteur de 3,5% annuel
+- Variations réalistes par pays et par année
+- Base de référence : données 2013
 
-# Avec Node.js
-npx http-server -p 8000
+### 📈 Visualisation des flux
+- **Épaisseur des lignes proportionnelle** au volume d'échanges
+  - Formule logarithmique : `stroke = 0.3 + log₁₀(1 + normalizedVolume × 9) × 2.2`
+  - Plage : 0,3px à 2,5px
+  - Gradient continu sans catégories
+- **Animations directionnelles** :
+  - Exportations : depuis la France vers le partenaire
+  - Importations : depuis le partenaire vers la France
+  - Balance/Volume : bidirectionnel
+- **Opacité** : 40% pour meilleure lisibilité
+- **Cycles d'animation** : 10 secondes
 
-# Avec PHP
-php -S localhost:8000
-```
+### 📋 Table de données exportable
+- **Affichage tabulaire** complet des données
+- **Métadonnées** : année, mode de visualisation, filtre appliqué
+- **Colonnes** : pays (drapeau + nom), balance, exports, imports, volume, % du total
+- **Formatage** : nombres avec séparateurs de milliers (espaces)
+- **Sélecteur d'année** : navigation rapide entre les années
+- **Export CSV** : téléchargement avec en-têtes et métadonnées
+- **Tri dynamique** : par volume décroissant
+- **Filtrage** : affiche uniquement les pays avec volume > 0
 
-Puis ouvrez http://localhost:8000 dans votre navigateur.
-
-## 🎮 Utilisation
-
-### Contrôles interactifs
-- **🖱️ Clic + Glisser** : Faire pivoter le globe
-- **🔍 Molette** : Zoomer / Dézoomer
-- **📍 Clic sur un point** : Zoomer sur une ville spécifique
-- **⏸️ Bouton Pause** : Arrêter/reprendre la rotation automatique
-- **🔄 Bouton Réinitialiser** : Revenir à la vue initiale
-
-### Villes affichées
-Le globe affiche 15 villes majeures :
-- Paris, Londres, New York, Tokyo
-- Sydney, Moscou, Pékin, Mexico
-- São Paulo, Le Caire, New Delhi
-- Singapour, Dubaï, Nairobi, Buenos Aires
+### 🎮 Contrôles interactifs
+- **Rotation automatique** avec contrôles manuels (clic + glisser)
+- **Zoom** : molette de souris
+- **Sélection année** : menu déroulant
+- **Filtres en cascade** : sélection du type puis de la valeur
+- **Modes de vue** : boutons radio pour basculer entre les 4 modes
+- **Légende dynamique** : mise à jour selon le mode sélectionné
 
 ## 🛠️ Technologies utilisées
 
-- **[Three.js](https://threejs.org/)** - Bibliothèque 3D WebGL
-- **[Globe.GL](https://globe.gl/)** - Visualisation de globe 3D
-- **HTML5 / CSS3** - Structure et style
-- **JavaScript ES6+** - Logique interactive
+- **Three.js v0.159.0** : Rendu WebGL 3D (local, 652KB)
+- **Globe.GL v2.27.2** : Bibliothèque de visualisation de globe (local, 969KB)
+- **TopoJSON v3** : Données des frontières pays via world-atlas (CDN)
+- **Vanilla JavaScript** : Aucun framework, code natif
+- **CSS3** : Gradients, animations, responsive design
+- **Python HTTP Server** : Serveur de développement local (port 8000)
 
 ## 📁 Structure du projet
 
 ```
 globe/
-├── index.html      # Structure HTML principale
-├── style.css       # Styles et animations
-├── app.js          # Logique du globe et interactions
-└── README.md       # Documentation
+├── index.html          # Interface principale (142 lignes)
+├── app.js              # Logique de visualisation (900+ lignes)
+├── api-config.js       # Configuration API et données simulées (87 lignes)
+├── style.css           # Styles et animations
+├── libs/
+│   ├── three.min.js    # Three.js v0.159.0 (local)
+│   └── globe.gl.min.js # Globe.GL v2.27.2 (local)
+├── images/
+│   ├── earth-8k.jpg    # Texture Terre 8K (2.5MB)
+│   ├── earth-topology.png
+│   └── night-sky.png
+└── README.md           # Documentation
 ```
 
-## 🎨 Personnalisation
+## 🌐 Sources de données
 
-### Ajouter des villes
-Modifiez le tableau `cities` dans [app.js](app.js) :
+### API Banque de France (structure prête)
+- **URL** : https://webstat.banque-france.fr/ws/
+- **Séries** : Balance des paiements (BOP)
+- **Format** : JSON
+- **État** : Structure implémentée, données simulées en attendant les codes de séries
+
+### Données géographiques
+- **Pays** : 195 pays avec centres géographiques
+- **Propriétés** : latitude, longitude, nom, capitale, drapeau, région
+- **Frontières** : TopoJSON via world-atlas CDN
+- **Texture Terre** : NASA Earth Observatory (8K résolution)
+
+### Données simulées (actuellement en cours)
+- **Années** : 2013-2025 (13 ans)
+- **Base** : Données 2013 avec 3 niveaux de partenaires
+  - Majeurs : 80-150 Md€ (Allemagne, Italie, Espagne, Belgique, États-Unis, Royaume-Uni, Pays-Bas)
+  - Moyens : 10-40 Md€ (Suisse, Chine, Pologne, Portugal, Suède, Irlande, etc.)
+  - Autres : 0,5-10 Md€
+- **Croissance** : Facteur de 3,5% annuel + variance aléatoire par pays/année
+
+## 🔧 Caractéristiques techniques
+
+### Performance
+- **100% offline** après chargement initial (sauf TopoJSON)
+- **Bibliothèques locales** : Three.js et Globe.GL (1,6MB total)
+- **Texture haute résolution** : 8K (2.5MB)
+- **Pas de dépendances CDN** pour les bibliothèques principales
+- **Animations fluides** : 60 FPS sur matériel moderne
+
+### Algorithmes de visualisation
+
+#### Épaisseur des lignes (logarithmique)
 ```javascript
-const cities = [
-    { lat: 48.8566, lng: 2.3522, name: 'Paris', country: 'France', population: '2.2M' },
-    // Ajoutez vos villes ici
-];
+const normalizedVolume = volume / maxVolume; // [0, 1]
+const stroke = 0.3 + Math.log10(1 + normalizedVolume * 9) * 2.2;
+// Résultat : 0.3px à 2.5px (gradient continu)
 ```
 
-### Ajouter des connexions
-Modifiez le tableau `connections` dans [app.js](app.js) :
+#### Coloration des surfaces (gradient)
+Pour exports, imports, volume :
 ```javascript
-const connections = [
-    { from: 'Paris', to: 'New York' },
-    // Ajoutez vos connexions ici
-];
+const normalized = value / maxValue; // [0, 1]
+const opacity = 0.15 + normalized * 0.25; // 15% à 40%
+
+// Exemple exports (bleu) :
+const blue = 100 + Math.floor(normalized * 155); // [100, 255]
+color = `rgba(0, 50, ${blue}, ${opacity})`;
+
+// Exemple imports (orange) :
+const red = 200 + Math.floor(normalized * 55);  // [200, 255]
+const green = 100 + Math.floor(normalized * 50); // [100, 150]
+color = `rgba(${red}, ${green}, 0, ${opacity})`;
 ```
 
-### Changer les couleurs
-Modifiez les couleurs dans [style.css](style.css) ou les propriétés du globe dans [app.js](app.js).
+Pour balance (seuils fixes) :
+```javascript
+if (balance > 5000) return 'rgba(0, 180, 0, 0.4)';    // Vert fort
+if (balance > 0) return 'rgba(100, 200, 100, 0.3)';    // Vert clair
+if (balance > -5000) return 'rgba(255, 150, 0, 0.3)';  // Orange
+return 'rgba(255, 0, 0, 0.4)';                         // Rouge fort
+```
 
-## 🌐 Ressources externes
+### Correspondance des noms de pays
+- **Matching flexible** : includes() pour correspondance partielle
+- **Gestion des variantes** : "United States" ↔ "USA", "Korea" ↔ "South Korea"
+- **TopoJSON** : 177 polygones de pays
+- **Dataset** : 195 pays avec données commerciales
 
-Les ressources suivantes sont chargées via CDN :
-- Three.js (bibliothèque 3D)
-- Globe.GL (composant globe)
-- Textures de la Terre (images haute résolution)
+## 🚀 Installation et lancement
 
-**Note** : Une connexion internet est requise pour charger ces ressources.
+```bash
+# Cloner le dépôt
+git clone https://github.com/Varcolacus/globe.git
+cd globe
 
-## 📝 License
+# Lancer le serveur local (Python 3)
+python -m http.server 8000
 
-Projet libre d'utilisation et de modification.
+# Ou avec Python 2
+python -m SimpleHTTPServer 8000
 
-## 🤝 Contribution
+# Ouvrir dans le navigateur
+# http://localhost:8000
+```
 
-N'hésitez pas à améliorer ce projet :
-- Ajouter plus de villes
-- Créer des visualisations de données
-- Améliorer les animations
-- Optimiser les performances
+## 📖 Utilisation
 
----
+1. **Sélectionner l'année** : Menu déroulant (2013-2025)
+2. **Choisir le type de filtre** : Tous, Région, Revenu, Groupe, Pays
+3. **Sélectionner la valeur** : Liste dynamique selon le type
+4. **Choisir le mode** : Balance, Exports, Imports, Volume
+5. **Observer les flux** : Lignes animées et coloration des pays
+6. **Consulter les données** : Cliquer sur "📊 Voir les données"
+7. **Exporter** : Bouton "Exporter CSV" dans la table de données
 
-Créé avec ❤️ en utilisant Three.js et Globe.GL
+## 🎯 Cas d'usage
+
+### Analyse économique
+- Identifier les principaux partenaires commerciaux
+- Analyser les évolutions temporelles (2013-2025)
+- Comparer la balance commerciale par région
+- Évaluer la dépendance commerciale par groupe économique
+
+### Éducation
+- Comprendre les flux commerciaux internationaux
+- Visualiser l'intégration européenne (UE, Zone Euro)
+- Étudier les groupes économiques (G7, BRICS, OPEP)
+- Observer les disparités géographiques
+
+### Communication
+- Présenter les données du commerce extérieur
+- Illustrer les relations économiques internationales
+- Support visuel pour rapports et présentations
+- Exploration interactive des données
+
+## 🔮 Évolutions futures
+
+### Intégration API réelle
+- [ ] Obtenir les codes de séries BOP de la Banque de France
+- [ ] Implémenter l'authentification API si nécessaire
+- [ ] Ajouter un système de cache pour les performances
+- [ ] Gestion des erreurs réseau
+
+### Fonctionnalités avancées
+- [ ] Export PNG/SVG du globe
+- [ ] Mode plein écran
+- [ ] Comparaison multi-années (graphiques évolution)
+- [ ] Animations temporelles automatiques
+- [ ] Thème clair/sombre
+- [ ] Mode présentation (slides automatiques)
+
+### Données supplémentaires
+- [ ] Détail par secteur d'activité
+- [ ] Données de services vs biens
+- [ ] Investissements directs étrangers (IDE)
+- [ ] Données emploi liées au commerce
+
+### Optimisations
+- [ ] Lazy loading des textures
+- [ ] Web Workers pour calculs intensifs
+- [ ] IndexedDB pour cache local
+- [ ] Progressive Web App (PWA)
+
+## 📝 Licence
+
+MIT License - Libre d'utilisation et de modification
+
+## 👤 Auteur
+
+**Varcolacus**
+- GitHub : [@Varcolacus](https://github.com/Varcolacus)
+- Projet : [globe](https://github.com/Varcolacus/globe)
+
+## 🙏 Crédits
+
+- **Globe.GL** : Vasturiano
+- **Three.js** : Three.js Authors
+- **TopoJSON** : Mike Bostock
+- **Données géographiques** : Natural Earth, World Atlas
+- **Texture Terre** : NASA Earth Observatory
+- **Classifications** : Banque Mondiale (revenus), sources officielles (groupes économiques)
+
+## 📊 Statistiques du projet
+
+- **Lignes de code** : ~1200 (HTML/JS/CSS)
+- **Pays** : 195
+- **Années** : 13 (2013-2025)
+- **Modes de visualisation** : 4
+- **Types de filtres** : 5
+- **Groupes économiques** : 9
+- **Commits Git** : 6
+- **Dernière mise à jour** : Janvier 2025
