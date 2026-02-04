@@ -48,8 +48,8 @@ const API_CONFIG = {
         const majorPartners = ['Allemagne', 'États-Unis', 'Chine', 'Italie', 'Espagne', 'Royaume-Uni', 'Belgique'];
         const mediumPartners = ['Pays-Bas', 'Suisse', 'Pologne', 'Japon', 'Inde', 'Brésil', 'Canada'];
         
-        // Facteur de croissance basé sur l'année (2020 = base)
-        const yearFactor = 1 + ((year - 2020) * 0.04); // ~4% de croissance par an
+        // Facteur de croissance basé sur l'année (2013 = base)
+        const yearFactor = 1 + ((year - 2013) * 0.035); // ~3.5% de croissance par an
         const yearVariance = (year * 123) % 1000 / 1000; // Variance spécifique à l'année
         
         return countries.map(country => {

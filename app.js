@@ -426,6 +426,91 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
     updatedArcs.sort((a, b) => a.stroke - b.stroke);
     
     globe.arcsData(updatedArcs);
+    
+    // Colorer les surfaces des pays selon le type de données
+    if (countriesWithTrade.length > 0) {
+        // Créer une map des valeurs par nom de pays
+        const dataMap = {};
+        let minVal = Infinity, maxVal = -Infinity;
+        
+        countriesWithTrade.forEach(c => {
+            let val;
+            switch(dataType) {
+                case 'exports': val = c.exports; break;
+                case 'imports': val = c.imports; break;
+                case 'volume': val = c.volume; break;
+                case 'balance': val = c.balance; break;
+            }
+            dataMap[c.name] = val;
+            if (dataType !== 'balance') {
+                minVal = Math.min(minVal, val);
+                maxVal = Math.max(maxVal, val);
+            }
+        });
+        
+        // Recharger les polygones avec les couleurs appropriées
+        fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+            .then(res => res.json())
+            .then(worldData => {
+                const countryPolygons = topojson.feature(worldData, worldData.objects.countries).features;
+                
+                globe.polygonsData(countryPolygons)
+                    .polygonCapColor(d => {
+                        // Trouver le pays correspondant
+                        const countryName = countries.find(c => 
+                            d.properties.name === c.name || 
+                            d.properties.name.includes(c.name) ||
+                            c.name.includes(d.properties.name)
+                        );
+                        
+                        if (countryName && dataMap[countryName.name] !== undefined) {
+                            const value = dataMap[countryName.name];
+                            
+                            if (dataType === 'balance') {
+                                // Balance: vert pour excédent, rouge pour déficit
+                                if (value > 5000) {
+                                    return 'rgba(0, 255, 136, 0.3)'; // Fort excédent
+                                } else if (value > 0) {
+                                    return 'rgba(136, 255, 136, 0.2)'; // Excédent
+                                } else if (value > -5000) {
+                                    return 'rgba(255, 170, 136, 0.2)'; // Déficit léger
+                                } else {
+                                    return 'rgba(255, 107, 107, 0.3)'; // Fort déficit
+                                }
+                            } else if (dataType === 'exports') {
+                                // Exports: gradient de bleu (clair à foncé)
+                                const normalized = (value - minVal) / (maxVal - minVal);
+                                const opacity = 0.15 + normalized * 0.25; // 0.15 à 0.4
+                                const intensity = 100 + normalized * 155; // Plus intense pour grandes valeurs
+                                return `rgba(${Math.floor(intensity * 0.66)}, ${Math.floor(intensity * 1.35)}, 245, ${opacity})`;
+                            } else if (dataType === 'imports') {
+                                // Imports: gradient d'orange (clair à foncé)
+                                const normalized = (value - minVal) / (maxVal - minVal);
+                                const opacity = 0.15 + normalized * 0.25; // 0.15 à 0.4
+                                const intensity = 150 + normalized * 105; // Plus intense pour grandes valeurs
+                                return `rgba(255, ${Math.floor(intensity)}, 50, ${opacity})`;
+                            } else if (dataType === 'volume') {
+                                // Volume: gradient de violet (clair à foncé)
+                                const normalized = (value - minVal) / (maxVal - minVal);
+                                const opacity = 0.15 + normalized * 0.25; // 0.15 à 0.4
+                                const intensity = 100 + normalized * 155;
+                                return `rgba(${Math.floor(intensity)}, ${Math.floor(intensity * 0.67)}, 255, ${opacity})`;
+                            }
+                        }
+                        return 'rgba(0, 0, 0, 0)'; // Transparent pour les autres
+                    });
+            });
+    } else {
+        // Pas de données, réinitialiser en transparent
+        fetch('https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json')
+            .then(res => res.json())
+            .then(worldData => {
+                const countryPolygons = topojson.feature(worldData, worldData.objects.countries).features;
+                globe.polygonsData(countryPolygons)
+                    .polygonCapColor(() => 'rgba(0, 0, 0, 0)');
+            });
+    }
+    
     console.log('🌍 Globe mis à jour avec', updatedArcs.length, 'connexions -', dataType);
 }
 
