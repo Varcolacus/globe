@@ -1503,8 +1503,19 @@ let isRotating = true;
 let rotationSpeed = 0.2;
 let showPorts = true;
 
+// Throttle pour 30 FPS (optimisation performance gratuite)
+let lastFrameTime = 0;
+const frameInterval = 1000 / 30; // 30 FPS au lieu de 60
+
 // Animation de rotation automatique
-function animate() {
+function animate(currentTime) {
+    // Limiter à 30 FPS
+    if (currentTime - lastFrameTime < frameInterval) {
+        requestAnimationFrame(animate);
+        return;
+    }
+    lastFrameTime = currentTime;
+    
     if (isRotating) {
         const controls = globe.controls();
         controls.autoRotate = true;
