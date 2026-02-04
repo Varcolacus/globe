@@ -725,9 +725,475 @@ function calculateShipsFromStats(annualPassages) {
     return Math.round(annualPassages * 0.01); // 1% des passages annuels enregistrés cette année
 }
 
-// Principales routes maritimes mondiales avec statistiques réelles
+// Calculer le trafic total mondial en TEU
+function getTotalWorldTEU() {
+    return worldMajorPorts.reduce((sum, port) => sum + port.teu, 0);
+}
+
+// Générer des waypoints intermédiaires réalistes entre deux ports
+function generateRouteWaypoints(fromPort, toPort) {
+    const waypoints = [{ lat: fromPort.lat, lng: fromPort.lng }];
+    
+    const fromLat = fromPort.lat;
+    const fromLng = fromPort.lng;
+    const toLat = toPort.lat;
+    const toLng = toPort.lng;
+    
+    // ========== TRANSPACIFIQUE : USA/Canada Côte Ouest ↔ Asie ==========
+    // USA/Canada Côte Ouest vers Asie (Los Angeles, Long Beach, Seattle, Vancouver, etc.)
+    if ((fromPort.country === 'USA' || fromPort.country === 'Canada') && 
+        fromLng < -100 && isAsian(toPort)) {
+        waypoints.push(
+            { lat: 36.0, lng: -135.0 },  // Large Californie/Oregon
+            { lat: 38.0, lng: -155.0 },  // Pacifique Nord-Est
+            { lat: 40.0, lng: -170.0 },  // Pacifique Centre-Nord
+            { lat: 42.0, lng: -180.0 },  // Ligne de date internationale
+            { lat: 42.0, lng: 175.0 },   // Pacifique Nord-Ouest
+            { lat: 40.0, lng: 165.0 },   // Large Japon Nord
+            { lat: 38.0, lng: 155.0 },   // Approche Japon
+            { lat: 36.0, lng: 145.0 },   // Large Tokyo
+            { lat: 34.0, lng: 135.0 },   // Mer du Japon
+            { lat: 30.0, lng: 125.0 }    // Approche Chine/Corée
+        );
+    }
+    // Asie vers USA/Canada Côte Ouest
+    else if (isAsian(fromPort) && 
+             (toPort.country === 'USA' || toPort.country === 'Canada') && 
+             toLng < -100) {
+        waypoints.push(
+            { lat: 30.0, lng: 130.0 },   // Large Chine/Japon
+            { lat: 34.0, lng: 140.0 },   // Mer du Japon
+            { lat: 38.0, lng: 150.0 },   // Large Japon Est
+            { lat: 40.0, lng: 160.0 },   // Pacifique Nord-Ouest
+            { lat: 42.0, lng: 170.0 },   // Pacifique Centre-Nord
+            { lat: 42.0, lng: 180.0 },   // Ligne de date
+            { lat: 42.0, lng: -175.0 },  // Pacifique Nord-Est
+            { lat: 40.0, lng: -165.0 },  // Pacifique Est
+            { lat: 38.0, lng: -150.0 },  // Approche côte
+            { lat: 36.0, lng: -135.0 }   // Large côte ouest
+        );
+    }
+    
+    // ========== ATLANTIQUE + SUEZ : USA/Canada Côte Est ↔ Asie ==========
+    // USA/Canada Côte Est vers Asie (via Atlantique + Suez)
+    else if ((fromPort.country === 'USA' || fromPort.country === 'Canada') && 
+             fromLng > -100 && isAsian(toPort)) {
+        waypoints.push(
+            { lat: 38.0, lng: -55.0 },   // Mid-Atlantique
+            { lat: 38.0, lng: -25.0 },   // Atlantique Est
+            { lat: 36.0, lng: -6.0 },    // Gibraltar
+            { lat: 36.0, lng: 10.0 },    // Méditerranée Ouest
+            { lat: 35.0, lng: 20.0 },    // Méditerranée Centre
+            { lat: 31.5, lng: 32.0 },    // Port Said/Suez
+            { lat: 27.0, lng: 34.0 },    // Mer Rouge Nord
+            { lat: 15.0, lng: 42.0 },    // Mer Rouge Centre
+            { lat: 12.5, lng: 43.5 },    // Bab-el-Mandeb
+            { lat: 8.0, lng: 55.0 },     // Golfe d'Aden
+            { lat: 6.0, lng: 75.0 },     // Océan Indien
+            { lat: 2.0, lng: 95.0 }      // Approche Malacca
+        );
+    }
+    // Asie vers USA/Canada Côte Est (via Suez + Atlantique)
+    else if (isAsian(fromPort) && 
+             (toPort.country === 'USA' || toPort.country === 'Canada') && 
+             toLng > -100) {
+        waypoints.push(
+            { lat: 2.0, lng: 100.0 },    // Détroit de Malacca
+            { lat: 6.0, lng: 80.0 },     // Océan Indien
+            { lat: 12.5, lng: 43.5 },    // Bab-el-Mandeb
+            { lat: 20.0, lng: 38.0 },    // Mer Rouge
+            { lat: 31.5, lng: 32.0 },    // Suez
+            { lat: 35.0, lng: 20.0 },    // Méditerranée
+            { lat: 36.0, lng: -6.0 },    // Gibraltar
+            { lat: 38.0, lng: -25.0 },   // Atlantique
+            { lat: 38.0, lng: -50.0 }    // Approche USA
+        );
+    }
+    
+    // ========== ASIE ↔ EUROPE (via Suez) ==========
+    else if (isAsian(fromPort) && isEuropean(toPort)) {
+        waypoints.push(
+            { lat: 1.29, lng: 103.85 }, // Singapore hub
+            { lat: 6.93, lng: 79.85 },  // Colombo
+            { lat: 12.6, lng: 43.4 },   // Bab-el-Mandeb
+            { lat: 20.0, lng: 38.0 },   // Mer Rouge Centre
+            { lat: 30.5, lng: 32.5 },   // Canal de Suez
+            { lat: 31.2, lng: 32.3 },   // Port Said
+            { lat: 35.4, lng: 14.1 },   // Méditerranée
+            { lat: 36.13, lng: -5.45 }  // Gibraltar/Algeciras
+        );
+    }
+    // Europe → Asie (via Suez inverse)
+    else if (isEuropean(fromPort) && isAsian(toPort)) {
+        waypoints.push(
+            { lat: 36.13, lng: -5.45 }, // Gibraltar
+            { lat: 35.4, lng: 14.1 },   // Méditerranée
+            { lat: 31.2, lng: 32.3 },   // Port Said
+            { lat: 30.5, lng: 32.5 },   // Canal de Suez
+            { lat: 20.0, lng: 38.0 },   // Mer Rouge
+            { lat: 12.6, lng: 43.4 },   // Bab-el-Mandeb
+            { lat: 6.93, lng: 79.85 },  // Colombo
+            { lat: 1.29, lng: 103.85 }  // Singapore hub
+        );
+    }
+    // Asie → Amérique du Nord (Transpacifique)
+    else if (isAsian(fromPort) && isNorthAmerican(toPort)) {
+        // Vérifier si destination côte ouest (Pacifique direct) ou côte est (via Suez)
+        if (toLng < -100) {
+            // Vers côte ouest - déjà géré ci-dessus
+            waypoints.push(
+                { lat: 35.0, lng: 150.0 },
+                { lat: 40.0, lng: 170.0 },
+                { lat: 42.0, lng: -160.0 },
+                { lat: 40.0, lng: -135.0 }
+            );
+        } else {
+            // Vers côte est - via Suez + Atlantique
+            waypoints.push(
+                { lat: 1.29, lng: 103.85 },  // Singapore
+                { lat: 6.93, lng: 79.85 },   // Colombo
+                { lat: 12.6, lng: 43.4 },    // Bab-el-Mandeb
+                { lat: 20.0, lng: 38.0 },    // Mer Rouge
+                { lat: 30.5, lng: 32.5 },    // Suez
+                { lat: 31.2, lng: 32.3 },    // Port Said
+                { lat: 36.13, lng: -5.45 },  // Gibraltar
+                { lat: 40.0, lng: -20.0 },   // Mid-Atlantique
+                { lat: 40.0, lng: -50.0 }    // Approche USA
+            );
+        }
+    }
+    // Amérique du Nord → Asie (Transpacifique inverse)
+    else if (isNorthAmerican(fromPort) && isAsian(toPort)) {
+        // Déjà géré par les cas spécifiques côte ouest/est ci-dessus
+        if (fromLng < -100) {
+            // Côte ouest - déjà géré
+            waypoints.push(
+                { lat: 40.0, lng: -140.0 },
+                { lat: 42.0, lng: 170.0 },
+                { lat: 38.0, lng: 150.0 },
+                { lat: 35.0, lng: 130.0 }
+            );
+        } else {
+            // Côte est - via Atlantique + Suez - déjà géré
+            waypoints.push(
+                { lat: 40.0, lng: -50.0 },
+                { lat: 40.0, lng: -20.0 },
+                { lat: 36.13, lng: -5.45 },
+                { lat: 35.4, lng: 14.1 },
+                { lat: 31.2, lng: 32.3 },
+                { lat: 30.5, lng: 32.5 },
+                { lat: 20.0, lng: 38.0 },
+                { lat: 12.6, lng: 43.4 },
+                { lat: 6.93, lng: 79.85 },
+                { lat: 1.29, lng: 103.85 }
+            );
+        }
+    }
+    // Europe → Amérique du Nord (Atlantique Nord)
+    else if (isEuropean(fromPort) && isNorthAmerican(toPort)) {
+        waypoints.push(
+            { lat: 50.5, lng: -4.0 },   // Manche
+            { lat: 48.0, lng: -15.0 },  // Atlantique
+            { lat: 46.0, lng: -25.0 },  // Mid-Atlantic
+            { lat: 44.0, lng: -35.0 },  // Mid-Atlantic
+            { lat: 42.0, lng: -45.0 }   // Approche Amérique
+        );
+    }
+    // Amérique du Nord → Europe (Atlantique inverse)
+    else if (isNorthAmerican(fromPort) && isEuropean(toPort)) {
+        waypoints.push(
+            { lat: 42.0, lng: -45.0 },  // Large Est USA
+            { lat: 44.0, lng: -35.0 },  // Mid-Atlantic
+            { lat: 46.0, lng: -25.0 },  // Mid-Atlantic
+            { lat: 48.0, lng: -15.0 },  // Atlantique Est
+            { lat: 50.5, lng: -4.0 }    // Manche
+        );
+    }
+    // Asie → Afrique (Océan Indien)
+    else if (isAsian(fromPort) && isAfrican(toPort)) {
+        waypoints.push(
+            { lat: 1.29, lng: 103.85 },  // Singapore
+            { lat: 6.93, lng: 79.85 },   // Colombo
+            { lat: -4.04, lng: 60.0 },   // Océan Indien Centre
+            { lat: -10.0, lng: 45.0 }    // Approche Afrique Est
+        );
+    }
+    // Europe → Amérique du Sud (via Atlantique Sud)
+    else if (isEuropean(fromPort) && isSouthAmerican(toPort)) {
+        waypoints.push(
+            { lat: 36.13, lng: -5.45 },  // Gibraltar
+            { lat: 28.0, lng: -15.0 },   // Canaries
+            { lat: 10.0, lng: -20.0 },   // Atlantique Tropical
+            { lat: -5.0, lng: -25.0 },   // Équateur
+            { lat: -15.0, lng: -30.0 }   // Atlantique Sud
+        );
+    }
+    // Asie intra-régionale (court)
+    else if (isAsian(fromPort) && isAsian(toPort)) {
+        const dist = Math.sqrt(Math.pow(toLat - fromLat, 2) + Math.pow(toLng - fromLng, 2));
+        if (dist > 20) { // Seulement si distance significative
+            const midLat = (fromLat + toLat) / 2;
+            const midLng = (fromLng + toLng) / 2;
+            waypoints.push({ lat: midLat, lng: midLng });
+        }
+    }
+    // Europe intra-régionale
+    else if (isEuropean(fromPort) && isEuropean(toPort)) {
+        const dist = Math.sqrt(Math.pow(toLat - fromLat, 2) + Math.pow(toLng - fromLng, 2));
+        if (dist > 10) {
+            const midLat = (fromLat + toLat) / 2;
+            const midLng = (fromLng + toLng) / 2;
+            waypoints.push({ lat: midLat, lng: midLng });
+        }
+    }
+    // Méditerranée → Moyen-Orient
+    else if ((fromPort.country === 'Greece' || fromPort.country === 'Turkey') && 
+             (toPort.country === 'UAE' || toPort.country === 'Saudi Arabia')) {
+        waypoints.push(
+            { lat: 31.2, lng: 32.3 },   // Port Said
+            { lat: 30.5, lng: 32.5 },   // Suez
+            { lat: 20.0, lng: 38.0 }    // Mer Rouge
+        );
+    }
+    // Par défaut : toujours passer par l'océan (jamais par les terres)
+    else {
+        const dist = Math.sqrt(Math.pow(toLat - fromLat, 2) + Math.pow(toLng - fromLng, 2));
+        
+        // Déterminer si on traverse l'Atlantique, Pacifique, ou autre
+        const lngDiff = toLng - fromLng;
+        const crossesPacific = Math.abs(lngDiff) > 120 && ((fromLng < 0 && toLng > 100) || (fromLng > 100 && toLng < 0));
+        const crossesAtlantic = (fromLng > -30 && fromLng < 40) && (toLng < -30 || toLng > 40);
+        
+        // Route autour du monde via océans
+        if (crossesPacific) {
+            // Traversée Pacifique : passer au large, pas par la Russie
+            const avgLat = (fromLat + toLat) / 2;
+            waypoints.push(
+                { lat: avgLat, lng: fromLng + (toLng - fromLng) * 0.25 },
+                { lat: avgLat + 10, lng: fromLng + (toLng - fromLng) * 0.5 },
+                { lat: avgLat, lng: fromLng + (toLng - fromLng) * 0.75 }
+            );
+        } else if (crossesAtlantic) {
+            // Traversée Atlantique : arc au milieu
+            const midLat = (fromLat + toLat) / 2;
+            const midLng = (fromLng + toLng) / 2;
+            waypoints.push(
+                { lat: fromLat + (toLat - fromLat) * 0.33, lng: fromLng + (toLng - fromLng) * 0.33 },
+                { lat: midLat + 5, lng: midLng },
+                { lat: fromLat + (toLat - fromLat) * 0.67, lng: fromLng + (toLng - fromLng) * 0.67 }
+            );
+        } else if (dist > 30) {
+            // Courte/moyenne distance : arc simple avec 3-5 waypoints
+            const numWaypoints = Math.min(5, Math.ceil(dist / 20));
+            for (let i = 1; i <= numWaypoints; i++) {
+                const ratio = i / (numWaypoints + 1);
+                const interpLat = fromLat + (toLat - fromLat) * ratio;
+                const interpLng = fromLng + (toLng - fromLng) * ratio;
+                
+                // Arc vers le nord (hémisphère nord) ou sud (hémisphère sud)
+                const hemisphere = (fromLat + toLat) / 2 > 0 ? 1 : -1;
+                const arcOffset = Math.sin(ratio * Math.PI) * Math.min(8, dist / 4) * hemisphere;
+                
+                waypoints.push({ 
+                    lat: interpLat + arcOffset, 
+                    lng: interpLng 
+                });
+            }
+        }
+    }
+    
+    waypoints.push({ lat: toLat, lng: toLng });
+    return waypoints;
+}
+
+function isAsian(port) {
+    const asiaCountries = ['China', 'Singapore', 'South Korea', 'Japan', 'Hong Kong', 'Taiwan', 'Malaysia', 'Thailand', 'Vietnam', 'Indonesia', 'Philippines', 'India', 'Pakistan', 'Bangladesh', 'Sri Lanka', 'Myanmar'];
+    return asiaCountries.includes(port.country);
+}
+
+function isEuropean(port) {
+    const europeCountries = ['Netherlands', 'Belgium', 'Germany', 'UK', 'France', 'Italy', 'Spain', 'Greece', 'Poland', 'Russia', 'Finland', 'Sweden', 'Latvia', 'Romania', 'Ukraine', 'Turkey', 'Portugal', 'Israel', 'Lebanon'];
+    return europeCountries.includes(port.country);
+}
+
+function isNorthAmerican(port) {
+    return ['USA', 'Canada', 'Mexico'].includes(port.country);
+}
+
+function isSouthAmerican(port) {
+    return ['Brazil', 'Argentina', 'Chile', 'Peru', 'Colombia', 'Ecuador', 'Uruguay'].includes(port.country);
+}
+
+function isAfrican(port) {
+    return ['Egypt', 'Morocco', 'South Africa', 'Nigeria', 'Kenya', 'Tanzania', 'Ghana', 'Senegal', 'Côte d\'Ivoire'].includes(port.country);
+}
+
+// Générer des routes inter-ports basées sur les poids TEU réels
+function generatePortToPortRoutes(year = 2025) {
+    const totalTEU = getTotalWorldTEU();
+    const routes = [];
+    
+    // Définir les principaux corridors maritimes avec paires de ports
+    const corridors = [
+        // Asie-Europe (via Suez) - Top ports
+        { from: 'Shanghai', to: 'Rotterdam', multiplier: 1.5 },
+        { from: 'Shanghai', to: 'Hamburg', multiplier: 1.3 },
+        { from: 'Singapore', to: 'Rotterdam', multiplier: 1.4 },
+        { from: 'Ningbo-Zhoushan', to: 'Antwerp', multiplier: 1.2 },
+        { from: 'Shenzhen', to: 'Rotterdam', multiplier: 1.2 },
+        { from: 'Hong Kong', to: 'Hamburg', multiplier: 1.1 },
+        { from: 'Busan', to: 'Rotterdam', multiplier: 1.0 },
+        
+        // Asie-Méditerranée
+        { from: 'Shanghai', to: 'Piraeus', multiplier: 1.0 },
+        { from: 'Singapore', to: 'Valencia', multiplier: 0.9 },
+        { from: 'Port Klang', to: 'Algeciras', multiplier: 0.8 },
+        
+        // Transpacifique (Asie-Amérique Nord)
+        { from: 'Shanghai', to: 'Los Angeles', multiplier: 1.8 },
+        { from: 'Shanghai', to: 'Long Beach', multiplier: 1.6 },
+        { from: 'Ningbo-Zhoushan', to: 'Los Angeles', multiplier: 1.4 },
+        { from: 'Shenzhen', to: 'Los Angeles', multiplier: 1.3 },
+        { from: 'Hong Kong', to: 'Long Beach', multiplier: 1.2 },
+        { from: 'Busan', to: 'Seattle', multiplier: 1.0 },
+        { from: 'Tokyo', to: 'Los Angeles', multiplier: 0.9 },
+        { from: 'Yokohama', to: 'Vancouver', multiplier: 0.8 },
+        
+        // Atlantique Nord (Europe-USA)
+        { from: 'Rotterdam', to: 'New York/New Jersey', multiplier: 1.3 },
+        { from: 'Hamburg', to: 'New York/New Jersey', multiplier: 1.1 },
+        { from: 'Antwerp', to: 'Savannah', multiplier: 1.0 },
+        { from: 'Le Havre', to: 'New York/New Jersey', multiplier: 0.9 },
+        { from: 'Felixstowe', to: 'Charleston', multiplier: 0.8 },
+        
+        // Asie-Moyen-Orient
+        { from: 'Singapore', to: 'Dubai', multiplier: 1.5 },
+        { from: 'Shanghai', to: 'Dubai', multiplier: 1.3 },
+        { from: 'Port Klang', to: 'Jeddah', multiplier: 1.0 },
+        { from: 'Hong Kong', to: 'Dubai', multiplier: 0.9 },
+        
+        // Intra-Asie (commerce régional intense)
+        { from: 'Shanghai', to: 'Singapore', multiplier: 1.6 },
+        { from: 'Shanghai', to: 'Hong Kong', multiplier: 1.4 },
+        { from: 'Busan', to: 'Shanghai', multiplier: 1.2 },
+        { from: 'Singapore', to: 'Port Klang', multiplier: 1.1 },
+        { from: 'Tokyo', to: 'Shanghai', multiplier: 1.0 },
+        
+        // Europe-Amérique du Sud
+        { from: 'Rotterdam', to: 'Santos', multiplier: 0.9 },
+        { from: 'Hamburg', to: 'Santos', multiplier: 0.8 },
+        { from: 'Antwerp', to: 'Buenos Aires', multiplier: 0.7 },
+        
+        // Asie-Afrique
+        { from: 'Singapore', to: 'Durban', multiplier: 0.8 },
+        { from: 'Shanghai', to: 'Mombasa', multiplier: 0.7 },
+        { from: 'Dubai', to: 'Dar es Salaam', multiplier: 0.6 },
+        
+        // Intra-Europe (feeder routes)
+        { from: 'Rotterdam', to: 'Hamburg', multiplier: 1.0 },
+        { from: 'Rotterdam', to: 'Antwerp', multiplier: 0.9 },
+        { from: 'Hamburg', to: 'Bremerhaven', multiplier: 0.8 },
+        
+        // Canal zones (hubs)
+        { from: 'Singapore', to: 'Port Said', multiplier: 1.2 },
+        { from: 'Dubai', to: 'Suez', multiplier: 1.1 },
+        { from: 'Los Angeles', to: 'Colon', multiplier: 1.0 },
+        
+        // Mer Noire
+        { from: 'Istanbul', to: 'Constanta', multiplier: 0.7 },
+        { from: 'Piraeus', to: 'Istanbul', multiplier: 0.8 },
+        
+        // Baltique
+        { from: 'Hamburg', to: 'St. Petersburg', multiplier: 0.7 },
+        { from: 'Rotterdam', to: 'Gdansk', multiplier: 0.6 },
+    ];
+    
+    // Générer routes avec intensité basée sur TEU réels
+    corridors.forEach(corridor => {
+        const fromPort = worldMajorPorts.find(p => p.name === corridor.from);
+        const toPort = worldMajorPorts.find(p => p.name === corridor.to);
+        
+        if (fromPort && toPort) {
+            // Calculer intensité basée sur TEU moyens des 2 ports
+            const avgTEU = (fromPort.teu + toPort.teu) / 2;
+            const teuPercentage = avgTEU / totalTEU;
+            
+            // Appliquer multiplicateur de corridor (certaines routes plus actives)
+            const baseShips = Math.round(2600 * teuPercentage * corridor.multiplier);
+            const intensity = Math.max(5, Math.min(200, baseShips)); // Min 5, Max 200 bateaux
+            
+            routes.push({
+                name: `${corridor.from} → ${corridor.to}`,
+                waypoints: generateRouteWaypoints(fromPort, toPort),
+                intensity: intensity,
+                fromPort: corridor.from,
+                toPort: corridor.to,
+                teuWeight: avgTEU,
+                color: getRouteColorByRegion(fromPort, toPort)
+            });
+        }
+    });
+    
+    console.log(`📊 ${routes.length} routes port-à-port générées avec poids TEU réels`);
+    const totalShips = routes.reduce((sum, r) => sum + r.intensity, 0);
+    console.log(`🚢 Total bateaux: ${totalShips} (basé sur ${(totalTEU/1000000).toFixed(0)}M TEU)`);
+    
+    return routes;
+}
+
+// Couleur par type de corridor
+function getRouteColorByRegion(fromPort, toPort) {
+    const fromContinent = getPortContinent(fromPort.country);
+    const toContinent = getPortContinent(toPort.country);
+    
+    if (fromContinent === 'Asia' && toContinent === 'Europe') return '#3498db'; // Bleu - Asie-Europe
+    if (fromContinent === 'Asia' && toContinent === 'North America') return '#2ecc71'; // Vert - Transpacifique
+    if (fromContinent === 'Europe' && toContinent === 'North America') return '#e74c3c'; // Rouge - Atlantique
+    if (fromContinent === toContinent) return '#f39c12'; // Orange - Intra-régional
+    return '#9b59b6'; // Violet - Autres
+}
+
+function getPortContinent(country) {
+    const asiaCountries = ['China', 'Singapore', 'South Korea', 'Japan', 'Hong Kong', 'Taiwan', 'Malaysia', 'Thailand', 'Vietnam', 'Indonesia', 'Philippines', 'India', 'Pakistan', 'Bangladesh', 'Sri Lanka', 'Myanmar'];
+    const europeCountries = ['Netherlands', 'Belgium', 'Germany', 'UK', 'France', 'Italy', 'Spain', 'Greece', 'Poland', 'Russia', 'Finland', 'Sweden', 'Latvia', 'Romania', 'Ukraine', 'Turkey', 'Portugal', 'Israel', 'Lebanon'];
+    const americaCountries = ['USA', 'Canada', 'Mexico'];
+    
+    if (asiaCountries.includes(country)) return 'Asia';
+    if (europeCountries.includes(country)) return 'Europe';
+    if (americaCountries.includes(country)) return 'North America';
+    return 'Other';
+}
+
+// Helper function to calculate total TEU for a list of ports
+function calculateRouteTEUWeight(portNames) {
+    return portNames.reduce((sum, portName) => {
+        const port = worldMajorPorts.find(p => p.name === portName);
+        return sum + (port ? port.teu : 0);
+    }, 0);
+}
+
+// Principales routes maritimes mondiales avec statistiques réelles + ajustement TEU ports
 function getMajorShippingRoutes(year = 2025) {
     const stats = maritimeTrafficStats[year] || maritimeTrafficStats[2025];
+    
+    // Calculer les poids TEU pour chaque route en fonction des ports desservis
+    const routePortWeights = {
+        suez: calculateRouteTEUWeight(['Shanghai', 'Singapore', 'Ningbo-Zhoushan', 'Shenzhen', 'Hong Kong', 'Rotterdam', 'Hamburg', 'Antwerp', 'Piraeus']),
+        atlantic: calculateRouteTEUWeight(['Rotterdam', 'Hamburg', 'Antwerp', 'Le Havre', 'New York/New Jersey', 'Savannah']),
+        transpacific: calculateRouteTEUWeight(['Shanghai', 'Ningbo-Zhoushan', 'Busan', 'Tokyo', 'Los Angeles', 'Long Beach', 'Seattle', 'Vancouver']),
+        mediterranean: calculateRouteTEUWeight(['Barcelona', 'Valencia', 'Marseille', 'Genoa', 'Piraeus', 'Istanbul', 'Port Said', 'Alexandria']),
+        cape: calculateRouteTEUWeight(['Shanghai', 'Singapore', 'Durban', 'Cape Town', 'Rotterdam']),
+        northEurope: calculateRouteTEUWeight(['Rotterdam', 'Hamburg', 'Antwerp', 'Bremerhaven', 'Gdansk', 'St. Petersburg']),
+        westAfrica: calculateRouteTEUWeight(['Tanger Med', 'Casablanca', 'Dakar', 'Abidjan', 'Lagos', 'Le Havre']),
+        panama: calculateRouteTEUWeight(['Los Angeles', 'Colon', 'Miami', 'Cartagena', 'Santos'])
+    };
+    
+    // Facteur de conversion ajusté : 1% des passages + bonus TEU
+    function calculateIntensity(annualPassages, teuWeight) {
+        const baseShips = Math.round(annualPassages * 0.01); // 1% des passages
+        const teuBonus = Math.round(teuWeight / 10000000); // +1 bateau par 10M TEU
+        return baseShips + teuBonus;
+    }
     
     return [
         // Route Europe → Asie via Suez (la plus importante)
@@ -810,7 +1276,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 29.6, lng: 120.75 }, // Entre Côte-Shanghai
                 { lat: 31.2, lng: 121.5 }   // Shanghai
             ],
-            intensity: calculateShipsFromStats(stats.suez),
+            intensity: calculateIntensity(stats.suez, routePortWeights.suez),
             annualPassages: stats.suez,
             color: '#3498db'
         },
@@ -836,7 +1302,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 40.7, lng: -64.5 },  // Entre Plateau-New York
                 { lat: 40.7, lng: -74.0 }   // New York
             ],
-            intensity: calculateShipsFromStats(stats.atlantic),
+            intensity: calculateIntensity(stats.atlantic, routePortWeights.atlantic),
             annualPassages: stats.atlantic,
             color: '#2ecc71'
         },
@@ -910,7 +1376,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
                 { lat: 1.3, lng: 103.8 }    // Singapour
             ],
-            intensity: calculateShipsFromStats(stats.cape),
+            intensity: calculateIntensity(stats.cape, routePortWeights.cape),
             annualPassages: stats.cape,
             color: '#e74c3c'
         },
@@ -978,7 +1444,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 43.0, lng: 7.5 },    // Côte d'Azur
                 { lat: 43.3, lng: 5.4 }     // Marseille (retour)
             ],
-            intensity: calculateShipsFromStats(stats.mediterranean),
+            intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
         },
@@ -1028,7 +1494,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 37.65, lng: -123.2 },// Entre Large-San Francisco
                 { lat: 37.8, lng: -122.4 }  // San Francisco
             ],
-            intensity: calculateShipsFromStats(stats.transpacific),
+            intensity: calculateIntensity(stats.transpacific, routePortWeights.transpacific),
             annualPassages: stats.transpacific,
             color: '#f39c12'
         },
@@ -1086,7 +1552,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 36.5, lng: -6.5 },   // Approche Gibraltar
                 { lat: 36.1, lng: -5.4 }    // Gibraltar
             ],
-            intensity: calculateShipsFromStats(stats.panama),
+            intensity: calculateIntensity(stats.panama, routePortWeights.panama),
             annualPassages: stats.panama,
             color: '#1abc9c'
         },
@@ -1135,7 +1601,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 55.5, lng: 13.0 },   // Retour Copenhague
                 { lat: 55.7, lng: 12.6 }    // Copenhague (retour)
             ],
-            intensity: calculateShipsFromStats(stats.northEurope),
+            intensity: calculateIntensity(stats.northEurope, routePortWeights.northEurope),
             annualPassages: stats.northEurope,
             color: '#34495e'
         },
@@ -1187,7 +1653,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 6.3, lng: 2.4 },     // Cotonou
                 { lat: 6.5, lng: 3.4 }      // Lagos
             ],
-            intensity: calculateShipsFromStats(stats.westAfrica),
+            intensity: calculateIntensity(stats.westAfrica, routePortWeights.westAfrica),
             annualPassages: stats.westAfrica,
             color: '#e67e22'
         }
@@ -1210,6 +1676,7 @@ const worldMajorPorts = [
     { name: 'Port Klang', lat: 2.99, lng: 101.39, country: 'Malaysia', teu: 13580000 },
     { name: 'Kaohsiung', lat: 22.61, lng: 120.30, country: 'Taiwan', teu: 10260000 },
     { name: 'Tokyo', lat: 35.62, lng: 139.78, country: 'Japan', teu: 9630000 },
+    { name: 'Yokohama', lat: 35.44, lng: 139.64, country: 'Japan', teu: 3070000 },
     { name: 'Xiamen', lat: 24.48, lng: 118.09, country: 'China', teu: 12200000 },
     { name: 'Dalian', lat: 38.91, lng: 121.60, country: 'China', teu: 9770000 },
     { name: 'Tanjung Pelepas', lat: 1.36, lng: 103.55, country: 'Malaysia', teu: 10840000 },
@@ -1368,8 +1835,8 @@ async function initializeShips() {
         return;
     }
     
-    // Fallback: utiliser les routes simulées avec statistiques maritimes réelles
-    console.log('⚠️ VesselFinder non disponible, utilisation des statistiques maritimes réelles');
+    // Fallback: utiliser les vraies routes maritimes avec ajustement TEU
+    console.log('⚠️ VesselFinder non disponible, utilisation des routes maritimes réelles');
     useRealAISData = false;
     
     // Obtenir l'année courante depuis le sélecteur
