@@ -629,6 +629,9 @@ globe.onGlobeReady(() => {
     
     scene.add(instancedShips);
     console.log(`✅ Instanced Rendering initialisé (${maxShips} bateaux max)`);
+    
+    // Démarrer l'animation des bateaux maintenant que tout est prêt
+    setInterval(animateShips, 33); // ~30 FPS (optimisé pour performance)
 });
 
 // Statistiques maritimes réelles (nombre de passages annuels)
@@ -1656,10 +1659,8 @@ console.log('🇫🇷 Commerce international de la France visualisé');
 // Initialiser et démarrer l'animation des bateaux après le chargement du globe
 console.log('🚢 Démarrage du système de bateaux...');
 
-// D'abord démarrer l'animation qui va appeler initializeShips
-setInterval(animateShips, 33); // ~30 FPS (optimisé pour performance)
-
-// Puis initialiser explicitement les bateaux
+// L'animation démarrera automatiquement dans globe.onGlobeReady()
+// Initialiser les bateaux (les données)
 initializeShips().then(() => {
     console.log('✅ Bateaux initialisés avec succès');
     console.log(`📊 Nombre de bateaux: ${shipAnimations.length}`);
