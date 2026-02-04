@@ -1373,11 +1373,7 @@ function getMajorShippingRoutes(year = 2025) {
                 { lat: 0.0, lng: 70.0 },    // Océan Indien
                 { lat: 2.5, lng: 80.0 },    // Entre Océan-Approche Malacca
                 { lat: 5.0, lng: 90.0 },    // Approche Malacca
-         
-        */
-        
-        /*
-               { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
+                { lat: 3.15, lng: 96.9 },   // Entre Approche-Singapour
                 { lat: 1.3, lng: 103.8 }    // Singapour
             ],
             intensity: calculateIntensity(stats.cape, routePortWeights.cape),
