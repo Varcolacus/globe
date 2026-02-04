@@ -1419,7 +1419,10 @@ function getMajorShippingRoutes(year = 2025) {
             intensity: calculateIntensity(stats.mediterranean, routePortWeights.mediterranean),
             annualPassages: stats.mediterranean,
             color: '#9b59b6'
-        },
+        }
+        
+        /*
+        ,
         // Route Transpacifique circulaire (boucle complète autour du Pacifique)
         {
             name: 'Transpacific Loop',
@@ -1472,6 +1475,7 @@ function getMajorShippingRoutes(year = 2025) {
             annualPassages: stats.transpacific,
             color: '#f39c12'
         }
+        */
         
         /*
         ,
