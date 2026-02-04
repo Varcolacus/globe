@@ -576,36 +576,10 @@ const globe = Globe()
         </div>
     `)
     .arcsTransitionDuration(0)
-    .htmlElementsData([])
-    .htmlElement(d => {
-        const el = document.createElement('div');
-        el.innerHTML = `
-            <div style="
-                background: rgba(255, 215, 0, 0.9);
-                border: 2px solid #FFD700;
-                border-radius: 50%;
-                width: ${Math.min(8 + (d.teu / 10000000) * 4, 16)}px;
-                height: ${Math.min(8 + (d.teu / 10000000) * 4, 16)}px;
-                cursor: pointer;
-                box-shadow: 0 0 8px rgba(255, 215, 0, 0.8);
-            "></div>
-        `;
-        el.style.pointerEvents = 'auto';
-        el.style.cursor = 'pointer';
-        el.title = `${d.name} (${d.country})\n${(d.teu / 1000000).toFixed(1)}M TEU/an`;
-        return el;
-    })
     .customLayerData([])
-    .customThreeObject(d => {
-        // Créer une sphère 3D optimisée (low poly pour performance)
-        const geometry = new THREE.SphereGeometry(0.5, 8, 8); // Réduit de 16 à 8 segments
-        const material = new THREE.MeshBasicMaterial({ 
-            color: d.color || '#FF0000',
-            transparent: false,
-            opacity: 1.0
-        });
-        const mesh = new THREE.Mesh(geometry, material);
-        return mesh;
+    .customThreeObject(() => {
+        // Utiliser des instances partagées pour tous les bateaux (InstancedMesh)
+        return new THREE.Group(); // Placeholder, géré par le système d'instancing
     })
     .customThreeObjectUpdate((obj, d) => {
         const coords = globe.getCoords(d.lat, d.lng, d.alt);
@@ -997,6 +971,157 @@ const worldMajorPorts = [
     { name: 'Suez', lat: 29.97, lng: 32.55, country: 'Egypt', teu: 0 }
 ];
 
+// ===== SYSTÈME D'OPTIMISATION AVANCÉ =====
+// Instanced Rendering + LOD + Frustum Culling + Object Pooling
+
+let instancedShips = null;
+let instancedPorts = null;
+let shipMatrices = [];
+let portMatrices = [];
+let shipColors = [];
+let portSizes = [];
+const dummy = new THREE.Object3D();
+const frustum = new THREE.Frustum();
+const cameraViewProjectionMatrix = new THREE.Matrix4();
+
+// Créer les géométries partagées (réutilisées pour toutes les instances)
+const shipGeometryLOD = [
+    new THREE.SphereGeometry(0.5, 16, 16), // Haute qualité (proche)
+    new THREE.SphereGeometry(0.5, 8, 8),   // Moyenne qualité
+    new THREE.SphereGeometry(0.5, 4, 4)    // Basse qualité (loin)
+];
+const portGeometry = new THREE.CircleGeometry(0.3, 8);
+
+function initializeInstancedRendering(scene) {
+    const maxShips = 500; // Capacité max
+    const maxPorts = 100;
+    
+    // Géométrie partagée pour tous les bateaux (instancing)
+    const shipMaterial = new THREE.MeshBasicMaterial({ 
+        vertexColors: true,
+        side: THREE.DoubleSide
+    });
+    
+    instancedShips = new THREE.InstancedMesh(
+        shipGeometryLOD[1], // Utiliser qualité moyenne par défaut
+        shipMaterial,
+        maxShips
+    );
+    instancedShips.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    
+    // Créer le buffer de couleurs pour les instances
+    const colors = new Float32Array(maxShips * 3);
+    instancedShips.instanceColor = new THREE.InstancedBufferAttribute(colors, 3);
+    instancedShips.count = 0; // Commencer avec 0 instances visibles
+    
+    scene.add(instancedShips);
+    
+    // Ports en instances également
+    const portMaterial = new THREE.MeshBasicMaterial({ 
+        color: 0xFFD700,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9
+    });
+    
+    instancedPorts = new THREE.InstancedMesh(
+        portGeometry,
+        portMaterial,
+        maxPorts
+    );
+    instancedPorts.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    instancedPorts.count = 0;
+    
+    scene.add(instancedPorts);
+    
+    console.log('🚀 Instanced Rendering initialisé (max:', maxShips, 'bateaux,', maxPorts, 'ports)');
+}
+
+// Fonction d'optimisation LOD - choisir la géométrie selon distance caméra
+function updateLOD(cameraPosition) {
+    const distance = cameraPosition.length();
+    let lodLevel = 1; // Moyenne par défaut
+    
+    if (distance < 150) {
+        lodLevel = 0; // Haute qualité
+    } else if (distance > 300) {
+        lodLevel = 2; // Basse qualité
+    }
+    
+    // Mettre à jour la géométrie si nécessaire
+    if (instancedShips && instancedShips.geometry !== shipGeometryLOD[lodLevel]) {
+        instancedShips.geometry = shipGeometryLOD[lodLevel];
+    }
+}
+
+// Frustum Culling optimisé - ne calculer que les objets visibles
+function isInFrustum(lat, lng, alt, camera) {
+    // Convertir lat/lng en position 3D
+    const phi = (90 - lat) * Math.PI / 180;
+    const theta = (lng + 180) * Math.PI / 180;
+    const radius = 100 + alt;
+    
+    const x = -radius * Math.sin(phi) * Math.cos(theta);
+    const y = radius * Math.cos(phi);
+    const z = radius * Math.sin(phi) * Math.sin(theta);
+    
+    const position = new THREE.Vector3(x, y, z);
+    
+    // Vérifier si dans le frustum
+    cameraViewProjectionMatrix.multiplyMatrices(
+        camera.projectionMatrix,
+        camera.matrixWorldInverse
+    );
+    frustum.setFromProjectionMatrix(cameraViewProjectionMatrix);
+    
+    return frustum.containsPoint(position);
+}
+
+// Pool d'objets réutilisables (Object Pooling)
+class ObjectPool {
+    constructor(createFn, resetFn, initialSize = 50) {
+        this.createFn = createFn;
+        this.resetFn = resetFn;
+        this.available = [];
+        this.inUse = [];
+        
+        // Pré-créer des objets
+        for (let i = 0; i < initialSize; i++) {
+            this.available.push(this.createFn());
+        }
+    }
+    
+    acquire() {
+        let obj = this.available.pop();
+        if (!obj) {
+            obj = this.createFn();
+        }
+        this.inUse.push(obj);
+        return obj;
+    }
+    
+    release(obj) {
+        const index = this.inUse.indexOf(obj);
+        if (index > -1) {
+            this.inUse.splice(index, 1);
+            this.resetFn(obj);
+            this.available.push(obj);
+        }
+    }
+    
+    releaseAll() {
+        while (this.inUse.length > 0) {
+            this.release(this.inUse[0]);
+        }
+    }
+}
+
+// Pool pour les données de position
+const positionPool = new ObjectPool(
+    () => ({ lat: 0, lng: 0, alt: 0 }),
+    (obj) => { obj.lat = 0; obj.lng = 0; obj.alt = 0; }
+);
+
 // Fonction pour animer les bateaux le long des routes maritimes réelles
 let shipAnimations = [];
 let useRealAISData = false;
@@ -1125,40 +1250,95 @@ function animateShips() {
         return;
     }
     
-    // Mode simulation: routes prédéfinies
-    const ships = shipAnimations.map((shipAnim, i) => {
+    // Mode simulation optimisé avec Instanced Rendering + Frustum Culling
+    if (!instancedShips) return;
+    
+    const camera = globe.camera();
+    updateLOD(camera.position);
+    
+    let visibleCount = 0;
+    const now = Date.now();
+    
+    shipAnimations.forEach((shipAnim, i) => {
         const route = shipAnim.route;
         const totalTime = shipAnim.speed;
-        const currentTime = (Date.now() + shipAnim.offset) % totalTime;
+        const currentTime = (now + shipAnim.offset) % totalTime;
         const progress = currentTime / totalTime;
         
         // Interpoler le long de la route
         const position = interpolateAlongRoute(route.waypoints, progress, shipAnim.direction === -1);
         
+        // Frustum Culling - skip si non visible
+        if (!isInFrustum(position.lat, position.lng, 0.01, camera)) {
+            return; // Ne pas calculer ce bateau
+        }
+        
         // Altitude légèrement au-dessus de l'eau avec effet de vague
-        const waveEffect = Math.sin(progress * Math.PI * 6 + Date.now() * 0.001) * 0.0008;
+        const waveEffect = Math.sin(progress * Math.PI * 6 + now * 0.001) * 0.0008;
         const alt = 0.01 + waveEffect;
         
-        // Calculer l'angle de direction pour orienter le bateau
+        // Convertir lat/lng en position 3D
+        const phi = (90 - position.lat) * Math.PI / 180;
+        const theta = (position.lng + 180) * Math.PI / 180;
+        const radius = 100 + alt;
+        
+        dummy.position.set(
+            -radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.cos(phi),
+            radius * Math.sin(phi) * Math.sin(theta)
+        );
+        
+        // Orientation
         const nextProgress = Math.min(progress + 0.005, 1);
         const nextPosition = interpolateAlongRoute(route.waypoints, nextProgress, shipAnim.direction === -1);
         const heading = Math.atan2(nextPosition.lng - position.lng, nextPosition.lat - position.lat);
+        dummy.rotation.set(0, heading, 0);
         
-        return { 
-            lat: position.lat, 
-            lng: position.lng, 
-            alt: alt, 
-            id: `ship-${i}`,
-            size: shipAnim.size,
-            color: shipAnim.color,
-            heading: heading,
-            routeName: route.name
-        };
+        // Taille variable
+        const scale = shipAnim.size * 1.5;
+        dummy.scale.set(scale, scale, scale);
+        
+        dummy.updateMatrix();
+        instancedShips.setMatrixAt(visibleCount, dummy.matrix);
+        
+        // Couleur
+        const color = new THREE.Color(shipAnim.color);
+        instancedShips.setColorAt(visibleCount, color);
+        
+        visibleCount++;
     });
     
-    if (ships.length > 0) {
-        globe.customLayerData(ships);
-        console.log(`📍 ${ships.length} bateaux positionnés`);
+    instancedShips.count = visibleCount;
+    instancedShips.instanceMatrix.needsUpdate = true;
+    if (instancedShips.instanceColor) {
+        instancedShips.instanceColor.needsUpdate = true;
+    }
+    
+    // Mettre à jour les ports si affichés
+    if (showPorts && instancedPorts) {
+        worldMajorPorts.forEach((port, i) => {
+            const phi = (90 - port.lat) * Math.PI / 180;
+            const theta = (port.lng + 180) * Math.PI / 180;
+            const radius = 100.2;
+            
+            dummy.position.set(
+                -radius * Math.sin(phi) * Math.cos(theta),
+                radius * Math.cos(phi),
+                radius * Math.sin(phi) * Math.sin(theta)
+            );
+            
+            const size = Math.min(0.3 + (port.teu / 10000000) * 0.4, 1.0);
+            dummy.scale.set(size, size, 1);
+            dummy.lookAt(0, 0, 0);
+            
+            dummy.updateMatrix();
+            instancedPorts.setMatrixAt(i, dummy.matrix);
+        });
+        
+        instancedPorts.count = worldMajorPorts.length;
+        instancedPorts.instanceMatrix.needsUpdate = true;
+    } else if (instancedPorts) {
+        instancedPorts.count = 0;
     }
 }
 
@@ -1349,9 +1529,20 @@ function showDataTable() {
     // Synchroniser le sélecteur d'année du modal avec l'année courante
     modalYearSelector.value = currentYear.toString();
     
-    // Filtrer les pays avec commerce et trier par volume
-    const tradingCountries = balanceData
-        .filter(c => c.volume > 0 && c.name !== 'France')
+    // Obtenir les pays avec données commerciales triés par volume
+    const tradingCountries = countries
+        .map(country => {
+            const data = tradeData[country.name];
+            if (!data) return null;
+            return {
+                ...country,
+                exports: data.exports || 0,
+                imports: data.imports || 0,
+                balance: (data.exports || 0) - (data.imports || 0),
+                volume: (data.exports || 0) + (data.imports || 0)
+            };
+        })
+        .filter(c => c !== null && c.volume > 0)
         .sort((a, b) => b.volume - a.volume);
     
     // Calculer les totaux
@@ -1403,33 +1594,31 @@ function showDataTable() {
                 <td style="padding: 10px; border: 1px solid #ddd; color: #333;">
                     ${country.flag} ${country.name}
                 </td>
-                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333;">
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">
                     ${country.exports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                    <span style="color: #666; font-size: 11px;">(${((country.exports / totalExports) * 100).toFixed(1)}%)</span>
                 </td>
-                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333;">
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">
                     ${country.imports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                    <span style="color: #666; font-size: 11px;">(${((country.imports / totalImports) * 100).toFixed(1)}%)</span>
                 </td>
                 <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: ${soldeColor}; font-weight: bold;">
                     ${country.balance > 0 ? '+' : ''}${country.balance.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
                 </td>
-                <td style="padding: 10px; text-align: right; border: 1px solid #ddd; color: #333; font-weight: bold;">
+                <td style="padding: 10px; text-align: right; border: 1px solid #ddd;">
                     ${country.volume.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
+                    <span style="color: #666; font-size: 11px;">(${((country.volume / totalVolume) * 100).toFixed(1)}%)</span>
                 </td>
             </tr>
         `;
-    }).join('');
-    
-    // Ajouter une ligne de total
-    tbody.innerHTML += `
-        <tr style="background: #667eea; color: white; font-weight: bold;">
+    }).join('') + `
+        <tr style="background: #e8f4f8; font-weight: bold;">
             <td style="padding: 12px; border: 1px solid #ddd;">
                 TOTAL
             </td>
             <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
                 ${totalExports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
             </td>
-            <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
-                ${totalImports.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
             </td>
             <td style="padding: 12px; text-align: right; border: 1px solid #ddd;">
                 ${totalBalance > 0 ? '+' : ''}${totalBalance.toLocaleString('fr-FR', {maximumFractionDigits: 0})} M€
