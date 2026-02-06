@@ -244,6 +244,9 @@ let currentFilterValue = null;
 
 async function loadBalanceData(year = currentYear) {
     try {
+        // Marquer comme chargement en cours
+        window.isLoadingData = true;
+        
         currentYear = year;
         console.log(`🔍 DEBUG loadBalanceData appelé: year=${year}, currentSourceCountry="${currentSourceCountry}"`);
         
@@ -275,6 +278,9 @@ async function loadBalanceData(year = currentYear) {
         if (title) {
             title.innerHTML = '❌ Erreur de chargement';
         }
+    } finally {
+        // Marquer comme terminé
+        window.isLoadingData = false;
     }
 }
 
@@ -2569,10 +2575,14 @@ document.getElementById('show-data').addEventListener('click', () => {
     showDataTable();
 });
 
-document.getElementById('year-selector').addEventListener('change', (e) => {
+document.getElementById('year-selector').addEventListener('change', async (e) => {
     const selectedYear = parseInt(e.target.value);
     console.log(`📅 Changement d'année: ${selectedYear}`);
-    loadBalanceData(selectedYear);
+    if (!window.isLoadingData) {
+        await loadBalanceData(selectedYear);
+    } else {
+        console.log('⏸️ Chargement en cours, veuillez patienter...');
+    }
 });
 
 // MODE PRODUCTION: API réelles uniquement, pas de simulation
@@ -2629,8 +2639,15 @@ function initializeCountrySelector() {
     }
     
     // Sélectionner un pays
-    function selectCountry(country) {
+    async function selectCountry(country) {
         console.log(`🔍 DEBUG selectCountry: AVANT currentSourceCountry="${currentSourceCountry}"`);
+        
+        // Éviter les appels concurrents
+        if (window.isLoadingData) {
+            console.log('⏸️ Chargement en cours, veuillez patienter...');
+            return;
+        }
+        
         searchInput.value = `${country.flag} ${country.name}`;
         currentSourceCountry = country.name;
         console.log(`🔍 DEBUG selectCountry: APRÈS currentSourceCountry="${currentSourceCountry}" (sélectionné: ${country.name})`);
@@ -2652,9 +2669,10 @@ function initializeCountrySelector() {
             .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b')
             .pointsData(countries); // Forcer le refresh des points
         
-        // Recharger les données (async - l'indicateur sera retiré quand terminé)
+        // Recharger les données ET ATTENDRE la fin
         console.log(`🏳️ Changement de pays source: ${country.name} - Chargement des données...`);
-        loadBalanceData(currentYear);
+        await loadBalanceData(currentYear);
+        console.log(`✅ Pays source changé avec succès vers: ${country.name}`);
     }
     
     // Filtrer les pays lors de la saisie
