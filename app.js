@@ -255,6 +255,13 @@ async function loadBalanceData(year = currentYear) {
         // Marquer comme chargement en cours
         window.isLoadingData = true;
         
+        // Désactiver le bouton de données pendant le chargement
+        const dataButton = document.getElementById('show-data');
+        if (dataButton) {
+            dataButton.disabled = true;
+            dataButton.textContent = '⏳ Chargement...';
+        }
+        
         currentYear = year;
         console.log(`🔍 DEBUG loadBalanceData appelé: year=${year}, currentSourceCountry="${currentSourceCountry}"`);
         
@@ -297,8 +304,13 @@ async function loadBalanceData(year = currentYear) {
             title.innerHTML = '❌ Erreur de chargement';
         }
     } finally {
-        // Marquer comme terminé
+        // Marquer comme terminé et réactiver le bouton
         window.isLoadingData = false;
+        const dataButton = document.getElementById('show-data');
+        if (dataButton) {
+            dataButton.disabled = false;
+            dataButton.textContent = '📊 Afficher Données';
+        }
     }
 }
 
@@ -2906,6 +2918,13 @@ document.getElementById('data-modal').addEventListener('click', (e) => {
 
 function showDataTable() {
     console.log(`🔍 DEBUG showDataTable: currentSourceCountry="${currentSourceCountry}", balanceData.length=${balanceData.length}`);
+    
+    // Vérifier si les données sont chargées
+    if (balanceData.length === 0) {
+        alert('⏳ Chargement des données en cours... Veuillez patienter.\n\nLe chargement de 193 pays peut prendre 30-60 secondes.');
+        return;
+    }
+    
     const modal = document.getElementById('data-modal');
     const tbody = document.getElementById('data-table-body');
     const metadataDiv = document.getElementById('metadata-info');

@@ -75,6 +75,18 @@ h1 {
     transform: translateY(0);
 }
 
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #555 0%, #666 100%);
+    box-shadow: none;
+}
+
+.btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 .info {
     font-size: 13px;
     line-height: 1.8;
