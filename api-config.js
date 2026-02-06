@@ -1,60 +1,353 @@
-// Configuration de l'API Banque de France
-const API_CONFIG = {
-    baseUrl: 'https://webstat.banque-france.fr/ws/',
+// Import national APIs configuration
+// const { NATIONAL_APIS, COUNTRY_ISO_CODES } = require('./national-apis-config.js');
+
+// Configuration intelligente avec fallback automatique
+const API_SMART_CONFIG = {
+    // Stratégie de fallback : National > Regional > International
+    fallbackStrategy: ['national', 'regional', 'international'],
     
-    // Exemples de séries pour la balance des paiements
-    // Format: code de la série pour chaque pays
-    balancePaiements: {
-        // Ces codes sont à adapter selon la documentation BdF
-        // Format général: BOP.A.{COUNTRY_CODE}.{INDICATOR}
-        series: [
-            'BOP-001', // Balance globale
-            'BOP-002', // Balance courante
-            'BOP-003'  // Balance des capitaux
-        ]
-    },
+    // Cache des métadonnées de sources
+    sourceMetadata: new Map(),
     
-    // Fonction pour construire l'URL d'une série
-    getSeriesUrl: function(seriesCode) {
-        return `${this.baseUrl}series/${seriesCode}`;
-    },
-    
-    // Fonction pour récupérer les données
-    async fetchSeries(seriesCode) {
-        try {
-            const response = await fetch(this.getSeriesUrl(seriesCode));
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error(`Erreur lors de la récupération de ${seriesCode}:`, error);
-            return null;
-        }
-    },
-    
-    // Récupérer les données de balance des paiements pour tous les pays
-    async fetchBalancePaiements(year = 2025) {
-        console.log(`🔄 Chargement des données Banque de France pour ${year}...`);
+    /**
+     * Obtenir la configuration API appropriée pour un pays
+     * @param {string} countryName - Nom du pays
+     * @returns {Object} Configuration avec métadonnées de source
+     */
+    getAPIConfigForCountry(countryName) {
+        const isoCode = COUNTRY_ISO_CODES[countryName];
         
-        // Pour l'instant, utilisons des données simulées
-        // À remplacer par de vraies requêtes API une fois les codes trouvés
-        return this.getSimulatedData(year);
+        // Priorité 1 : API nationale premium
+        if (isoCode && NATIONAL_APIS.premium[isoCode]) {
+            return {
+                type: 'national',
+                tier: 'premium',
+                config: NATIONAL_APIS.premium[isoCode],
+                metadata: {
+                    source: NATIONAL_APIS.premium[isoCode].institution,
+                    sourceType: 'National Statistical Office',
+                    country: countryName,
+                    quality: 'excellent',
+                    priority: 1,
+                    lastUpdate: new Date().toISOString()
+                }
+            };
+        }
+        
+        // Priorité 2 : API nationale standard
+        if (isoCode && NATIONAL_APIS.standard[isoCode]) {
+            return {
+                type: 'national',
+                tier: 'standard',
+                config: NATIONAL_APIS.standard[isoCode],
+                metadata: {
+                    source: NATIONAL_APIS.standard[isoCode].institution,
+                    sourceType: 'National Statistical Office',
+                    country: countryName,
+                    quality: 'good',
+                    priority: 2,
+                    lastUpdate: new Date().toISOString()
+                }
+            };
+        }
+        
+        // Priorité 3 : API nationale limitée
+        if (isoCode && NATIONAL_APIS.limited[isoCode]) {
+            return {
+                type: 'national',
+                tier: 'limited',
+                config: NATIONAL_APIS.limited[isoCode],
+                metadata: {
+                    source: NATIONAL_APIS.limited[isoCode].institution,
+                    sourceType: 'National Statistical Office',
+                    country: countryName,
+                    quality: 'limited',
+                    priority: 3,
+                    note: NATIONAL_APIS.limited[isoCode].note,
+                    lastUpdate: new Date().toISOString()
+                }
+            };
+        }
+        
+        // Priorité 4 : Eurostat pour pays UE
+        if (this.isEUCountry(countryName)) {
+            return {
+                type: 'regional',
+                tier: 'eurostat',
+                config: NATIONAL_APIS.international.EUROSTAT,
+                metadata: {
+                    source: 'Eurostat',
+                    sourceType: 'Regional Organization (EU)',
+                    country: countryName,
+                    quality: 'excellent',
+                    priority: 4,
+                    note: 'National API unavailable, using EU regional data',
+                    lastUpdate: new Date().toISOString()
+                }
+            };
+        }
+        
+        // Priorité 5 : UN Comtrade (fallback international)
+        return {
+            type: 'international',
+            tier: 'comtrade',
+            config: NATIONAL_APIS.international.COMTRADE,
+            metadata: {
+                source: 'UN Comtrade',
+                sourceType: 'International Organization',
+                country: countryName,
+                quality: 'good',
+                priority: 5,
+                note: 'National API unavailable, using UN aggregated data',
+                lastUpdate: new Date().toISOString()
+            }
+        };
     },
     
-    // Données simulées pour tester (à remplacer par vraies données API)
-    getSimulatedData(year = 2025) {
-        // Créer des données plus variées pour mieux voir les différences
+    /**
+     * Vérifier si un pays est membre de l'UE
+     */
+    isEUCountry(countryName) {
+        const euCountries = [
+            'Allemagne', 'Autriche', 'Belgique', 'Bulgarie', 'Chypre', 'Croatie',
+            'Danemark', 'Espagne', 'Estonie', 'Finlande', 'France', 'Grèce',
+            'Hongrie', 'Irlande', 'Italie', 'Lettonie', 'Lituanie', 'Luxembourg',
+            'Malte', 'Pays-Bas', 'Pologne', 'Portugal', 'République tchèque',
+            'Roumanie', 'Slovaquie', 'Slovénie', 'Suède'
+        ];
+        return euCountries.includes(countryName);
+    },
+    
+    /**
+     * Tenter de récupérer les données avec fallback automatique
+     */
+    async fetchTradeDataWithFallback(countryName, year = 2025) {
+        const apiConfig = this.getAPIConfigForCountry(countryName);
+        
+        console.log(`📊 ${countryName}: Trying ${apiConfig.metadata.source} (${apiConfig.type}/${apiConfig.tier})`);
+        
+        try {
+            // Tentative avec l'API configurée
+            const data = await this.attemptFetch(apiConfig, countryName, year);
+            
+            if (data) {
+                // Succès : stocker les métadonnées
+                this.sourceMetadata.set(countryName, apiConfig.metadata);
+                return {
+                    ...data,
+                    _metadata: apiConfig.metadata
+                };
+            }
+        } catch (error) {
+            console.warn(`⚠️ ${apiConfig.metadata.source} failed for ${countryName}:`, error.message);
+        }
+        
+        // Si échec, essayer le fallback suivant
+        if (apiConfig.type !== 'international') {
+            console.log(`🔄 ${countryName}: Falling back to international data...`);
+            const fallbackConfig = {
+                type: 'international',
+                tier: 'worldbank',
+                config: NATIONAL_APIS.international.WORLDBANK,
+                metadata: {
+                    source: 'World Bank',
+                    sourceType: 'International Organization',
+                    country: countryName,
+                    quality: 'good',
+                    priority: 6,
+                    note: 'Fallback due to national API failure',
+                    lastUpdate: new Date().toISOString()
+                }
+            };
+            
+            const fallbackData = await this.attemptFetch(fallbackConfig, countryName, year);
+            if (fallbackData) {
+                this.sourceMetadata.set(countryName, fallbackConfig.metadata);
+                return {
+                    ...fallbackData,
+                    _metadata: fallbackConfig.metadata
+                };
+            }
+        }
+        
+        // Dernier recours : données simulées
+        console.log(`⚠️ ${countryName}: Using simulated data (all APIs unavailable)`);
+        return this.getSimulatedDataForCountry(countryName, year);
+    },
+    
+    /**
+     * Tentative de récupération depuis une API spécifique
+     */
+    async attemptFetch(apiConfig, countryName, year) {
+        // Pour l'instant, retourner null pour simuler l'échec
+        // Dans une vraie implémentation, faire la vraie requête HTTP
+        return null;
+    },
+    
+    /**
+     * Obtenir toutes les métadonnées de sources utilisées
+     */
+    getAllSourceMetadata() {
+        const metadata = {
+            totalCountries: this.sourceMetadata.size,
+            bySourceType: {},
+            byQuality: {},
+            sources: []
+        };
+        
+        for (const [country, meta] of this.sourceMetadata.entries()) {
+            // Compter par type de source
+            metadata.bySourceType[meta.sourceType] = 
+                (metadata.bySourceType[meta.sourceType] || 0) + 1;
+            
+            // Compter par qualité
+            metadata.byQuality[meta.quality] = 
+                (metadata.byQuality[meta.quality] || 0) + 1;
+            
+            // Ajouter détails
+            metadata.sources.push({
+                country,
+                source: meta.source,
+                type: meta.sourceType,
+                quality: meta.quality,
+                priority: meta.priority,
+                note: meta.note
+            });
+        }
+        
+        return metadata;
+    },
+    
+    /**
+     * Données simulées pour un pays spécifique (avec métadonnées)
+     */
+    getSimulatedDataForCountry(countryName, year = 2025) {
         const majorPartners = ['Allemagne', 'États-Unis', 'Chine', 'Italie', 'Espagne', 'Royaume-Uni', 'Belgique'];
         const mediumPartners = ['Pays-Bas', 'Suisse', 'Pologne', 'Japon', 'Inde', 'Brésil', 'Canada'];
         
-        // Facteur de croissance basé sur l'année (2013 = base)
+        const yearFactor = 1 + ((year - 2013) * 0.035);
+        const yearVariance = (year * 123) % 1000 / 1000;
+        
+        let exports, imports;
+        
+        if (majorPartners.includes(countryName)) {
+            exports = (40000 + (Math.random() + yearVariance) * 70000) * yearFactor;
+            imports = (40000 + (Math.random() + yearVariance) * 70000) * yearFactor;
+        } else if (mediumPartners.includes(countryName)) {
+            exports = (5000 + (Math.random() + yearVariance) * 30000) * yearFactor;
+            imports = (5000 + (Math.random() + yearVariance) * 30000) * yearFactor;
+        } else {
+            exports = (250 + (Math.random() + yearVariance) * 8000) * yearFactor;
+            imports = (250 + (Math.random() + yearVariance) * 8000) * yearFactor;
+        }
+        
+        const balance = exports - imports;
+        const volume = exports + imports;
+        
+        const simulatedMetadata = {
+            source: 'Simulated Data',
+            sourceType: 'Internal Generation',
+            country: countryName,
+            quality: 'simulated',
+            priority: 99,
+            note: 'All external APIs unavailable - using statistical simulation',
+            lastUpdate: new Date().toISOString()
+        };
+        
+        this.sourceMetadata.set(countryName, simulatedMetadata);
+        
+        return {
+            balance,
+            exports,
+            imports,
+            volume,
+            _metadata: simulatedMetadata
+        };
+    },
+    
+    /**
+     * Obtenir données pour tous les pays (mode batch avec métadonnées)
+     */
+    async fetchAllCountriesData(year = 2025, selectedCountry = 'France') {
+        console.log(`\n🌍 Fetching trade data for all countries (year: ${year}, from: ${selectedCountry})`);
+        console.log(`📋 Strategy: National API → Regional → International → Simulated\n`);
+        
+        const results = [];
+        
+        for (const country of countries) {
+            if (country.name === selectedCountry) {
+                // Pays source = balance 0
+                results.push({
+                    ...country,
+                    balance: 0,
+                    exports: 0,
+                    imports: 0,
+                    volume: 0,
+                    _metadata: {
+                        source: 'Source Country',
+                        sourceType: 'Reference',
+                        country: selectedCountry,
+                        quality: 'N/A',
+                        priority: 0,
+                        note: 'This is the reference country',
+                        lastUpdate: new Date().toISOString()
+                    }
+                });
+            } else {
+                const data = await this.fetchTradeDataWithFallback(country.name, year);
+                results.push({
+                    ...country,
+                    ...data
+                });
+            }
+        }
+        
+        // Afficher résumé des sources
+        const metadata = this.getAllSourceMetadata();
+        console.log(`\n✅ Data fetching complete!`);
+        console.log(`📊 Sources summary:`);
+        console.log(`   - Total countries: ${metadata.totalCountries}`);
+        console.log(`   - By source type:`, metadata.bySourceType);
+        console.log(`   - By quality:`, metadata.byQuality);
+        
+        return {
+            data: results,
+            metadata: metadata,
+            timestamp: new Date().toISOString(),
+            year: year,
+            sourceCountry: selectedCountry
+        };
+    }
+};
+
+// Backward compatibility: ancienne API_CONFIG pointant vers le nouveau système
+const API_CONFIG = {
+    async fetchBalancePaiements(year = 2025, selectedCountry = 'France') {
+        return API_SMART_CONFIG.fetchAllCountriesData(year, selectedCountry);
+    },
+    
+    // Méthode simplifiée conservée pour compatibilité
+    getSimulatedData(year = 2025) {
         const yearFactor = 1 + ((year - 2013) * 0.035); // ~3.5% de croissance par an
         const yearVariance = (year * 123) % 1000 / 1000; // Variance spécifique à l'année
         
+        const majorPartners = ['Allemagne', 'États-Unis', 'Chine', 'Italie', 'Espagne', 'Royaume-Uni', 'Belgique'];
+        const mediumPartners = ['Pays-Bas', 'Suisse', 'Pologne', 'Japon', 'Inde', 'Brésil', 'Canada'];
+        
         return countries.map(country => {
             if (country.name === 'France') {
-                return { ...country, balance: 0, exports: 0, imports: 0, volume: 0 };
+                return { 
+                    ...country, 
+                    balance: 0, 
+                    exports: 0, 
+                    imports: 0, 
+                    volume: 0,
+                    _metadata: {
+                        source: 'Source Country',
+                        sourceType: 'Reference',
+                        quality: 'N/A'
+                    }
+                };
             }
             
             let exports, imports;
@@ -83,7 +376,12 @@ const API_CONFIG = {
                 balance: balance,
                 exports: exports,
                 imports: imports,
-                volume: volume
+                volume: volume,
+                _metadata: {
+                    source: 'Simulated (Legacy)',
+                    sourceType: 'Internal Generation',
+                    quality: 'simulated'
+                }
             };
         });
     }

@@ -24,6 +24,11 @@
         </div>
         
         <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
+            <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">🏳️ Pays source:</h3>
+            <select id="source-country-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px;">
+                <option value="France" selected>🇫🇷 France</option>
+                <!-- Options remplies dynamiquement -->
+            </select>
             <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">📅 Année:</h3>
             <select id="year-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px;">
                 <option value="2025">2025</option>
@@ -140,6 +145,7 @@
     <script src="libs/three.min.js"></script>
     <script src="libs/globe.gl.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
+    <script src="national-apis-config.js"></script>
     <script src="api-config.js"></script>
     <script src="app.js"></script>
 </body>

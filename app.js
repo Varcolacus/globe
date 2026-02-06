@@ -224,26 +224,30 @@ const countries = [
     { lat: -17.8252, lng: 31.0335, name: 'Zimbabwe', capital: 'Harare', flag: '🇿🇼' , region: 'Afrique' }
 ];
 
-// Connexions commerciales depuis la France vers tous les autres pays
+// Variables globales pour la gestion des données
+let balanceData = [];
+let currentDataType = 'balance'; // balance, exports, imports, volume
+let currentYear = 2025;
+let currentSourceCountry = 'France'; // Pays source pour les flux commerciaux
+let currentFilterType = 'all'; // all, region, income, group, country
+
+// Connexions commerciales depuis le pays source vers tous les autres pays
 const connections = countries
-    .filter(country => country.name !== 'France')
+    .filter(country => country.name !== currentSourceCountry)
     .map(country => ({
-        from: 'France',
+        from: currentSourceCountry,
         to: country.name
     }));
 
 // Charger les données de la balance des paiements depuis l'API
-let balanceData = [];
-let currentDataType = 'balance'; // balance, exports, imports, volume
-let currentYear = 2025;
-let currentFilterType = 'all'; // all, region, income, group, country
 let currentFilterValue = null;
 
 async function loadBalanceData(year = currentYear) {
     try {
         currentYear = year;
-        balanceData = await API_CONFIG.fetchBalancePaiements(year);
-        console.log(`✅ Données ${year} chargées:`, balanceData.length, 'pays');
+        const response = await API_CONFIG.fetchBalancePaiements(year, currentSourceCountry);
+        balanceData = response.data || response; // Extraire .data si présent, sinon utiliser directement
+        console.log(`✅ Données ${year} chargées pour ${currentSourceCountry}:`, balanceData.length, 'pays');
         updateGlobeWithBalanceData(currentDataType);
     } catch (error) {
         console.error('❌ Erreur chargement données:', error);
@@ -254,7 +258,7 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
     currentDataType = dataType;
     
     // Filtrer les pays avec du commerce réel (volume > 0)
-    let countriesWithTrade = balanceData.filter(c => c.volume > 0 && c.name !== 'France');
+    let countriesWithTrade = balanceData.filter(c => c.volume > 0 && c.name !== currentSourceCountry);
     
     // Appliquer le filtre selon le type
     if (currentFilterType !== 'all' && currentFilterValue) {
@@ -305,7 +309,7 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
     
     // Créer les arcs uniquement pour les pays avec commerce
     const updatedArcs = countriesWithTrade.map(countryData => {
-        const startCountry = countries.find(c => c.name === 'France');
+        const startCountry = countries.find(c => c.name === currentSourceCountry);
         const endCountry = countries.find(c => c.name === countryData.name);
         
         if (!startCountry || !endCountry) return null;
@@ -541,8 +545,8 @@ const globe = Globe()
     .atmosphereAltitude(0.15)
     .pointsData(countries)
     .pointAltitude(0.01)
-    .pointRadius(d => d.name === 'France' ? 1.2 : 0.7)
-    .pointColor(d => d.name === 'France' ? '#0055A4' : '#ff6b6b')
+    .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
+    .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b')
     .pointLabel(d => `
         <div style="background: rgba(0,0,0,0.9); padding: 12px; border-radius: 8px; border: 1px solid #667eea;">
             <div style="font-size: 18px; font-weight: bold; color: #667eea; margin-bottom: 5px;">
@@ -1516,7 +1520,9 @@ function getMajorShippingRoutes(year) {
                 { lat: 51.92, lng: 4.48 },   // Rotterdam
                 { lat: 51.6, lng: 4.4 },     // Intermédiaire
                 { lat: 51.27, lng: 4.41 },   // Antwerp
-                { lat: 52.0, lng: 5.5 },     // Mer du Nord Sud
+                { lat: 52.5, lng: 4.0 },     // Mer du Nord Ouest
+                { lat: 54.0, lng: 5.0 },     // Mer du Nord Nord
+                { lat: 54.5, lng: 7.5 },     // Approche Hamburg par mer
                 { lat: 53.55, lng: 9.99 },   // Hamburg
                 { lat: 53.54, lng: 8.58 }    // Bremerhaven
             ],
@@ -1547,7 +1553,8 @@ function getMajorShippingRoutes(year) {
                 { lat: 49.49, lng: 0.12 },   // Le Havre
                 { lat: 51.0, lng: 1.5 },     // Manche
                 { lat: 51.92, lng: 4.48 },   // Rotterdam
-                { lat: 52.5, lng: 7.0 },     // Mer du Nord
+                { lat: 53.0, lng: 4.5 },     // Mer du Nord Centre
+                { lat: 54.5, lng: 6.5 },     // Mer du Nord Nord
                 { lat: 53.55, lng: 9.99 }    // Hamburg
             ],
             intensity: 220,
@@ -1593,9 +1600,11 @@ function getMajorShippingRoutes(year) {
             name: 'Nordic-Baltic',
             waypoints: [
                 { lat: 60.17, lng: 24.94 },  // Helsinki
-                { lat: 59.0, lng: 23.5 },    // Golfe de Finlande Sud
+                { lat: 59.5, lng: 23.0 },    // Golfe de Finlande Ouest
+                { lat: 58.5, lng: 21.5 },    // Mer Baltique Nord
                 { lat: 56.95, lng: 24.11 },  // Riga
-                { lat: 55.5, lng: 21.0 },    // Mer Baltique
+                { lat: 56.0, lng: 20.5 },    // Mer Baltique Centre-Ouest
+                { lat: 55.0, lng: 18.5 },    // Approche Gdansk par mer
                 { lat: 54.35, lng: 18.65 }   // Gdansk
             ],
             intensity: 130,
@@ -1685,7 +1694,10 @@ function getMajorShippingRoutes(year) {
             name: 'Turkey-Greece',
             waypoints: [
                 { lat: 41.02, lng: 28.97 },  // Istanbul
-                { lat: 40.0, lng: 27.5 },    // Mer de Marmara
+                { lat: 40.5, lng: 27.5 },    // Mer de Marmara Centre
+                { lat: 40.2, lng: 26.5 },    // Approche Dardanelles
+                { lat: 39.5, lng: 25.5 },    // Mer Égée Nord
+                { lat: 38.8, lng: 25.8 },    // Mer Égée Centre-Ouest
                 { lat: 38.42, lng: 27.14 },  // Izmir
                 { lat: 38.0, lng: 25.0 },    // Mer Égée
                 { lat: 37.95, lng: 23.65 }   // Piraeus
@@ -1704,8 +1716,12 @@ function getMajorShippingRoutes(year) {
                 { lat: 49.28, lng: -123.12 },// Vancouver
                 { lat: 48.0, lng: -123.5 },  // Puget Sound
                 { lat: 47.60, lng: -122.33 },// Seattle
-                { lat: 40.0, lng: -124.0 },  // Côte Oregon/Californie
-                { lat: 35.0, lng: -121.0 },  // Californie Centre
+                { lat: 48.5, lng: -127.0 },  // Offshore Nord-Ouest Washington
+                { lat: 46.0, lng: -126.5 },  // Offshore Washington
+                { lat: 43.0, lng: -126.0 },  // Offshore Oregon
+                { lat: 40.0, lng: -125.5 },  // Offshore Nord Californie
+                { lat: 37.80, lng: -123.5 },  // Offshore Oakland
+                { lat: 35.0, lng: -122.0 },  // Californie Centre
                 { lat: 33.74, lng: -118.27 },// Los Angeles
                 { lat: 33.76, lng: -118.23 },// Intermédiaire
                 { lat: 33.75, lng: -118.19 } // Long Beach
@@ -1720,9 +1736,10 @@ function getMajorShippingRoutes(year) {
             name: 'US East Coast',
             waypoints: [
                 { lat: 40.67, lng: -74.05 }, // New York/New Jersey
-                { lat: 38.0, lng: -75.0 },   // Atlantique
+                { lat: 38.5, lng: -74.5 },   // Offshore Delaware
+                { lat: 36.5, lng: -75.5 },   // Offshore Virginia
+                { lat: 34.0, lng: -76.0 },   // Offshore North Carolina
                 { lat: 32.78, lng: -79.93 }, // Charleston
-                { lat: 32.4, lng: -80.5 },   // Intermédiaire
                 { lat: 32.03, lng: -81.09 }  // Savannah
             ],
             intensity: 240,
@@ -1768,8 +1785,10 @@ function getMajorShippingRoutes(year) {
             name: 'Canada-Europe',
             waypoints: [
                 { lat: 49.28, lng: -123.12 },// Vancouver
-                { lat: 45.0, lng: -125.0 },  // Large Côte Ouest
-                { lat: 35.0, lng: -122.0 },  // Californie
+                { lat: 47.0, lng: -126.0 },  // Offshore Nord-Ouest
+                { lat: 45.0, lng: -127.0 },  // Large Côte Ouest
+                { lat: 40.0, lng: -126.5 },  // Offshore Californie Nord
+                { lat: 35.0, lng: -124.0 },  // Offshore Californie
                 { lat: 25.0, lng: -115.0 },  // Basse Californie
                 { lat: 15.0, lng: -105.0 },  // Large Mexique
                 { lat: 9.36, lng: -79.90 },  // Colon (Panama)
@@ -1858,12 +1877,17 @@ function getMajorShippingRoutes(year) {
             name: 'North-South America',
             waypoints: [
                 { lat: 40.67, lng: -74.05 }, // New York
-                { lat: 32.03, lng: -81.09 }, // Savannah
-                { lat: 20.0, lng: -55.0 },   // Atlantique Nord
-                { lat: 10.0, lng: -45.0 },   // Atlantique Tropical
-                { lat: 0.0, lng: -35.0 },    // Équateur
-                { lat: -10.0, lng: -32.0 },  // Atlantique large du Brésil
-                { lat: -20.0, lng: -35.0 },  // Atlantique Sud
+                { lat: 38.5, lng: -74.5 },   // Offshore Delaware
+                { lat: 36.5, lng: -75.5 },   // Offshore Virginia (Norfolk area)
+                { lat: 34.0, lng: -76.0 },   // Offshore North Carolina
+                { lat: 32.03, lng: -79.93 }, // Charleston area
+                { lat: 28.0, lng: -79.0 },   // Offshore Floride Est
+                { lat: 24.0, lng: -76.0 },   // Atlantique Bahamas
+                { lat: 20.0, lng: -65.0 },   // Atlantique Nord Caraïbes
+                { lat: 10.0, lng: -50.0 },   // Atlantique Tropical
+                { lat: 0.0, lng: -38.0 },    // Équateur
+                { lat: -10.0, lng: -34.0 },  // Atlantique large du Brésil
+                { lat: -20.0, lng: -37.0 },  // Atlantique Sud
                 { lat: -23.96, lng: -46.33 } // Santos
             ],
             intensity: 160,
@@ -1911,10 +1935,11 @@ function getMajorShippingRoutes(year) {
             name: 'East Africa Coast',
             waypoints: [
                 { lat: -29.86, lng: 31.04 }, // Durban
-                { lat: -25.0, lng: 34.0 },   // Large du Mozambique
-                { lat: -20.0, lng: 38.0 },   // Canal Mozambique
-                { lat: -15.0, lng: 41.5 },   // Large du Mozambique Nord
-                { lat: -10.0, lng: 42.5 },   // Approche Tanzanie
+                { lat: -27.0, lng: 33.5 },   // Large du Mozambique Sud
+                { lat: -23.0, lng: 36.0 },   // Canal Mozambique Sud
+                { lat: -18.0, lng: 39.0 },   // Canal Mozambique Centre
+                { lat: -15.0, lng: 41.0 },   // Large du Mozambique Nord
+                { lat: -10.0, lng: 41.5 },   // Approche Tanzanie offshore
                 { lat: -6.80, lng: 39.28 },  // Dar es Salaam
                 { lat: -5.0, lng: 39.5 },    // Intermédiaire
                 { lat: -4.04, lng: 39.67 }   // Mombasa
@@ -1929,14 +1954,25 @@ function getMajorShippingRoutes(year) {
             name: 'Africa East Coast-Suez',
             waypoints: [
                 { lat: -33.93, lng: 18.42 }, // Cape Town
+                { lat: -35.0, lng: 20.0 },   // Sud Cap de Bonne-Espérance
+                { lat: -35.5, lng: 23.0 },   // Océan Indien Sud
+                { lat: -34.0, lng: 27.0 },   // Large côte est
                 { lat: -29.86, lng: 31.04 }, // Durban
-                { lat: -15.0, lng: 40.0 },   // Canal Mozambique
+                { lat: -27.0, lng: 33.5 },   // Large du Mozambique Sud
+                { lat: -23.0, lng: 36.0 },   // Canal Mozambique Sud
+                { lat: -18.0, lng: 39.0 },   // Canal Mozambique Centre
+                { lat: -15.0, lng: 41.0 },   // Large du Mozambique Nord
+                { lat: -10.0, lng: 41.5 },   // Approche Tanzanie offshore
+                { lat: -6.80, lng: 39.28 },  // Dar es Salaam
                 { lat: -4.04, lng: 39.67 },  // Mombasa
-                { lat: 0.0, lng: 48.0 },     // Océan Indien large de Somalie
-                { lat: 5.0, lng: 52.0 },     // Océan Indien Est Somalie
-                { lat: 10.0, lng: 52.0 },    // Approche Golfe d'Aden
-                { lat: 13.0, lng: 48.0 },    // Entrée Golfe d'Aden
-                { lat: 20.0, lng: 38.0 },    // Mer Rouge
+                { lat: 0.0, lng: 50.0 },     // Océan Indien large de Somalie
+                { lat: 3.0, lng: 53.0 },     // Océan Indien Est Somalie
+                { lat: 8.0, lng: 54.0 },     // Large côte est Somalie
+                { lat: 11.0, lng: 52.0 },    // Approche Golfe d'Aden offshore
+                { lat: 12.6, lng: 48.0 },    // Golfe d'Aden Centre
+                { lat: 13.0, lng: 43.5 },    // Bab-el-Mandeb (détroit)
+                { lat: 15.0, lng: 42.0 },    // Mer Rouge Sud
+                { lat: 20.0, lng: 38.0 },    // Mer Rouge Centre
                 { lat: 29.97, lng: 32.55 }   // Suez
             ],
             intensity: 170,
@@ -2453,18 +2489,22 @@ function updateLegend(dataType) {
     const title = document.getElementById('legend-title');
     const content = document.getElementById('legend-content');
     
+    // Obtenir le drapeau du pays source
+    const sourceCountry = countries.find(c => c.name === currentSourceCountry);
+    const sourceFlag = sourceCountry ? sourceCountry.flag : '🏳️';
+    
     switch(dataType) {
         case 'exports':
-            title.textContent = 'Exportations (France → Pays):';
+            title.textContent = `Exportations (${sourceFlag} ${currentSourceCountry} → Pays):`;
             content.innerHTML = `
-                <span style="color: rgba(66, 135, 245, 0.8);">●</span> Flux sortant de France<br>
+                <span style="color: rgba(66, 135, 245, 0.8);">●</span> Flux sortant de ${currentSourceCountry}<br>
                 <small style="color: #999;">L'épaisseur de la ligne représente le volume</small>
             `;
             break;
         case 'imports':
-            title.textContent = 'Importations (Pays → France):';
+            title.textContent = `Importations (Pays → ${sourceFlag} ${currentSourceCountry}):`;
             content.innerHTML = `
-                <span style="color: rgba(255, 140, 50, 0.8);">●</span> Flux entrant vers France<br>
+                <span style="color: rgba(255, 140, 50, 0.8);">●</span> Flux entrant vers ${currentSourceCountry}<br>
                 <small style="color: #999;">L'épaisseur de la ligne représente le volume</small>
             `;
             break;
@@ -2505,6 +2545,65 @@ document.getElementById('year-selector').addEventListener('change', (e) => {
     console.log(`📅 Changement d'année: ${selectedYear}`);
     loadBalanceData(selectedYear);
 });
+
+// Peupler le sélecteur de pays source
+function populateSourceCountrySelector() {
+    const selector = document.getElementById('source-country-selector');
+    if (!selector) {
+        console.error('❌ Élément source-country-selector non trouvé');
+        return;
+    }
+    
+    // Vider le sélecteur avant d'ajouter les options
+    selector.innerHTML = '';
+    
+    // Trier les pays par nom
+    const sortedCountries = [...countries].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedCountries.forEach(country => {
+        const option = document.createElement('option');
+        option.value = country.name;
+        option.textContent = `${country.flag} ${country.name}`;
+        if (country.name === currentSourceCountry) {
+            option.selected = true;
+        }
+        selector.appendChild(option);
+    });
+    
+    console.log(`✅ Sélecteur de pays peuplé avec ${sortedCountries.length} pays`);
+}
+
+// Initialiser le sélecteur de pays après un court délai pour s'assurer que le DOM est prêt
+setTimeout(() => {
+    populateSourceCountrySelector();
+    
+    // Gestionnaire pour le changement de pays source
+    const sourceSelector = document.getElementById('source-country-selector');
+    if (sourceSelector) {
+        sourceSelector.addEventListener('change', (e) => {
+            const selectedCountry = e.target.value;
+            console.log(`🏳️ Changement de pays source: ${selectedCountry}`);
+            currentSourceCountry = selectedCountry;
+            
+            // Mettre à jour le titre
+            const title = document.querySelector('.controls h1');
+            const countryData = countries.find(c => c.name === selectedCountry);
+            if (title && countryData) {
+                title.textContent = `${countryData.flag} Commerce International`;
+            }
+            
+            // Rafraîchir les points pour mettre en évidence le nouveau pays source
+            globe
+                .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
+                .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b');
+            
+            // Recharger les données
+            loadBalanceData(currentYear);
+        });
+    } else {
+        console.error('❌ Élément source-country-selector non trouvé pour l\'event listener');
+    }
+}, 100);
 
 // Gestionnaire pour le type de filtre
 document.getElementById('filter-type-selector').addEventListener('change', (e) => {

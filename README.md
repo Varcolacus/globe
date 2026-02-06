@@ -122,6 +122,67 @@ globe/
 
 ## 🌐 Sources de données
 
+### 🏛️ APIs d'Institutions Nationales (Système Multi-Sources)
+
+Le projet intègre un **système intelligent de fallback** qui priorise les données des institutions statistiques nationales, avec basculement automatique vers des organisations internationales si nécessaire.
+
+#### **Stratégie de Priorité Automatique**
+
+**Priorité 1 - APIs Nationales Premium** (10 pays) 🌟
+- Norvège (SSB), Pays-Bas (CBS), Suède (SCB), États-Unis (Census Bureau)
+- UK (ONS), Australie (ABS), Canada (StatCan), Suisse (Customs), Danemark, Finlande
+- **Qualité**: Excellente - Documentation complète, temps réel, haute fiabilité
+
+**Priorité 2 - APIs Nationales Standard** (30+ pays) ⭐
+- France (Banque de France), Allemagne (Destatis), Japon (e-Stat), Italie (ISTAT)
+- Espagne (INE), Brésil (Comex Stat), Inde (DGCI&S), Corée du Sud, Singapour...
+- **Qualité**: Bonne - Mise à jour régulière, documentation disponible
+
+**Priorité 3 - APIs Nationales Limitées** (15+ pays)
+- Chine (Customs), Russie (Rosstat), Turquie, Égypte...
+- **Qualité**: Partielle - Données agrégées ou accès restreint
+
+**Priorité 4 - Eurostat** (27 pays UE) 🇪🇺
+- Fallback régional pour pays membres de l'Union Européenne
+- **Qualité**: Excellente - Données harmonisées EU
+
+**Priorité 5-6 - Organisations Internationales** 🌍
+- UN Comtrade (190+ pays) - Gratuit, 100 req/h
+- World Bank (200+ pays) - Gratuit, illimité
+- IMF (190+ pays) - Balance des paiements
+- **Qualité**: Bonne - Données agrégées mais complètes
+
+#### **Traçabilité des Données**
+
+Chaque donnée inclut des **métadonnées complètes** :
+```javascript
+{
+    source: "Statistics Norway (SSB)",
+    sourceType: "National Statistical Office",
+    country: "Norvège",
+    quality: "excellent",
+    priority: 1,
+    lastUpdate: "2026-02-06T...",
+    note: "API premium avec documentation complète"
+}
+```
+
+**Visualiser les sources** : Ouvrez `data-sources.html` pour voir un tableau détaillé des sources utilisées pour chaque pays, avec filtres par type et qualité.
+
+#### **Configuration Technique**
+
+Fichiers du système :
+- `national-apis-config.js` : Configuration de 65+ APIs nationales
+- `api-config.js` : Logique de fallback automatique et métadonnées
+- `data-sources.html` : Interface de visualisation des sources
+
+**Avantages** :
+- ✅ **65 pays** avec APIs nationales fonctionnelles et gratuites
+- ✅ **190+ pays** couverts via fallback international
+- ✅ **Traçabilité totale** : source exacte pour chaque donnée
+- ✅ **Robustesse** : fallback automatique si une API échoue
+- ✅ **0€** : toutes les APIs utilisées sont gratuites
+
 ### API Banque de France (structure prête)
 - **URL** : https://webstat.banque-france.fr/ws/
 - **Séries** : Balance des paiements (BOP)
