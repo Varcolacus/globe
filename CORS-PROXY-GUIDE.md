@@ -1,5 +1,10 @@
 # 🌐 Utiliser les données officielles UN Comtrade
 
+## ⚠️ MODE PRODUCTION : Données officielles uniquement
+
+Cette application utilise **exclusivement des données officielles** de l'API UN Comtrade.
+**Aucune donnée simulée** n'est générée. Si les données ne sont pas disponibles pour un pays/année, la valeur sera 0.
+
 ## Problème CORS
 
 Les navigateurs bloquent les requêtes directes vers l'API UN Comtrade à cause de la politique CORS (Cross-Origin Resource Sharing). Vous verrez des erreurs comme :
@@ -49,31 +54,32 @@ Vous devriez voir des données JSON sur le commerce France-Allemagne.
 
 1. Démarrer le proxy CORS (voir ci-dessus)
 2. Ouvrir l'application : `http://localhost:8000/index.html`
-3. La checkbox "🌐 Utiliser données officielles (UN Comtrade)" doit être cochée
+3. L'application utilise **automatiquement** les données officielles UN Comtrade
 4. Sélectionner un pays et une année
 5. Observer la console du navigateur :
-   - ✅ "Real data from UN Comtrade" = données officielles récupérées
-   - ⚠️ Messages d'erreur = fallback vers simulation
+   - ✅ "Official data from UN Comtrade" = données récupérées avec succès
+   - ⚪ "No data available" = données non disponibles (affichera 0)
 
 ## 📊 Vérifier les données officielles
 
 1. Cliquer sur "📊 Afficher Données"
 2. Regarder la colonne "Source" dans le tableau
 3. Les pays avec données officielles afficheront "UN Comtrade"
-4. Les autres afficheront "Simulation"
+4. Les autres afficheront "No data available" (valeur = 0)
 
-## ⚙️ Configuration
+## ⚙️ Configuration (pour développeurs)
 
 Dans `api-config.js` :
 
 ```javascript
-API_SMART_CONFIG.useCorsProxy = true;  // Activer le proxy
-API_SMART_CONFIG.useRealAPIs = true;   // Tenter d'utiliser APIs réelles
+API_SMART_CONFIG.useCorsProxy = true;  // Activer le proxy CORS (requis)
+API_SMART_CONFIG.useRealAPIs = true;   // Toujours true (pas de simulation)
 ```
 
-Ou dans `app.js` via la checkbox UI :
-```javascript
-API_CONFIG.useRealAPIs = true;  // Contrôlé par la checkbox
+L'application est configurée en **mode production** :
+- ✅ Données officielles uniquement (UN Comtrade API)
+- ❌ Aucune donnée simulée
+- ⚪ Valeur = 0 si données non disponibles
 ```
 
 ## 🚀 Production

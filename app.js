@@ -2549,13 +2549,9 @@ document.getElementById('year-selector').addEventListener('change', (e) => {
     loadBalanceData(selectedYear);
 });
 
-// Gestionnaire pour activer/désactiver les appels API réels
-document.getElementById('use-real-api-toggle').addEventListener('change', (e) => {
-    API_CONFIG.useRealAPIs = e.target.checked;
-    console.log(`${e.target.checked ? '🌐' : '⚡'} ${e.target.checked ? 'APIs réelles activées' : 'Mode simulation (rapide)'}`);
-    // Recharger les données avec le nouveau mode
-    loadBalanceData(currentYear);
-});
+// MODE PRODUCTION: API réelles uniquement, pas de simulation
+// La checkbox a été retirée - les données officielles sont toujours utilisées
+// API_CONFIG.useRealAPIs est toujours true
 
 // Système de recherche de pays avec dropdown filtrable
 let allCountriesSorted = [];
@@ -2879,8 +2875,8 @@ function showDataTable() {
     metadataDiv.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <strong>📊 Source:</strong> API Nationale / Simulation<br>
-                <small>Données commerciales internationales</small>
+                <strong>📊 Source:</strong> UN Comtrade (Données Officielles)<br>
+                <small>API comtradeapi.un.org</small>
             </div>
             <div>
                 <strong>📅 Année:</strong> ${currentYear}<br>
@@ -2969,7 +2965,7 @@ function downloadCSV() {
     // En-tête du CSV avec métadonnées
     const lastUpdate = new Date().toISOString().split('T')[0];
     let csv = `"Balance des Paiements - ${currentSourceCountry}"\n`;
-    csv += `"Source: API Nationale / Simulation"\n`;
+    csv += `"Source: UN Comtrade (Données Officielles) - comtradeapi.un.org"\n`;
     csv += `"Année: ${currentYear}"\n`;
     csv += `"Date d'extraction: ${lastUpdate}"\n`;
     csv += `"Nombre de pays: ${tradingCountries.length}"\n`;

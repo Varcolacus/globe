@@ -6,8 +6,8 @@ const API_SMART_CONFIG = {
     // Stratégie de fallback : National > Regional > International
     fallbackStrategy: ['national', 'regional', 'international'],
     
-    // Activer les appels API réels (peut être désactivé pour utiliser uniquement simulation)
-    useRealAPIs: true,
+    // Mode PRODUCTION : uniquement données officielles, pas de simulation
+    useRealAPIs: true,  // Toujours activé - pas de simulation
     
     // Proxy CORS pour contourner les restrictions du navigateur
     useCorsProxy: true,
@@ -531,14 +531,15 @@ const API_SMART_CONFIG = {
     
     /**
      * Obtenir données pour tous les pays (mode batch avec métadonnées)
+     * UNIQUEMENT DONNÉES OFFICIELLES - Pas de simulation
      */
     async fetchAllCountriesData(year = 2025, selectedCountry = 'France') {
-        console.log(`\n🌍 Fetching trade data for all countries (year: ${year}, from: ${selectedCountry})`);
-        console.log(`📋 Strategy: ${this.useRealAPIs ? 'Real APIs (Bilateral)' : 'Simulation only'} → Fallback\n`);
+        console.log(`\n🌍 Fetching OFFICIAL trade data only (year: ${year}, from: ${selectedCountry})`);
+        console.log(`📋 Source: UN Comtrade API via CORS proxy\n`);
         
         const results = [];
         let successCount = 0;
-        let fallbackCount = 0;
+        let noDataCount = 0;
         
         for (const country of countries) {
             if (country.name === selectedCountry) {
@@ -553,60 +554,68 @@ const API_SMART_CONFIG = {
                         source: 'Source Country',
                         sourceType: 'Reference',
                         country: selectedCountry,
-                        quality: 'N/A',
+                        quality: 'reference',
                         priority: 0,
                         note: 'This is the reference country',
                         lastUpdate: new Date().toISOString()
                     }
                 });
             } else {
-                let tradeData = null;
+                // Essayer d'obtenir les données bilatérales réelles
+                const tradeData = await this.fetchBilateralTrade(selectedCountry, country.name, year);
                 
-                // Essayer d'abord les données bilatérales réelles si activé
-                if (this.useRealAPIs) {
-                    tradeData = await this.fetchBilateralTrade(selectedCountry, country.name, year);
-                    
-                    if (tradeData) {
-                        successCount++;
-                        console.log(`✅ ${country.name}: Real data from ${tradeData.source}`);
-                        results.push({
-                            ...country,
-                            balance: tradeData.balance,
-                            exports: tradeData.exports,
-                            imports: tradeData.imports,
-                            volume: tradeData.volume,
-                            _metadata: {
-                                source: tradeData.source,
-                                sourceType: 'International Organization',
-                                country: country.name,
-                                quality: 'official',
-                                priority: 1,
-                                lastUpdate: new Date().toISOString()
-                            }
-                        });
-                        
-                        // Délai pour respecter les limites de taux
-                        await new Promise(resolve => setTimeout(resolve, this.rateLimitDelay));
-                        continue;
-                    }
+                if (tradeData) {
+                    // Données officielles obtenues
+                    successCount++;
+                    console.log(`✅ ${country.name}: Official data from ${tradeData.source}`);
+                    results.push({
+                        ...country,
+                        balance: tradeData.balance,
+                        exports: tradeData.exports,
+                        imports: tradeData.imports,
+                        volume: tradeData.volume,
+                        _metadata: {
+                            source: tradeData.source,
+                            sourceType: 'International Organization',
+                            country: country.name,
+                            quality: 'official',
+                            priority: 1,
+                            lastUpdate: new Date().toISOString()
+                        }
+                    });
+                } else {
+                    // Pas de données disponibles - afficher 0
+                    noDataCount++;
+                    console.log(`⚪ ${country.name}: No data available`);
+                    results.push({
+                        ...country,
+                        balance: 0,
+                        exports: 0,
+                        imports: 0,
+                        volume: 0,
+                        _metadata: {
+                            source: 'No data available',
+                            sourceType: 'Missing',
+                            country: country.name,
+                            quality: 'unavailable',
+                            priority: 99,
+                            note: 'Official data not available for this country/year',
+                            lastUpdate: new Date().toISOString()
+                        }
+                    });
                 }
                 
-                // Fallback vers simulation si API échoue ou désactivée
-                fallbackCount++;
-                const simulatedData = await this.fetchTradeDataWithFallback(country.name, year);
-                results.push({
-                    ...country,
-                    ...simulatedData
-                });
+                // Délai pour respecter les limites de taux
+                await new Promise(resolve => setTimeout(resolve, this.rateLimitDelay));
             }
         }
         
         // Afficher résumé des sources
         const metadata = this.getAllSourceMetadata();
-        console.log(`\n✅ Data fetching complete!`);
+        console.log(`\n✅ Data fetching complete - OFFICIAL DATA ONLY!`);
         console.log(`📊 Sources summary:`);
-        console.log(`   - Real API data: ${successCount} countries`);
-        console.log(`   - Simulated data: ${fallbackCount} countries`);
+        console.log(`   - Official data: ${successCount} countries`);
+        console.log(`   - No data: ${noDataCount} countries`);
         console.log(`   - Total countries: ${metadata.totalCountries}`);
         console.log(`   - By source type:`, metadata.bySourceType);
         console.log(`   - By quality:`, metadata.byQuality);
