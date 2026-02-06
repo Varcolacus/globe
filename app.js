@@ -245,12 +245,33 @@ let currentFilterValue = null;
 async function loadBalanceData(year = currentYear) {
     try {
         currentYear = year;
+        
+        // Afficher un indicateur de chargement
+        const title = document.querySelector('.controls h1');
+        if (title) {
+            const originalText = title.textContent;
+            title.innerHTML = `<span class="loading">${originalText} ⏳</span>`;
+        }
+        
         const response = await API_CONFIG.fetchBalancePaiements(year, currentSourceCountry);
         balanceData = response.data || response; // Extraire .data si présent, sinon utiliser directement
         console.log(`✅ Données ${year} chargées pour ${currentSourceCountry}:`, balanceData.length, 'pays');
+        
+        // Retirer l'indicateur de chargement
+        if (title) {
+            const sourceCountry = countries.find(c => c.name === currentSourceCountry);
+            const flag = sourceCountry ? sourceCountry.flag : '🌍';
+            title.innerHTML = `${flag} Commerce International`;
+        }
+        
         updateGlobeWithBalanceData(currentDataType);
     } catch (error) {
         console.error('❌ Erreur chargement données:', error);
+        // Retirer indicateur même en cas d'erreur
+        const title = document.querySelector('.controls h1');
+        if (title) {
+            title.innerHTML = '❌ Erreur de chargement';
+        }
     }
 }
 
@@ -2609,10 +2630,10 @@ function initializeCountrySelector() {
         dropdown.style.display = 'none';
         clearBtn.style.display = 'inline';
         
-        // Mettre à jour le titre
+        //  Mettre à jour le titre avec indicateur de chargement immédiat
         const title = document.querySelector('.controls h1');
         if (title) {
-            title.textContent = `${country.flag} Commerce International`;
+            title.innerHTML = `<span class="loading">${country.flag} Commerce International ⏳</span>`;
         }
         
         // Rafraîchir les points pour mettre en évidence le nouveau pays source
@@ -2620,8 +2641,8 @@ function initializeCountrySelector() {
             .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
             .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b');
         
-        // Recharger les données
-        console.log(`🏳️ Changement de pays source: ${country.name}`);
+        // Recharger les données (async - l'indicateur sera retiré quand terminé)
+        console.log(`🏳️ Changement de pays source: ${country.name} - Chargement des données...`);
         loadBalanceData(currentYear);
     }
     

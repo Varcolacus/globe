@@ -15,7 +15,7 @@ const API_SMART_CONFIG = {
     corsProxyUrl: 'http://localhost:3001/?url=',
     
     // Limite de taux pour éviter de surcharger les APIs
-    rateLimitDelay: 200, // ms entre chaque requête
+    rateLimitDelay: 50, // ms entre chaque requête (réduit pour UI réactive)
     
     // Cache des métadonnées de sources
     sourceMetadata: new Map(),
@@ -486,7 +486,8 @@ const API_SMART_CONFIG = {
                 return null; // Pas d'API nationale configurée
             }
             
-            console.log(`🏛️ Trying national API: ${apiConfig.institution} for ${sourceCountry}-${partnerCountry}`);
+            // Log silencieux pour éviter 195 messages dans la console
+            // console.log(`🏛️ Trying national API: ${apiConfig.institution} for ${sourceCountry}-${partnerCountry}`);
             
             // TODO: Implémenter les appels spécifiques à chaque API nationale
             // Chaque API a son propre format et endpoints
@@ -506,10 +507,10 @@ const API_SMART_CONFIG = {
             
             // Pour l'instant, retourner null pour signaler que l'implémentation
             // spécifique de chaque API nationale n'est pas encore faite
-            console.log(`⚠️ ${apiConfig.institution}: Bilateral data parsing not yet implemented`);
             return null;
             
         } catch (error) {
+            // Logs d'erreur seulement
             console.warn(`❌ National API failed for ${sourceCountry}-${partnerCountry}:`, error.message);
             return null;
         }
@@ -599,10 +600,10 @@ const API_SMART_CONFIG = {
                                'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
             
             if (euCountries.includes(sourceISO) && euCountries.includes(partnerISO)) {
-                // TODO: Implémenter appel Eurostat bilateral
+                // TODO: Implémenter appel Eurostat bilateral (COMEXT database)
                 // const eurostatData = await this.fetchEurostatBilateral(sourceISO, partnerISO, year);
                 // if (eurostatData) return eurostatData;
-                console.log(`📊 ${sourceCountry}-${partnerCountry}: Could use Eurostat (EU-EU trade) - Not yet implemented`);
+                // Log silencieux pour éviter d'encombrer la console
             }
             
             // ========================================================================
@@ -617,7 +618,7 @@ const API_SMART_CONFIG = {
                 ? `${this.corsProxyUrl}${encodeURIComponent(apiUrl)}`
                 : apiUrl;
             
-            console.log(`🌐 Using UN Comtrade (aggregates national data): ${sourceCountry} ↔ ${partnerCountry} (${year})`);
+            // Log silencieux pour éviter d'encombrer la console (voir progression dans fetchAllCountriesData)
             
             const response = await fetch(url, {
                 headers: {
@@ -686,6 +687,8 @@ const API_SMART_CONFIG = {
         let nationalDataCount = 0;
         let comtradeCount = 0;
         let noDataCount = 0;
+        let processedCount = 0;
+        const totalCountries = countries.length;
         
         // Pays membres de l'UE (priorité Eurostat qui utilise les données nationales)
         const euCountries = ['Allemagne', 'France', 'Italie', 'Espagne', 'Pays-Bas', 'Belgique', 
@@ -695,6 +698,13 @@ const API_SMART_CONFIG = {
                             'Luxembourg', 'Malte', 'Bulgarie', 'Roumanie'];
         
         for (const country of countries) {
+            processedCount++;
+            
+            // Afficher progression tous les 20 pays
+            if (processedCount % 20 === 0 || processedCount === totalCountries) {
+                console.log(`⏳ Progression: ${processedCount}/${totalCountries} pays traités (${Math.round(processedCount/totalCountries*100)}%)`);
+            }
+            
             if (country.name === selectedCountry) {
                 // Pays source = balance 0
                 results.push({
@@ -735,8 +745,7 @@ const API_SMART_CONFIG = {
                 }
                 
                 if (tradeData) {
-                    // Données officielles obtenues
-                    console.log(`✅ ${country.name}: ${dataSource}`);
+                    // Données officielles obtenues (log silencieux sauf erreurs)
                     results.push({
                         ...country,
                         balance: tradeData.balance,
@@ -756,7 +765,6 @@ const API_SMART_CONFIG = {
                 } else {
                     // Pas de données disponibles - afficher 0
                     noDataCount++;
-                    console.log(`⚪ ${country.name}: No official data available`);
                     results.push({
                         ...country,
                         balance: 0,
