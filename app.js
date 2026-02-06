@@ -472,6 +472,7 @@ function updateGlobeWithBalanceData(dataType = 'balance') {
     // Trier par épaisseur pour afficher les petites lignes en premier
     updatedArcs.sort((a, b) => a.stroke - b.stroke);
     
+    console.log(`🌐 Mise à jour globe: ${updatedArcs.length} arcs créés pour ${currentSourceCountry}`);
     globe.arcsData(updatedArcs);
     
     // Colorer les surfaces des pays selon le type de données
