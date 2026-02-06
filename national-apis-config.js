@@ -21,17 +21,16 @@ const NATIONAL_APIS = {
         },
         'NL': {
             country: 'Pays-Bas',
-            institution: 'Statistics Netherlands (CBS)',
-            url: 'https://opendata.cbs.nl/ODataApi/odata',
+            institution: 'De Nederlandsche Bank (DNB) & CBS',
+            url: 'https://statistiek.dnb.nl/downloads/',
+            urlSecondary: 'https://opendata.cbs.nl/ODataApi/odata',
             authRequired: false,
             quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            format: 'OData',
-            tableCodes: {
-                trade: '82009ENG'
-            },
-            docs: 'https://opendata.cbs.nl/statline/portal.html?_la=en&_catalog=CBS'
+            format: 'SDMX',
+            note: 'Balance des paiements (DNB), commerce extérieur (CBS)',
+            docs: 'https://www.dnb.nl/en/statistics/'
         },
         'SE': {
             country: 'Suède',
@@ -57,15 +56,14 @@ const NATIONAL_APIS = {
         },
         'GB': {
             country: 'Royaume-Uni',
-            institution: 'Office for National Statistics (ONS)',
+            institution: 'Bank of England & ONS',
             url: 'https://api.ons.gov.uk',
+            urlSecondary: 'https://www.bankofengland.co.uk/boeapps/database/',
             authRequired: false,
             quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            datasets: {
-                trade: '/datasets/trade'
-            },
+            note: 'Balance des paiements (ONS), statistiques monétaires (BoE)',
             docs: 'https://developer.ons.gov.uk/'
         },
         'AU': {
@@ -94,13 +92,14 @@ const NATIONAL_APIS = {
         },
         'CH': {
             country: 'Suisse',
-            institution: 'Swiss Federal Customs Administration',
-            url: 'https://www.gate.ezv.admin.ch/swissimpex',
+            institution: 'Swiss National Bank (SNB)',
+            url: 'https://data.snb.ch/en',
             authRequired: false,
             quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://www.gate.ezv.admin.ch/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements et statistiques monétaires',
+            docs: 'https://data.snb.ch/en/topics/aube'
         },
         'DK': {
             country: 'Danemark',
@@ -117,13 +116,14 @@ const NATIONAL_APIS = {
         },
         'FI': {
             country: 'Finlande',
-            institution: 'Statistics Finland',
-            url: 'https://pxdata.stat.fi/PxWeb/api/v1',
+            institution: 'Bank of Finland (Suomen Pankki)',
+            url: 'https://www.suomenpankki.fi/en/Statistics/',
             authRequired: false,
             quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://www.stat.fi/org/lainsaadanto/avoin_data_en.html'
+            note: 'Balance des paiements',
+            docs: 'https://www.suomenpankki.fi/en/Statistics/'
         }
     },
 
@@ -131,96 +131,103 @@ const NATIONAL_APIS = {
     standard: {
         'DE': {
             country: 'Allemagne',
-            institution: 'Federal Statistical Office (Destatis)',
-            url: 'https://www-genesis.destatis.de/genesisWS/rest/2020',
-            authRequired: true,
-            quality: 'good',
+            institution: 'Deutsche Bundesbank (Central Bank)',
+            url: 'https://api.statistiken.bundesbank.de/rest',
+            authRequired: false,
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://www.destatis.de/EN/Service/OpenData/_node.html'
+            docs: 'https://www.bundesbank.de/en/statistics/time-series-databases'
         },
         'FR': {
             country: 'France',
-            institution: 'Banque de France & Douanes Françaises',
-            url: 'https://webstat.banque-france.fr/ws/',
-            urlSecondary: 'https://api.gouv.fr/les-api/api_cle_douane',
+            institution: 'Banque de France (Central Bank)',
+            url: 'https://webstat.banque-france.fr',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://developer.webstat.banque-france.fr/'
+            note: 'Balance des paiements, commerce extérieur, statistiques monétaires',
+            docs: 'https://webstat.banque-france.fr'
         },
         'IT': {
             country: 'Italie',
-            institution: 'Italian National Institute of Statistics (ISTAT)',
-            url: 'http://sdmx.istat.it/SDMXWS/rest',
+            institution: 'Banca d\'Italia (Central Bank)',
+            url: 'https://infostat.bancaditalia.it/inquiry/',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
             format: 'SDMX',
-            docs: 'https://www.istat.it/en/analysis-and-products/api'
+            note: 'Balance des paiements et statistiques financières',
+            docs: 'https://www.bancaditalia.it/statistiche/index.html'
         },
         'ES': {
             country: 'Espagne',
-            institution: 'National Statistics Institute (INE)',
-            url: 'https://servicios.ine.es/wstempus/js/EN',
+            institution: 'Banco de España (Central Bank)',
+            url: 'https://www.bde.es/webbe/es/estadisticas/',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://www.ine.es/dyngs/DataLab/en/manual.html?cid=45'
+            note: 'Balance des paiements et commerce extérieur',
+            docs: 'https://www.bde.es/bde/en/areas/estadis/'
         },
         'JP': {
             country: 'Japon',
-            institution: 'e-Stat (Ministry of Internal Affairs)',
-            url: 'https://api.e-stat.go.jp/rest/3.0/app',
-            authRequired: true,
-            quality: 'good',
+            institution: 'Bank of Japan & Ministry of Finance',
+            url: 'https://www.stat-search.boj.or.jp/index_en.html',
+            urlSecondary: 'https://api.e-stat.go.jp/rest/3.0/app',
+            authRequired: false,
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            language: 'ja/en',
-            docs: 'https://www.e-stat.go.jp/api/'
+            note: 'Balance des paiements (BoJ/MoF)',
+            docs: 'https://www.boj.or.jp/en/statistics/index.htm'
         },
         'KR': {
             country: 'Corée du Sud',
-            institution: 'Korea Customs Service',
-            url: 'https://unipass.customs.go.kr/api',
+            institution: 'Bank of Korea',
+            url: 'https://ecos.bok.or.kr/api/',
             authRequired: true,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://unipass.customs.go.kr/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://ecos.bok.or.kr/'
         },
         'BR': {
             country: 'Brésil',
-            institution: 'Comex Stat (MDIC)',
-            url: 'http://api.comexstat.mdic.gov.br/general',
+            institution: 'Banco Central do Brasil',
+            url: 'https://www.bcb.gov.br/en/statistics',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'http://comexstat.mdic.gov.br/en/api'
+            note: 'Balance des paiements',
+            docs: 'https://www.bcb.gov.br/en/statistics'
         },
         'MX': {
             country: 'Mexique',
-            institution: 'INEGI',
-            url: 'https://www.inegi.org.mx/app/api/denue/v1',
+            institution: 'Banco de México (Central Bank)',
+            url: 'https://www.banxico.org.mx/SieAPIRest/service/v1/',
             authRequired: true,
-            quality: 'good',
-            coverage: 'partial',
+            quality: 'excellent',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'https://www.inegi.org.mx/servicios/api_indicadores.html'
+            note: 'Balance des paiements',
+            docs: 'https://www.banxico.org.mx/SieAPIRest/service/v1/doc/'
         },
         'IN': {
             country: 'Inde',
-            institution: 'DGCI&S (Ministry of Commerce)',
-            url: 'https://tradestat.commerce.gov.in/eidb',
+            institution: 'Reserve Bank of India (RBI)',
+            url: 'https://www.rbi.org.in/Scripts/Statistics.aspx',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://tradestat.commerce.gov.in/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.rbi.org.in/Scripts/Statistics.aspx'
         },
         'SG': {
             country: 'Singapour',
@@ -244,23 +251,25 @@ const NATIONAL_APIS = {
         },
         'AT': {
             country: 'Autriche',
-            institution: 'Statistics Austria',
-            url: 'https://data.statistik.gv.at/web/meta.jsp',
+            institution: 'Oesterreichische Nationalbank (OeNB)',
+            url: 'https://www.oenb.at/en/Statistics.html',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://www.statistik.at/en/services/tools/services/open-data'
+            note: 'Balance des paiements',
+            docs: 'https://www.oenb.at/en/Statistics.html'
         },
         'BE': {
             country: 'Belgique',
-            institution: 'StatBel',
-            url: 'https://statbel.fgov.be/en/open-data',
+            institution: 'National Bank of Belgium (NBB)',
+            url: 'https://stat.nbb.be/',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://statbel.fgov.be/en/open-data'
+            note: 'Balance des paiements et commerce extérieur',
+            docs: 'https://www.nbb.be/en/statistics'
         },
         'PL': {
             country: 'Pologne',
@@ -274,33 +283,36 @@ const NATIONAL_APIS = {
         },
         'AR': {
             country: 'Argentine',
-            institution: 'INDEC',
-            url: 'https://apis.datos.gob.ar/series/api',
-            authRequired: false,
-            quality: 'good',
-            coverage: 'partial',
-            updateFrequency: 'quarterly',
-            docs: 'https://apis.datos.gob.ar/'
-        },
-        'CL': {
-            country: 'Chili',
-            institution: 'INE Chile',
-            url: 'https://api.ine.cl/api/v1',
+            institution: 'Banco Central de la República Argentina (BCRA)',
+            url: 'https://www.bcra.gob.ar/PublicacionesEstadisticas/Principales_variables.asp',
             authRequired: false,
             quality: 'good',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://www.ine.cl/herramientas/desarrolladores'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.bcra.gob.ar/'
+        },
+        'CL': {
+            country: 'Chili',
+            institution: 'Banco Central de Chile',
+            url: 'https://si3.bcentral.cl/siete',
+            authRequired: false,
+            quality: 'excellent',
+            coverage: 'complete',
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.bcentral.cl/en/web/banco-central/areas/statistics'
         },
         'ZA': {
             country: 'Afrique du Sud',
-            institution: 'Stats SA',
-            url: 'http://www.statssa.gov.za/api',
+            institution: 'South African Reserve Bank (SARB)',
+            url: 'https://www.resbank.co.za/en/home/what-we-do/statistics',
             authRequired: false,
-            quality: 'good',
-            coverage: 'partial',
+            quality: 'excellent',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'http://www.statssa.gov.za/'
+            note: 'Balance des paiements',
+            docs: 'https://www.resbank.co.za/en/home/what-we-do/statistics'
         },
         'IL': {
             country: 'Israël',
@@ -314,43 +326,47 @@ const NATIONAL_APIS = {
         },
         'TH': {
             country: 'Thaïlande',
-            institution: 'Thai Customs',
-            url: 'https://www.customs.go.th/statistic_report.php',
-            authRequired: true,
-            quality: 'moderate',
+            institution: 'Bank of Thailand',
+            url: 'https://www.bot.or.th/en/statistics.html',
+            authRequired: false,
+            quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://www.customs.go.th/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.bot.or.th/en/statistics.html'
         },
         'MY': {
             country: 'Malaisie',
-            institution: 'DOSM',
-            url: 'https://api.dosm.gov.my',
+            institution: 'Bank Negara Malaysia (BNM)',
+            url: 'https://www.bnm.gov.my/publications/statistics',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://open.dosm.gov.my/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.bnm.gov.my/'
         },
         'ID': {
             country: 'Indonésie',
-            institution: 'BPS Statistics Indonesia',
-            url: 'https://webapi.bps.go.id',
-            authRequired: true,
-            quality: 'moderate',
-            coverage: 'partial',
+            institution: 'Bank Indonesia (BI)',
+            url: 'https://www.bi.go.id/en/statistik/',
+            authRequired: false,
+            quality: 'good',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'https://webapi.bps.go.id/'
+            note: 'Balance des paiements',
+            docs: 'https://www.bi.go.id/en/statistik/'
         },
         'PH': {
             country: 'Philippines',
-            institution: 'Philippine Statistics Authority',
-            url: 'https://psa.gov.ph/id/162679',
+            institution: 'Bangko Sentral ng Pilipinas (BSP)',
+            url: 'https://www.bsp.gov.ph/SitePages/Statistics/Statistics.aspx',
             authRequired: false,
-            quality: 'moderate',
-            coverage: 'partial',
+            quality: 'good',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'https://psa.gov.ph/'
+            note: 'Balance des paiements',
+            docs: 'https://www.bsp.gov.ph/'
         },
         'VN': {
             country: 'Vietnam',
@@ -364,53 +380,58 @@ const NATIONAL_APIS = {
         },
         'CO': {
             country: 'Colombie',
-            institution: 'DANE',
-            url: 'https://www.dane.gov.co/files/sen/ccee/microdatos',
+            institution: 'Banco de la República (Colombia)',
+            url: 'https://www.banrep.gov.co/en/statistics',
             authRequired: false,
-            quality: 'moderate',
-            coverage: 'partial',
+            quality: 'excellent',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'https://www.dane.gov.co/'
+            note: 'Balance des paiements',
+            docs: 'https://www.banrep.gov.co/en/statistics'
         },
         'PE': {
             country: 'Pérou',
-            institution: 'INEI',
-            url: 'https://www.inei.gob.pe/',
+            institution: 'Banco Central de Reserva del Perú (BCRP)',
+            url: 'https://estadisticas.bcrp.gob.pe/estadisticas/series/',
             authRequired: false,
-            quality: 'moderate',
-            coverage: 'partial',
+            quality: 'excellent',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            docs: 'https://www.inei.gob.pe/'
+            note: 'Balance des paiements',
+            docs: 'https://estadisticas.bcrp.gob.pe/'
         },
         'PT': {
             country: 'Portugal',
-            institution: 'Statistics Portugal (INE)',
-            url: 'https://www.ine.pt/xportal/xmain?xpid=INE',
+            institution: 'Banco de Portugal (Central Bank)',
+            url: 'https://www.bportugal.pt/en/page/statistics',
             authRequired: false,
-            quality: 'good',
+            quality: 'excellent',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://www.ine.pt/'
+            note: 'Balance des paiements',
+            docs: 'https://bpstat.bportugal.pt/'
         },
         'GR': {
             country: 'Grèce',
-            institution: 'Hellenic Statistical Authority (ELSTAT)',
-            url: 'https://www.statistics.gr/en/home/',
-            authRequired: false,
-            quality: 'moderate',
-            coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://www.statistics.gr/'
-        },
-        'IE': {
-            country: 'Irlande',
-            institution: 'Central Statistics Office',
-            url: 'https://ws.cso.ie/public/api.restful/PxStat.Data.Cube_API.ReadDataset',
+            institution: 'Bank of Greece (Central Bank)',
+            url: 'https://www.bankofgreece.gr/en/statistics',
             authRequired: false,
             quality: 'good',
             coverage: 'complete',
             updateFrequency: 'monthly',
-            docs: 'https://data.cso.ie/'
+            note: 'Balance des paiements',
+            docs: 'https://www.bankofgreece.gr/en/statistics'
+        },
+        'IE': {
+            country: 'Irlande',
+            institution: 'Central Bank of Ireland',
+            url: 'https://data.centralbank.ie/',
+            authRequired: false,
+            quality: 'excellent',
+            coverage: 'complete',
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://www.centralbank.ie/statistics'
         },
         'CZ': {
             country: 'République tchèque',
@@ -444,13 +465,14 @@ const NATIONAL_APIS = {
         },
         'TR': {
             country: 'Turquie',
-            institution: 'TurkStat',
-            url: 'https://data.tuik.gov.tr/Kategori/GetKategori?p=dis-ticaret-104',
+            institution: 'Central Bank of Turkey (TCMB)',
+            url: 'https://evds2.tcmb.gov.tr/index.php',
             authRequired: true,
-            quality: 'moderate',
+            quality: 'excellent',
             coverage: 'complete',
-            updateFrequency: 'monthly',
-            docs: 'https://www.tuik.gov.tr/'
+            updateFrequency: 'quarterly',
+            note: 'Balance des paiements',
+            docs: 'https://evds2.tcmb.gov.tr/'
         },
         'AE': {
             country: 'Émirats Arabes Unis',
@@ -479,14 +501,14 @@ const NATIONAL_APIS = {
         },
         'RU': {
             country: 'Russie',
-            institution: 'Rosstat',
-            url: 'https://rosstat.gov.ru/',
+            institution: 'Bank of Russia (CBR)',
+            url: 'https://www.cbr.ru/eng/statistics/',
             authRequired: false,
-            quality: 'limited',
-            coverage: 'partial',
+            quality: 'good',
+            coverage: 'complete',
             updateFrequency: 'quarterly',
-            note: 'Accès restreint en 2026',
-            docs: 'https://rosstat.gov.ru/'
+            note: 'Balance des paiements',
+            docs: 'https://www.cbr.ru/eng/statistics/'
         },
         'EG': {
             country: 'Égypte',

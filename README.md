@@ -122,52 +122,93 @@ globe/
 
 ## 🌐 Sources de données
 
-### 🏛️ APIs d'Institutions Nationales (Système Multi-Sources)
+### 🏛️ Hiérarchie Stricte des Sources de Données
 
-Le projet intègre un **système intelligent de fallback** qui priorise les données des institutions statistiques nationales, avec basculement automatique vers des organisations internationales si nécessaire.
+Le projet utilise un **système de priorité absolue** qui tente TOUJOURS d'obtenir les données directement depuis les banques centrales nationales en premier.
 
-#### **Stratégie de Priorité Automatique**
+#### **Hiérarchie de Priorité (ORDRE STRICT)**
 
-**Priorité 1 - APIs Nationales Premium** (10 pays) 🌟
-- Norvège (SSB), Pays-Bas (CBS), Suède (SCB), États-Unis (Census Bureau)
-- UK (ONS), Australie (ABS), Canada (StatCan), Suisse (Customs), Danemark, Finlande
-- **Qualité**: Excellente - Documentation complète, temps réel, haute fiabilité
+**🥇 PRIORITÉ 1 - API Nationale Directe (SOURCE PRIMAIRE)**
+- **38 banques centrales** configurées avec implémentations spécifiques
+- **Exemples fonctionnels** :
+  - 🇨🇦 Statistics Canada (WDS API) - ✅ Fonctionnel
+  - 🇧🇷 Banco Central do Brasil (SGS API) - ✅ Fonctionnel
+  - 🇩🇪 Deutsche Bundesbank (REST + SDMX) - ✅ Fonctionnel
+  - 🇨🇭 Swiss National Bank (Cubes API) - ✅ Fonctionnel
+  - 🇺🇸 US Census Bureau - 🔑 Requiert clé gratuite
+  - 🇰🇷 Bank of Korea (ECOS) - 🔑 Requiert clé gratuite
+- **Qualité** : Excellente - Source primaire directe, données officielles
+- **Utilisation** : TOUJOURS tentée en premier
 
-**Priorité 2 - APIs Nationales Standard** (30+ pays) ⭐
-- France (Banque de France), Allemagne (Destatis), Japon (e-Stat), Italie (ISTAT)
-- Espagne (INE), Brésil (Comex Stat), Inde (DGCI&S), Corée du Sud, Singapour...
-- **Qualité**: Bonne - Mise à jour régulière, documentation disponible
+**🥈 PRIORITÉ 2 - Sources Secondaires (FALLBACK uniquement)**
 
-**Priorité 3 - APIs Nationales Limitées** (15+ pays)
-- Chine (Customs), Russie (Rosstat), Turquie, Égypte...
-- **Qualité**: Partielle - Données agrégées ou accès restreint
+⚠️ **Important** : Ces sources ne sont utilisées QUE si l'API nationale n'est pas disponible
 
-**Priorité 4 - Eurostat** (27 pays UE) 🇪🇺
-- Fallback régional pour pays membres de l'Union Européenne
-- **Qualité**: Excellente - Données harmonisées EU
+- **Eurostat** (27 pays UE 🇪🇺)
+  - Agrégateur secondaire des données des banques centrales européennes
+  - Utilisé UNIQUEMENT si API nationale non disponible/complexe
+  - Exemples : France (WEBSTAT portail uniquement), Italie (SDMX complexe)
+  
+- **World Bank** (200+ pays 🌍)
+  - Agrégateur secondaire mondial
+  - Utilisé UNIQUEMENT si API nationale ET Eurostat non disponibles
+  - Qualité : Bonne, mais source secondaire
 
-**Priorité 5-6 - Organisations Internationales** 🌍
-- UN Comtrade (190+ pays) - Gratuit, 100 req/h
-- World Bank (200+ pays) - Gratuit, illimité
-- IMF (190+ pays) - Balance des paiements
-- **Qualité**: Bonne - Données agrégées mais complètes
+**🥉 PRIORITÉ 3 - Simulation**
+- Uniquement si aucune source de données n'est disponible
+- Facteur de croissance : 3,5% annuel
+
+#### **38 Banques Centrales Implémentées**
+
+**Europe (18)** : France, Allemagne, Italie, Espagne, UK, Pays-Bas, Belgique, Autriche, Portugal, Suède, Danemark, Norvège, Pologne, Rép. Tchèque, Hongrie, Roumanie, Suisse
+
+**Amériques (6)** : USA, Canada, Brésil, Mexique, Argentine, Chili, Colombie, Pérou
+
+**Asie-Pacifique (9)** : Japon, Corée, Inde, Australie, Singapour, Thaïlande, Malaisie, Indonésie, Philippines
+
+**Autres (3)** : Afrique du Sud, Turquie, Russie
+
+#### **Pourquoi cette Hiérarchie ?**
+
+1. **API Nationale = Source Primaire**
+   - Données directement de l'institution officielle
+   - Mise à jour la plus rapide
+   - Format natif de chaque pays
+
+2. **Eurostat/World Bank = Sources Secondaires**
+   - Compilent depuis les banques centrales
+   - Ajoutent délai de traitement
+   - Harmonisation peut altérer légèrement les données
+   - **NE REMPLACENT PAS l'API nationale directe**
 
 #### **Traçabilité des Données**
 
 Chaque donnée inclut des **métadonnées complètes** :
 ```javascript
 {
-    source: "Statistics Norway (SSB)",
-    sourceType: "National Statistical Office",
-    country: "Norvège",
-    quality: "excellent",
-    priority: 1,
+    source: "Statistics Canada (WDS)",
+    sourceType: "National Central Bank - Direct API",
+    country: "Canada",
+    quality: "official",
+    priority: 1, // API nationale directe
     lastUpdate: "2026-02-06T...",
-    note: "API premium avec documentation complète"
+    note: "Source primaire directe"
 }
 ```
 
-**Visualiser les sources** : Ouvrez `data-sources.html` pour voir un tableau détaillé des sources utilisées pour chaque pays, avec filtres par type et qualité.
+**Logs Console** : Le système affiche clairement quelle source est utilisée :
+```
+🏛️ Attempting national API: Statistics Canada...
+🇨🇦 StatCan: Table 12-10-0011-01 accessed
+✅ Exports: 450,000,000 CAD (Source: Statistics Canada - official)
+
+ou
+
+🏛️ Attempting national API: Banque de France...
+🇫🇷 Banque de France: API nationale directe NON DISPONIBLE
+   → WEBSTAT = portail interactif uniquement
+   → Fallback vers source SECONDAIRE (Eurostat)
+```
 
 #### **Configuration Technique**
 

@@ -75,10 +75,12 @@ const server = http.createServer((req, res) => {
             'Accept': 'application/json'
         }
     }, (proxyRes) => {
-        // Transmettre les headers de la réponse
+        // Transmettre les headers de la réponse avec tous les headers CORS
         res.writeHead(proxyRes.statusCode, {
             'Content-Type': proxyRes.headers['content-type'] || 'application/json',
-            'Access-Control-Allow-Origin': '*'
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+            'Access-Control-Allow-Headers': 'Content-Type'
         });
 
         // Transmettre le corps de la réponse
