@@ -278,6 +278,8 @@ async function loadBalanceData(year = currentYear) {
 function updateGlobeWithBalanceData(dataType = 'balance') {
     currentDataType = dataType;
     
+    console.log(`🔄 updateGlobeWithBalanceData appelé - dataType: ${dataType}, currentSourceCountry: ${currentSourceCountry}, balanceData.length: ${balanceData.length}`);
+    
     // Filtrer les pays avec du commerce réel (volume > 0)
     let countriesWithTrade = balanceData.filter(c => c.volume > 0 && c.name !== currentSourceCountry);
     
@@ -2636,10 +2638,14 @@ function initializeCountrySelector() {
             title.innerHTML = `<span class="loading">${country.flag} Commerce International ⏳</span>`;
         }
         
+        // Vider les arcs immédiatement pour feedback visuel
+        globe.arcsData([]);
+        
         // Rafraîchir les points pour mettre en évidence le nouveau pays source
         globe
             .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
-            .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b');
+            .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b')
+            .pointsData(countries); // Forcer le refresh des points
         
         // Recharger les données (async - l'indicateur sera retiré quand terminé)
         console.log(`🏳️ Changement de pays source: ${country.name} - Chargement des données...`);
