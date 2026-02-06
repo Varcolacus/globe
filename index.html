@@ -25,10 +25,19 @@
         
         <div style="margin-top: 15px; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 10px;">
             <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">🏳️ Pays source:</h3>
-            <select id="source-country-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px;">
-                <option value="France" selected>🇫🇷 France</option>
-                <!-- Options remplies dynamiquement -->
-            </select>
+            <div style="position: relative; margin-bottom: 15px;">
+                <input 
+                    type="text" 
+                    id="country-search-input" 
+                    placeholder="🔍 Rechercher un pays..." 
+                    autocomplete="off"
+                    style="width: 100%; padding: 8px 35px 8px 8px; border-radius: 6px; border: none; font-size: 14px; box-sizing: border-box;"
+                />
+                <span id="country-clear-btn" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 18px; color: #999; display: none;">×</span>
+                <div id="country-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 300px; overflow-y: auto; background: white; border-radius: 6px; margin-top: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); z-index: 1000;">
+                    <!-- Options filtrées dynamiquement -->
+                </div>
+            </div>
             <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">📅 Année:</h3>
             <select id="year-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 15px;">
                 <option value="2025">2025</option>

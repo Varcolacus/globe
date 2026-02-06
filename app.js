@@ -2546,63 +2546,184 @@ document.getElementById('year-selector').addEventListener('change', (e) => {
     loadBalanceData(selectedYear);
 });
 
-// Peupler le sélecteur de pays source
-function populateSourceCountrySelector() {
-    const selector = document.getElementById('source-country-selector');
-    if (!selector) {
-        console.error('❌ Élément source-country-selector non trouvé');
+// Système de recherche de pays avec dropdown filtrable
+let allCountriesSorted = [];
+let selectedCountryIndex = -1;
+
+function initializeCountrySelector() {
+    const searchInput = document.getElementById('country-search-input');
+    const dropdown = document.getElementById('country-dropdown');
+    const clearBtn = document.getElementById('country-clear-btn');
+    
+    if (!searchInput || !dropdown) {
+        console.error('❌ Éléments de recherche de pays non trouvés');
         return;
     }
     
-    // Vider le sélecteur avant d'ajouter les options
-    selector.innerHTML = '';
-    
     // Trier les pays par nom
-    const sortedCountries = [...countries].sort((a, b) => a.name.localeCompare(b.name));
+    allCountriesSorted = [...countries].sort((a, b) => a.name.localeCompare(b.name));
     
-    sortedCountries.forEach(country => {
-        const option = document.createElement('option');
-        option.value = country.name;
-        option.textContent = `${country.flag} ${country.name}`;
-        if (country.name === currentSourceCountry) {
-            option.selected = true;
+    // Définir le pays initial
+    const initialCountry = allCountriesSorted.find(c => c.name === currentSourceCountry);
+    if (initialCountry) {
+        searchInput.value = `${initialCountry.flag} ${initialCountry.name}`;
+    }
+    
+    // Remplir le dropdown avec tous les pays
+    function renderCountryOptions(filteredCountries = allCountriesSorted) {
+        dropdown.innerHTML = '';
+        
+        if (filteredCountries.length === 0) {
+            dropdown.innerHTML = '<div class="no-results">Aucun pays trouvé</div>';
+            return;
         }
-        selector.appendChild(option);
+        
+        filteredCountries.forEach((country, index) => {
+            const option = document.createElement('div');
+            option.className = 'country-option';
+            option.dataset.countryName = country.name;
+            option.dataset.index = index;
+            option.innerHTML = `<span class="country-option-flag">${country.flag}</span><span>${country.name}</span>`;
+            
+            option.addEventListener('click', () => {
+                selectCountry(country);
+            });
+            
+            dropdown.appendChild(option);
+        });
+        
+        selectedCountryIndex = -1;
+    }
+    
+    // Sélectionner un pays
+    function selectCountry(country) {
+        searchInput.value = `${country.flag} ${country.name}`;
+        currentSourceCountry = country.name;
+        dropdown.style.display = 'none';
+        clearBtn.style.display = 'inline';
+        
+        // Mettre à jour le titre
+        const title = document.querySelector('.controls h1');
+        if (title) {
+            title.textContent = `${country.flag} Commerce International`;
+        }
+        
+        // Rafraîchir les points pour mettre en évidence le nouveau pays source
+        globe
+            .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
+            .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b');
+        
+        // Recharger les données
+        console.log(`🏳️ Changement de pays source: ${country.name}`);
+        loadBalanceData(currentYear);
+    }
+    
+    // Filtrer les pays lors de la saisie
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        clearBtn.style.display = searchTerm ? 'inline' : 'none';
+        
+        // Si l'input est vide, afficher tous les pays
+        if (!searchTerm) {
+            renderCountryOptions(allCountriesSorted);
+            dropdown.style.display = 'block';
+            return;
+        }
+        
+        // Filtrer les pays
+        const filtered = allCountriesSorted.filter(country => 
+            country.name.toLowerCase().includes(searchTerm) ||
+            country.capital.toLowerCase().includes(searchTerm)
+        );
+        
+        renderCountryOptions(filtered);
+        dropdown.style.display = 'block';
     });
     
-    console.log(`✅ Sélecteur de pays peuplé avec ${sortedCountries.length} pays`);
+    // Ouvrir le dropdown au focus
+    searchInput.addEventListener('focus', () => {
+        const searchTerm = searchInput.value.toLowerCase();
+        if (searchTerm.includes('🏳️') || searchTerm.includes('🇫🇷')) {
+            // Si c'est un pays déjà sélectionné, vider et afficher tous
+            searchInput.value = '';
+            clearBtn.style.display = 'none';
+            renderCountryOptions(allCountriesSorted);
+        } else {
+            // Filtrer selon la valeur actuelle
+            const filtered = searchTerm ? 
+                allCountriesSorted.filter(country => 
+                    country.name.toLowerCase().includes(searchTerm) ||
+                    country.capital.toLowerCase().includes(searchTerm)
+                ) : allCountriesSorted;
+            renderCountryOptions(filtered);
+        }
+        dropdown.style.display = 'block';
+    });
+    
+    // Navigation au clavier
+    searchInput.addEventListener('keydown', (e) => {
+        const options = dropdown.querySelectorAll('.country-option');
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            selectedCountryIndex = Math.min(selectedCountryIndex + 1, options.length - 1);
+            updateHighlight(options);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            selectedCountryIndex = Math.max(selectedCountryIndex - 1, 0);
+            updateHighlight(options);
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (selectedCountryIndex >= 0 && options[selectedCountryIndex]) {
+                const countryName = options[selectedCountryIndex].dataset.countryName;
+                const country = allCountriesSorted.find(c => c.name === countryName);
+                if (country) selectCountry(country);
+            }
+        } else if (e.key === 'Escape') {
+            dropdown.style.display = 'none';
+        }
+    });
+    
+    // Mettre à jour le highlight
+    function updateHighlight(options) {
+        options.forEach((opt, idx) => {
+            opt.classList.toggle('highlighted', idx === selectedCountryIndex);
+        });
+        
+        // Scroll vers l'élément sélectionné
+        if (selectedCountryIndex >= 0 && options[selectedCountryIndex]) {
+            options[selectedCountryIndex].scrollIntoView({ block: 'nearest' });
+        }
+    }
+    
+    // Bouton clear
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        clearBtn.style.display = 'none';
+        searchInput.focus();
+        renderCountryOptions(allCountriesSorted);
+        dropdown.style.display = 'block';
+    });
+    
+    // Fermer le dropdown si on clique ailleurs
+    document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !dropdown.contains(e.target) && !clearBtn.contains(e.target)) {
+            dropdown.style.display = 'none';
+            
+            // Restaurer le pays sélectionné si l'input est vide ou invalide
+            const country = allCountriesSorted.find(c => c.name === currentSourceCountry);
+            if (country && !searchInput.value.includes(country.name)) {
+                searchInput.value = `${country.flag} ${country.name}`;
+            }
+        }
+    });
+    
+    console.log(`✅ Système de recherche de pays initialisé avec ${allCountriesSorted.length} pays`);
 }
 
 // Initialiser le sélecteur de pays après un court délai pour s'assurer que le DOM est prêt
 setTimeout(() => {
-    populateSourceCountrySelector();
-    
-    // Gestionnaire pour le changement de pays source
-    const sourceSelector = document.getElementById('source-country-selector');
-    if (sourceSelector) {
-        sourceSelector.addEventListener('change', (e) => {
-            const selectedCountry = e.target.value;
-            console.log(`🏳️ Changement de pays source: ${selectedCountry}`);
-            currentSourceCountry = selectedCountry;
-            
-            // Mettre à jour le titre
-            const title = document.querySelector('.controls h1');
-            const countryData = countries.find(c => c.name === selectedCountry);
-            if (title && countryData) {
-                title.textContent = `${countryData.flag} Commerce International`;
-            }
-            
-            // Rafraîchir les points pour mettre en évidence le nouveau pays source
-            globe
-                .pointRadius(d => d.name === currentSourceCountry ? 1.2 : 0.7)
-                .pointColor(d => d.name === currentSourceCountry ? '#0055A4' : '#ff6b6b');
-            
-            // Recharger les données
-            loadBalanceData(currentYear);
-        });
-    } else {
-        console.error('❌ Élément source-country-selector non trouvé pour l\'event listener');
-    }
+    initializeCountrySelector();
 }, 100);
 
 // Gestionnaire pour le type de filtre

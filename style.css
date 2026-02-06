@@ -113,6 +113,82 @@ h1 {
     animation: pulse 2s infinite;
 }
 
+/* Styles pour le sélecteur de pays avec recherche */
+#country-search-input {
+    transition: border 0.2s, box-shadow 0.2s;
+}
+
+#country-search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.5);
+}
+
+#country-dropdown {
+    animation: dropdownSlide 0.2s ease-out;
+}
+
+@keyframes dropdownSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+#country-dropdown::-webkit-scrollbar {
+    width: 8px;
+}
+
+#country-dropdown::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+}
+
+#country-dropdown::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+
+#country-dropdown::-webkit-scrollbar-thumb:hover {
+    background: #555;
+}
+
+.country-option {
+    padding: 10px 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+    transition: background 0.2s;
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: center;
+}
+
+.country-option:hover,
+.country-option.highlighted {
+    background: #667eea;
+    color: white;
+}
+
+.country-option:last-child {
+    border-bottom: none;
+}
+
+.country-option-flag {
+    margin-right: 8px;
+    font-size: 18px;
+}
+
+.no-results {
+    padding: 20px;
+    text-align: center;
+    color: #999;
+    font-style: italic;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .controls {
