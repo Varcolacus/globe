@@ -9,6 +9,10 @@ const API_SMART_CONFIG = {
     // Activer les appels API réels (peut être désactivé pour utiliser uniquement simulation)
     useRealAPIs: true,
     
+    // Proxy CORS pour contourner les restrictions du navigateur
+    useCorsProxy: true,
+    corsProxyUrl: 'http://localhost:3001/?url=',
+    
     // Limite de taux pour éviter de surcharger les APIs
     rateLimitDelay: 200, // ms entre chaque requête
     
@@ -468,15 +472,19 @@ const API_SMART_CONFIG = {
             
             // UN Comtrade API pour commerce bilatéral
             // Format: /reporter/partner/year
-            const url = `https://comtradeapi.un.org/data/v1/get/C/A/${year}/${sourceISO}/${partnerISO}/total`;
+            const apiUrl = `https://comtradeapi.un.org/data/v1/get/C/A/${year}/${sourceISO}/${partnerISO}/total`;
             
-            console.log(`📡 Fetching bilateral data: ${sourceCountry} ↔ ${partnerCountry} (${year})`);
+            // Utiliser le proxy CORS si activé, sinon tentative directe
+            const url = this.useCorsProxy 
+                ? `${this.corsProxyUrl}${encodeURIComponent(apiUrl)}`
+                : apiUrl;
+            
+            console.log(`📡 Fetching bilateral data: ${sourceCountry} ↔ ${partnerCountry} (${year}) ${this.useCorsProxy ? '(via proxy)' : ''}`);
             
             const response = await fetch(url, {
                 headers: {
                     'Accept': 'application/json'
-                },
-                mode: 'cors' // Tenter CORS direct
+                }
             });
             
             if (!response.ok) {
@@ -621,6 +629,14 @@ const API_CONFIG = {
     },
     set useRealAPIs(value) {
         API_SMART_CONFIG.useRealAPIs = value;
+    },
+    
+    // Exposer la configuration du proxy CORS
+    get useCorsProxy() {
+        return API_SMART_CONFIG.useCorsProxy;
+    },
+    set useCorsProxy(value) {
+        API_SMART_CONFIG.useCorsProxy = value;
     },
     
     async fetchBalancePaiements(year = 2025, selectedCountry = 'France') {
