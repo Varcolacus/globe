@@ -1,3 +1,11 @@
+// ============================================================================
+// 🌍 GLOBE 3D - COMMERCE INTERNATIONAL
+// Version: 20260206f
+// ============================================================================
+console.log('🚀 App.js chargé - Version 20260206f');
+console.log('🔍 Debug mode activé - Logs verbeux disponibles');
+console.log('📊 Simulation déterministe basée sur hash');
+
 // Centres géographiques des pays avec régions
 const countryRegions = {
     'Europe': ['France', 'Albanie', 'Andorre', 'Autriche', 'Biélorussie', 'Belgique', 'Bosnie-Herzégovine', 'Bulgarie', 'Croatie', 'Chypre', 'Tchéquie', 'Danemark', 'Estonie', 'Finlande', 'Allemagne', 'Grèce', 'Hongrie', 'Islande', 'Irlande', 'Italie', 'Kosovo', 'Lettonie', 'Liechtenstein', 'Lituanie', 'Luxembourg', 'Macédoine du Nord', 'Malte', 'Moldavie', 'Monaco', 'Monténégro', 'Pays-Bas', 'Norvège', 'Pologne', 'Portugal', 'Roumanie', 'Russie', 'Saint-Marin', 'Serbie', 'Slovaquie', 'Slovénie', 'Espagne', 'Suède', 'Suisse', 'Ukraine', 'Royaume-Uni', 'Vatican'],
