@@ -2056,7 +2056,8 @@ const API_SMART_CONFIG = {
      */
     async fetchAllCountriesData(year = 2025, selectedCountry = 'France') {
         console.log(`\n🌍 Chargement des données OFFICIELLES (année: ${year}, depuis: ${selectedCountry})`);
-        console.log(`📋 Hiérarchie: 1️⃣ Sources Nationales → 2️⃣ Organisations Internationales → 3️⃣ Simulation`);
+        console.log(`� DEBUG: selectedCountry = "${selectedCountry}" (type: ${typeof selectedCountry})`);
+        console.log(`�📋 Hiérarchie: 1️⃣ Sources Nationales → 2️⃣ Organisations Internationales → 3️⃣ Simulation`);
         console.log(`🏛️ Priorité absolue : Banques centrales et instituts statistiques nationaux\n`);
         
         const results = [];
@@ -2139,22 +2140,68 @@ const API_SMART_CONFIG = {
                         }
                     });
                 } else {
-                    // Pas de données disponibles - utiliser simulation
+                    // Pas de données disponibles - utiliser simulation adaptée au pays source
                     noDataCount++;
-                    // FALLBACK TEMPORAIRE: Générer des données simulées réalistes
-                    const isMajorPartner = ['Allemagne', 'États-Unis', 'Chine', 'Italie', 'Espagne', 'Royaume-Uni', 'Belgique'].includes(country.name);
-                    const isMediumPartner = ['Pays-Bas', 'Suisse', 'Pologne', 'Japon', 'Inde', 'Brésil', 'Canada'].includes(country.name);
+                    
+                    // Adapter les partenaires commerciaux selon le pays source
+                    let majorPartners, mediumPartners;
+                    
+                    switch(selectedCountry) {
+                        case 'Canada':
+                            majorPartners = ['États-Unis', 'Chine', 'Mexique', 'Royaume-Uni', 'Allemagne'];
+                            mediumPartners = ['Japon', 'Corée du Sud', 'Inde', 'France', 'Italie'];
+                            break;
+                        case 'Allemagne':
+                            majorPartners = ['France', 'États-Unis', 'Chine', 'Pays-Bas', 'Royaume-Uni', 'Italie', 'Pologne'];
+                            mediumPartners = ['Autriche', 'Espagne', 'Belgique', 'Suisse', 'République tchèque'];
+                            break;
+                        case 'Royaume-Uni':
+                            majorPartners = ['États-Unis', 'Allemagne', 'Chine', 'Pays-Bas', 'France', 'Irlande'];
+                            mediumPartners = ['Belgique', 'Espagne', 'Italie', 'Suisse', 'Inde'];
+                            break;
+                        case 'Chine':
+                            majorPartners = ['États-Unis', 'Japon', 'Corée du Sud', 'Allemagne', 'Australie', 'Brésil'];
+                            mediumPartners = ['France', 'Royaume-Uni', 'Inde', 'Russie', 'Italie'];
+                            break;
+                        case 'Japon':
+                            majorPartners = ['États-Unis', 'Chine', 'Corée du Sud', 'Australie', 'Allemagne'];
+                            mediumPartners = ['Thaïlande', 'Royaume-Uni', 'France', 'Pays-Bas', 'Inde'];
+                            break;
+                        case 'États-Unis':
+                            majorPartners = ['Canada', 'Mexique', 'Chine', 'Japon', 'Allemagne', 'Royaume-Uni'];
+                            mediumPartners = ['Corée du Sud', 'France', 'Inde', 'Brésil', 'Italie'];
+                            break;
+                        case 'France':
+                        default:
+                            majorPartners = ['Allemagne', 'États-Unis', 'Chine', 'Italie', 'Espagne', 'Royaume-Uni', 'Belgique'];
+                            mediumPartners = ['Pays-Bas', 'Suisse', 'Pologne', 'Japon', 'Inde', 'Brésil', 'Canada'];
+                    }
+                    
+                    const isMajorPartner = majorPartners.includes(country.name);
+                    const isMediumPartner = mediumPartners.includes(country.name);
+                    
+                    // Adapter aussi les volumes selon la taille économique du pays source
+                    const countryGDP = {
+                        'États-Unis': 2.5,
+                        'Chine': 2.0,
+                        'Allemagne': 1.2,
+                        'Japon': 1.0,
+                        'Royaume-Uni': 0.9,
+                        'France': 0.8,
+                        'Canada': 0.6
+                    };
+                    const gdpFactor = countryGDP[selectedCountry] || 0.5;
                     
                     let exports, imports;
                     if (isMajorPartner) {
-                        exports = 40000 + Math.random() * 70000;
-                        imports = 40000 + Math.random() * 70000;
+                        exports = (40000 + Math.random() * 70000) * gdpFactor;
+                        imports = (40000 + Math.random() * 70000) * gdpFactor;
                     } else if (isMediumPartner) {
-                        exports = 5000 + Math.random() * 30000;
-                        imports = 5000 + Math.random() * 30000;
+                        exports = (5000 + Math.random() * 30000) * gdpFactor;
+                        imports = (5000 + Math.random() * 30000) * gdpFactor;
                     } else {
-                        exports = 250 + Math.random() * 8000;
-                        imports = 250 + Math.random() * 8000;
+                        exports = (250 + Math.random() * 8000) * gdpFactor;
+                        imports = (250 + Math.random() * 8000) * gdpFactor;
                     }
                     
                     results.push({
@@ -2164,12 +2211,12 @@ const API_SMART_CONFIG = {
                         imports: imports,
                         volume: exports + imports,
                         _metadata: {
-                            source: 'Simulated (API unavailable)',
+                            source: `Simulated (API unavailable for ${selectedCountry})`,
                             sourceType: 'Fallback',
                             country: country.name,
                             quality: 'simulated',
                             priority: 99,
-                            note: 'UN Comtrade API temporarily unavailable - using simulated data',
+                            note: `Data simulated based on ${selectedCountry} trade patterns`,
                             lastUpdate: new Date().toISOString()
                         }
                     });
@@ -2190,6 +2237,7 @@ const API_SMART_CONFIG = {
         console.log(`   - Total official data: ${totalOfficial} countries`);
         console.log(`   - No data available: ${noDataCount} countries`);
         console.log(`   - Total countries: ${metadata.totalCountries}`);
+        console.log(`🔍 DEBUG: Retour avec sourceCountry="${selectedCountry}"`);
         console.log(`\n💡 Note: UN Comtrade data comes from national statistical offices worldwide`);
         
         return {

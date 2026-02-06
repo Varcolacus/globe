@@ -245,6 +245,7 @@ let currentFilterValue = null;
 async function loadBalanceData(year = currentYear) {
     try {
         currentYear = year;
+        console.log(`🔍 DEBUG loadBalanceData appelé: year=${year}, currentSourceCountry="${currentSourceCountry}"`);
         
         // Afficher un indicateur de chargement
         const title = document.querySelector('.controls h1');
@@ -256,6 +257,8 @@ async function loadBalanceData(year = currentYear) {
         const response = await API_CONFIG.fetchBalancePaiements(year, currentSourceCountry);
         balanceData = response.data || response; // Extraire .data si présent, sinon utiliser directement
         console.log(`✅ Données ${year} chargées pour ${currentSourceCountry}:`, balanceData.length, 'pays');
+        console.log(`🔍 DEBUG: Premier pays dans balanceData:`, balanceData[0]?.name, 'balance:', balanceData[0]?.balance);
+        console.log(`🔍 DEBUG: Pays source dans balanceData:`, balanceData.find(c => c.name === currentSourceCountry)?.balance);
         
         // Retirer l'indicateur de chargement
         if (title) {
@@ -2627,8 +2630,10 @@ function initializeCountrySelector() {
     
     // Sélectionner un pays
     function selectCountry(country) {
+        console.log(`🔍 DEBUG selectCountry: AVANT currentSourceCountry="${currentSourceCountry}"`);
         searchInput.value = `${country.flag} ${country.name}`;
         currentSourceCountry = country.name;
+        console.log(`🔍 DEBUG selectCountry: APRÈS currentSourceCountry="${currentSourceCountry}" (sélectionné: ${country.name})`);
         dropdown.style.display = 'none';
         clearBtn.style.display = 'inline';
         
@@ -2863,6 +2868,7 @@ document.getElementById('data-modal').addEventListener('click', (e) => {
 });
 
 function showDataTable() {
+    console.log(`🔍 DEBUG showDataTable: currentSourceCountry="${currentSourceCountry}", balanceData.length=${balanceData.length}`);
     const modal = document.getElementById('data-modal');
     const tbody = document.getElementById('data-table-body');
     const metadataDiv = document.getElementById('metadata-info');
