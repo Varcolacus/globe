@@ -134,6 +134,39 @@
         <div class="log" id="log"></div>
     </div>
 
+    <!-- Définir countries AVANT le chargement des scripts API -->
+    <script>
+        // Liste complète des pays (required by api-config.js)
+        const countries = [
+            { lat: 46.2276, lng: 2.2137, name: 'France', capital: 'Paris', flag: '🇫🇷', region: 'Europe' },
+            { lat: 56.1304, lng: -106.3468, name: 'Canada', capital: 'Ottawa', flag: '🇨🇦' , region: 'Amériques' },
+            { lat: 51.1657, lng: 10.4515, name: 'Allemagne', capital: 'Berlin', flag: '🇩🇪' , region: 'Europe' },
+            { lat: 37.0902, lng: -95.7129, name: 'États-Unis', capital: 'Washington DC', flag: '🇺🇸' , region: 'Amériques' },
+            { lat: 35.8617, lng: 104.1954, name: 'Chine', capital: 'Beijing', flag: '🇨🇳' , region: 'Asie' },
+            { lat: 36.2048, lng: 138.2529, name: 'Japon', capital: 'Tokyo', flag: '🇯🇵' , region: 'Asie' },
+            { lat: 55.3781, lng: -3.4360, name: 'Royaume-Uni', capital: 'Londres', flag: '🇬🇧' , region: 'Europe' },
+            { lat: 41.8719, lng: 12.5674, name: 'Italie', capital: 'Rome', flag: '🇮🇹' , region: 'Europe' },
+            { lat: 40.4637, lng: -3.7492, name: 'Espagne', capital: 'Madrid', flag: '🇪🇸' , region: 'Europe' },
+            { lat: 19.4326, lng: -99.1332, name: 'Mexique', capital: 'Mexico', flag: '🇲🇽' , region: 'Amériques' },
+            { lat: -14.2350, lng: -51.9253, name: 'Brésil', capital: 'Brasília', flag: '🇧🇷' , region: 'Amériques' },
+            { lat: 20.5937, lng: 78.9629, name: 'Inde', capital: 'New Delhi', flag: '🇮🇳' , region: 'Asie' },
+            { lat: 61.5240, lng: 105.3188, name: 'Russie', capital: 'Moscou', flag: '🇷🇺' , region: 'Europe' },
+            { lat: 37.5665, lng: 126.9780, name: 'Corée du Sud', capital: 'Séoul', flag: '🇰🇷' , region: 'Asie' },
+            { lat: -25.2744, lng: 133.7751, name: 'Australie', capital: 'Canberra', flag: '🇦🇺' , region: 'Océanie' },
+            { lat: 52.3676, lng: 4.9041, name: 'Pays-Bas', capital: 'Amsterdam', flag: '🇳🇱' , region: 'Europe' },
+            { lat: 50.5039, lng: 4.4699, name: 'Belgique', capital: 'Bruxelles', flag: '🇧🇪' , region: 'Europe' },
+            { lat: 46.9479, lng: 7.4474, name: 'Suisse', capital: 'Berne', flag: '🇨🇭' , region: 'Europe' },
+            { lat: 52.2297, lng: 21.0122, name: 'Pologne', capital: 'Varsovie', flag: '🇵🇱' , region: 'Europe' },
+            { lat: 59.3293, lng: 18.0686, name: 'Suède', capital: 'Stockholm', flag: '🇸🇪' , region: 'Europe' },
+            { lat: 39.9334, lng: 32.8597, name: 'Turquie', capital: 'Ankara', flag: '🇹🇷' , region: 'Asie' },
+            { lat: 24.7136, lng: 46.6753, name: 'Arabie saoudite', capital: 'Riyad', flag: '🇸🇦' , region: 'Asie' },
+            { lat: -25.7479, lng: 28.2293, name: 'Afrique du Sud', capital: 'Pretoria', flag: '🇿🇦' , region: 'Afrique' },
+            { lat: 13.7563, lng: 100.5018, name: 'Thaïlande', capital: 'Bangkok', flag: '🇹🇭' , region: 'Asie' },
+            { lat: -6.2088, lng: 106.8456, name: 'Indonésie', capital: 'Jakarta', flag: '🇮🇩' , region: 'Asie' }
+        ];
+        console.log('✅ Liste des pays chargée:', countries.length, 'pays');
+    </script>
+
     <!-- Chargement des scripts -->
     <script src="national-apis-config.js?v=20260206f"></script>
     <script src="api-config.js?v=20260206f"></script>
