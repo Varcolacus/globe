@@ -1,8 +1,8 @@
 // ============================================================================
 // 🌍 GLOBE 3D - COMMERCE INTERNATIONAL
-// Version: 20260206f
+// Version: 20260206g
 // ============================================================================
-console.log('🚀 App.js chargé - Version 20260206f');
+console.log('🚀 App.js chargé - Version 20260206g');
 console.log('🔍 Debug mode activé - Logs verbeux disponibles');
 console.log('📊 Simulation déterministe basée sur hash');
 
