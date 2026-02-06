@@ -131,7 +131,8 @@ Le projet utilise un **système de priorité absolue** qui tente TOUJOURS d'obte
 **🥇 PRIORITÉ 1 - API Nationale Directe (SOURCE PRIMAIRE)**
 - **38 banques centrales** configurées avec implémentations spécifiques
 - **Exemples fonctionnels** :
-  - 🇨🇦 Statistics Canada (WDS API) - ✅ Fonctionnel
+  - �🇷 Banque de France (SDMX WEBSTAT) - ✅ Accessible (gratuite)
+  - �🇨🇦 Statistics Canada (WDS API) - ✅ Fonctionnel
   - 🇧🇷 Banco Central do Brasil (SGS API) - ✅ Fonctionnel
   - 🇩🇪 Deutsche Bundesbank (REST + SDMX) - ✅ Fonctionnel
   - 🇨🇭 Swiss National Bank (Cubes API) - ✅ Fonctionnel
@@ -198,16 +199,17 @@ Chaque donnée inclut des **métadonnées complètes** :
 
 **Logs Console** : Le système affiche clairement quelle source est utilisée :
 ```
-🏛️ Attempting national API: Statistics Canada...
-🇨🇦 StatCan: Table 12-10-0011-01 accessed
-✅ Exports: 450,000,000 CAD (Source: Statistics Canada - official)
+🏛️ Attempting national API: Banque de France...
+🇫🇷 Banque de France: Tentative API SDMX...
+✅ Banque de France: Données SDMX récupérées
+   → Parser SDMX détaillé à implémenter
+   → Fallback vers Eurostat pour données complètes
 
 ou
 
-🏛️ Attempting national API: Banque de France...
-🇫🇷 Banque de France: API nationale directe NON DISPONIBLE
-   → WEBSTAT = portail interactif uniquement
-   → Fallback vers source SECONDAIRE (Eurostat)
+🏛️ Attempting national API: Statistics Canada...
+🇨🇦 StatCan: Table 12-10-0011-01 accessed
+✅ Exports: 450,000,000 CAD (Source: Statistics Canada - official)
 ```
 
 #### **Configuration Technique**

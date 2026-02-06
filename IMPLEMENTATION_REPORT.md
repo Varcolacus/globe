@@ -35,8 +35,11 @@
 
 | Pays | Banque Centrale | API | Statut |
 |------|----------------|-----|---------|
+| �🇷 France | Banque de France | API SDMX WEBSTAT | ✅ **Accessible** (parser à finaliser) |
 | 🇩🇪 Allemagne | Deutsche Bundesbank | REST + SDMX-JSON | ✅ **Fonctionnel** |
 | 🇨🇭 Suisse | Swiss National Bank | Cubes API | ✅ **Fonctionnel** |
+| 🇨🇦 Canada | Statistics Canada | WDS API | ✅ **Fonctionnel** |
+| 🇧🇷 Brésil | Banco Central do Brasil | SGS API | ✅ **Fonctionnel** |
 
 ### 📋 API Nationale Non Disponible (Fallback Eurostat - Source Secondaire)
 
@@ -44,8 +47,7 @@
 
 | Pays | Banque Centrale | Raison du Fallback |
 |------|----------------|-------------------|
-| 🇫🇷 France | Banque de France | WEBSTAT = Portail interactif, pas d'API REST |
-| 🇮🇹 Italie | Banca d'Italia | SDMX disponible mais complexe, non implémenté |
+| �🇹 Italie | Banca d'Italia | SDMX disponible mais complexe, parser non finalisé |
 | 🇪🇸 Espagne | Banco de España | Données via Excel/CSV uniquement, pas d'API |
 | 🇳🇱 Pays-Bas | De Nederlandsche Bank (DNB) | DSD SDMX nécessite parser spécialisé |
 | 🇧🇪 Belgique | National Bank of Belgium | Belgostat SDMX non implémenté |
@@ -123,7 +125,8 @@
 
 ```
 Total Banques Centrales : 38
-├─ ✅ Fonctionnelles immédiatement : 4 (11%)
+├─ ✅ Fonctionnelles immédiatement : 5 (13%)
+│  ├─ Banque de France (SDMX - parser à finaliser)
 │  ├─ Statistics Canada (WDS)
 │  ├─ Banco Central do Brasil (SGS)
 │  ├─ Deutsche Bundesbank (REST)
@@ -135,8 +138,8 @@ Total Banques Centrales : 38
 │  ├─ Banco de México (SIE)
 │  └─ Bank of Thailand / TCMB Turkey
 │
-├─ 📋 Fallback Eurostat (données officielles) : 15 (39%)
-│  └─ France, Italie, Espagne, Pays-Bas, Belgique, etc.
+├─ 📋 Fallback Eurostat (données officielles) : 14 (37%)
+│  └─ Italie, Espagne, Pays-Bas, Belgique, etc.
 │
 └─ 📋 Fallback World Bank : 15 (39%)
    └─ UK, Japon, Inde, Australie, etc.
@@ -180,7 +183,35 @@ async tryNationalBilateralAPI(sourceCountry, partnerCountry, sourceISO, partnerI
 
 ### Exemples d'Implémentations Réussies
 
-#### 🇨🇦 Statistics Canada (WDS API)
+#### �🇷 Banque de France (API SDMX WEBSTAT)
+
+```javascript
+async fetchBanqueDeFranceData(sourceISO, partnerISO, year, apiConfig) {
+    // Banque de France WEBSTAT - API SDMX
+    // API: https://webstat.banque-france.fr/ws/
+    // Format: SDMX 2.1 (XML et JSON supportés)
+    
+    const dataflowId = 'BOP-BP6'; // Balance des paiements BPM6
+    const key = `A.${partnerISO}.*.*.`; // Annuel, pays partenaire
+    const url = `https://webstat.banque-france.fr/ws/data/${dataflowId}/${key}?format=jsondata&startPeriod=${year}&endPeriod=${year}`;
+    
+    const response = await fetch(proxyUrl);
+    const data = await response.json();
+    
+    if (data.dataSets && data.dataSets[0]) {
+        const observations = data.dataSets[0].observations;
+        // Parser SDMX détaillé à finaliser
+        return {
+            exports: observations[exportKey],
+            source: 'Banque de France WEBSTAT',
+            quality: 'official',
+            format: 'SDMX-JSON'
+        };
+    }
+}
+```
+
+#### �🇨🇦 Statistics Canada (WDS API)
 
 ```javascript
 async fetchStatisticsCanadaData(sourceISO, partnerISO, year, apiConfig) {

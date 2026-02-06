@@ -738,16 +738,60 @@ const API_SMART_CONFIG = {
      */
     async fetchBanqueDeFranceData(sourceISO, partnerISO, year, apiConfig) {
         try {
-            // WEBSTAT utilise un portail interactif et des fichiers SDMX
-            // Site: https://webstat.banque-france.fr/
-            // Pas d'API REST publique simple disponible
+            // Banque de France WEBSTAT - API SDMX
+            // Documentation: https://webstat.banque-france.fr/fr/
+            // API SDMX: https://webstat.banque-france.fr/ws/
+            // Format: SDMX 2.1 (XML et JSON supportés)
             
-            console.log(`🇫🇷 Banque de France: API nationale directe NON DISPONIBLE`);
-            console.log(`   → WEBSTAT = portail interactif uniquement`);
-            console.log(`   → Fallback vers source SECONDAIRE (Eurostat)`);
-            return null; // Fallback vers Eurostat (données BdF officielles)
+            // Dataflow: Balance des paiements
+            // Structure: BOP (Balance of Payments)
+            const dataflowId = 'BOP-BP6'; // Balance des paiements BPM6
+            
+            // Construction de la requête SDMX
+            // Format: /data/{dataflow}/{key}?format=jsondata
+            const key = `A.${partnerISO}.*.*.`; // Annuel, pays partenaire, toutes séries
+            const url = `https://webstat.banque-france.fr/ws/data/${dataflowId}/${key}?format=jsondata&startPeriod=${year}&endPeriod=${year}`;
+            
+            const proxyUrl = this.useCorsProxy ? `${this.corsProxyUrl}${encodeURIComponent(url)}` : url;
+            
+            console.log(`🇫🇷 Banque de France: Tentative API SDMX...`);
+            
+            const response = await fetch(proxyUrl);
+            
+            if (!response.ok) {
+                console.log(`🇫🇷 Banque de France: API response ${response.status}`);
+                console.log(`   → Fallback vers source SECONDAIRE (Eurostat)`);
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            // Parser le format SDMX-JSON de la Banque de France
+            if (data.dataSets && data.dataSets[0]) {
+                const observations = data.dataSets[0].observations;
+                
+                if (observations && Object.keys(observations).length > 0) {
+                    // Extraction des données d'exports/imports
+                    // Note: Structure SDMX nécessite mapping des dimensions
+                    console.log(`✅ Banque de France: Données SDMX récupérées`);
+                    
+                    // TODO: Parser précis des observations SDMX
+                    // Pour l'instant, on laisse fallback Eurostat pour données complètes
+                    console.log(`   → Parser SDMX détaillé à implémenter`);
+                    console.log(`   → Fallback vers Eurostat pour données complètes`);
+                    return null;
+                } else {
+                    console.log(`🇫🇷 Banque de France: Pas de données pour ${partnerISO} en ${year}`);
+                    return null;
+                }
+            }
+            
+            console.log(`🇫🇷 Banque de France: Format SDMX non reconnu`);
+            return null;
+            
         } catch (error) {
-            console.warn(`Banque de France API error:`, error.message);
+            console.warn(`🇫🇷 Banque de France API error:`, error.message);
+            console.log(`   → Fallback vers source SECONDAIRE (Eurostat)`);
             return null;
         }
     },
