@@ -258,10 +258,20 @@ async function loadBalanceData(year = currentYear) {
         }
         
         const response = await API_CONFIG.fetchBalancePaiements(year, currentSourceCountry);
+        const oldData = balanceData.length > 0 ? balanceData[0] : null;
         balanceData = response.data || response; // Extraire .data si présent, sinon utiliser directement
         console.log(`✅ Données ${year} chargées pour ${currentSourceCountry}:`, balanceData.length, 'pays');
-        console.log(`🔍 DEBUG: Premier pays dans balanceData:`, balanceData[0]?.name, 'balance:', balanceData[0]?.balance);
+        console.log(`🔍 DEBUG: Premier pays AVANT:`, oldData?.name, oldData?.balance);
+        console.log(`🔍 DEBUG: Premier pays APRÈS:`, balanceData[0]?.name, 'balance:', balanceData[0]?.balance);
         console.log(`🔍 DEBUG: Pays source dans balanceData:`, balanceData.find(c => c.name === currentSourceCountry)?.balance);
+        
+        // Comparer top 5 partenaires
+        const top5 = balanceData
+            .filter(c => c.volume > 0 && c.name !== currentSourceCountry)
+            .sort((a, b) => b.volume - a.volume)
+            .slice(0, 5)
+            .map(c => `${c.name}(${(c.volume/1000).toFixed(1)}Md)`);
+        console.log(`📊 Top 5 partenaires de ${currentSourceCountry}:`, top5.join(', '));
         
         // Retirer l'indicateur de chargement
         if (title) {

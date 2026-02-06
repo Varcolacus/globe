@@ -1829,6 +1829,11 @@ const API_SMART_CONFIG = {
      */
     async fetchBilateralTrade(sourceCountry, partnerCountry, year) {
         try {
+            // LOG VERBOSE pour tracer le flux
+            if (Math.random() < 0.05) { // Log 5% des appels pour éviter surcharge console
+                console.log(`🔍 fetchBilateralTrade: ${sourceCountry} → ${partnerCountry} (${year})`);
+            }
+            
             const sourceISO = COUNTRY_ISO_CODES[sourceCountry];
             const partnerISO = COUNTRY_ISO_CODES[partnerCountry];
             
@@ -2118,6 +2123,9 @@ const API_SMART_CONFIG = {
                     if (tradeData) {
                         dataSource = 'UN Comtrade (National Sources)';
                         comtradeCount++;
+                        if (comtradeCount <= 3) { // Log les 3 premières réussites
+                            console.log(`✅ Données API pour ${selectedCountry} → ${country.name}:`, tradeData);
+                        }
                     }
                 }
                 
@@ -2142,6 +2150,10 @@ const API_SMART_CONFIG = {
                 } else {
                     // Pas de données disponibles - utiliser simulation adaptée au pays source
                     noDataCount++;
+                    
+                    if (noDataCount <= 3) { // Log les 3 premières simulations
+                        console.log(`⚠️ Simulation pour ${selectedCountry} → ${country.name} (API unavailable)`);
+                    }
                     
                     // Adapter les partenaires commerciaux selon le pays source
                     let majorPartners, mediumPartners;
@@ -2180,6 +2192,26 @@ const API_SMART_CONFIG = {
                     const isMajorPartner = majorPartners.includes(country.name);
                     const isMediumPartner = mediumPartners.includes(country.name);
                     
+                    // Hash déterministe pour générer les mêmes valeurs à chaque fois
+                    const hashString = (str) => {
+                        let hash = 0;
+                        for (let i = 0; i < str.length; i++) {
+                            hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                            hash = hash & hash; // Convert to 32bit integer
+                        }
+                        return Math.abs(hash);
+                    };
+                    
+                    // Générateur pseudo-aléatoire déterministe
+                    const deterministicRandom = (seed) => {
+                        const x = Math.sin(seed) * 10000;
+                        return x - Math.floor(x);
+                    };
+                    
+                    // Seed basé sur source + partner pour cohérence
+                    const seed1 = hashString(`${selectedCountry}-${country.name}-${year}-exports`);
+                    const seed2 = hashString(`${selectedCountry}-${country.name}-${year}-imports`);
+                    
                     // Adapter aussi les volumes selon la taille économique du pays source
                     const countryGDP = {
                         'États-Unis': 2.5,
@@ -2194,14 +2226,14 @@ const API_SMART_CONFIG = {
                     
                     let exports, imports;
                     if (isMajorPartner) {
-                        exports = (40000 + Math.random() * 70000) * gdpFactor;
-                        imports = (40000 + Math.random() * 70000) * gdpFactor;
+                        exports = (40000 + deterministicRandom(seed1) * 70000) * gdpFactor;
+                        imports = (40000 + deterministicRandom(seed2) * 70000) * gdpFactor;
                     } else if (isMediumPartner) {
-                        exports = (5000 + Math.random() * 30000) * gdpFactor;
-                        imports = (5000 + Math.random() * 30000) * gdpFactor;
+                        exports = (5000 + deterministicRandom(seed1) * 30000) * gdpFactor;
+                        imports = (5000 + deterministicRandom(seed2) * 30000) * gdpFactor;
                     } else {
-                        exports = (250 + Math.random() * 8000) * gdpFactor;
-                        imports = (250 + Math.random() * 8000) * gdpFactor;
+                        exports = (250 + deterministicRandom(seed1) * 8000) * gdpFactor;
+                        imports = (250 + deterministicRandom(seed2) * 8000) * gdpFactor;
                     }
                     
                     results.push({
