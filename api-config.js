@@ -6,6 +6,12 @@ const API_SMART_CONFIG = {
     // Stratégie de fallback : National > Regional > International
     fallbackStrategy: ['national', 'regional', 'international'],
     
+    // Activer les appels API réels (peut être désactivé pour utiliser uniquement simulation)
+    useRealAPIs: true,
+    
+    // Limite de taux pour éviter de surcharger les APIs
+    rateLimitDelay: 200, // ms entre chaque requête
+    
     // Cache des métadonnées de sources
     sourceMetadata: new Map(),
     
@@ -179,9 +185,190 @@ const API_SMART_CONFIG = {
      * Tentative de récupération depuis une API spécifique
      */
     async attemptFetch(apiConfig, countryName, year) {
-        // Pour l'instant, retourner null pour simuler l'échec
-        // Dans une vraie implémentation, faire la vraie requête HTTP
-        return null;
+        try {
+            // Appeler la fonction appropriée selon le type d'API
+            if (apiConfig.institution === 'Eurostat') {
+                return await this.fetchFromEurostat(countryName, year);
+            } else if (apiConfig.institution === 'UN Comtrade') {
+                return await this.fetchFromComtrade(countryName, year);
+            } else if (apiConfig.institution === 'World Bank') {
+                return await this.fetchFromWorldBank(countryName, year);
+            }
+            // Ajouter d'autres APIs au besoin
+            return null;
+        } catch (error) {
+            console.warn(`⚠️ Error fetching from ${apiConfig.institution} for ${countryName}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Récupérer données depuis Eurostat
+     * API: https://ec.europa.eu/eurostat/api/dissemination/sdmx/2.1/data/
+     */
+    async fetchFromEurostat(countryName, year) {
+        try {
+            const isoCode = COUNTRY_ISO_CODES[countryName];
+            if (!isoCode) return null;
+            
+            // Dataset: ext_lt_intratrd (Extra-EU trade)
+            // Format: JSON-stat
+            const url = `https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/ext_lt_intratrd?format=JSON&lang=en&time=${year}&reporter=${isoCode}`;
+            
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            
+            const data = await response.json();
+            
+            // Parser les données Eurostat
+            return this.parseEurostatData(data, countryName);
+        } catch (error) {
+            console.warn(`Eurostat fetch failed for ${countryName}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Récupérer données depuis UN Comtrade
+     * API: https://comtradeapi.un.org/
+     */
+    async fetchFromComtrade(countryName, year) {
+        try {
+            const isoCode = COUNTRY_ISO_CODES[countryName];
+            if (!isoCode) return null;
+            
+            // API UN Comtrade v2
+            const url = `https://comtradeapi.un.org/data/v1/get/C/A/${year}/${isoCode}/all/total`;
+            
+            const response = await fetch(url);
+            if (!response.ok) return null;
+            
+            const data = await response.json();
+            
+            // Parser les données Comtrade
+            return this.parseComtradeData(data, countryName);
+        } catch (error) {
+            console.warn(`UN Comtrade fetch failed for ${countryName}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Récupérer données depuis World Bank
+     */
+    async fetchFromWorldBank(countryName, year) {
+        try {
+            const isoCode = COUNTRY_ISO_CODES[countryName];
+            if (!isoCode) return null;
+            
+            // Indicateurs: NE.EXP.GNFS.CD (exports), NE.IMP.GNFS.CD (imports)
+            const exportsUrl = `https://api.worldbank.org/v2/country/${isoCode}/indicator/NE.EXP.GNFS.CD?date=${year}&format=json`;
+            const importsUrl = `https://api.worldbank.org/v2/country/${isoCode}/indicator/NE.IMP.GNFS.CD?date=${year}&format=json`;
+            
+            const [exportsRes, importsRes] = await Promise.all([
+                fetch(exportsUrl),
+                fetch(importsUrl)
+            ]);
+            
+            if (!exportsRes.ok || !importsRes.ok) return null;
+            
+            const exportsData = await exportsRes.json();
+            const importsData = await importsRes.json();
+            
+            return this.parseWorldBankData(exportsData, importsData, countryName);
+        } catch (error) {
+            console.warn(`World Bank fetch failed for ${countryName}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Parser les données Eurostat
+     */
+    parseEurostatData(data, countryName) {
+        try {
+            // Eurostat retourne des données complexes, simplification
+            // Extraire exports et imports
+            const tradeData = {
+                country: countryName,
+                exports: 0,
+                imports: 0
+            };
+            
+            // Parser la structure JSON-stat de Eurostat
+            if (data.value && data.dimension) {
+                // Logique de parsing spécifique à Eurostat
+                // (structure complexe, nécessite parsing détaillé)
+            }
+            
+            tradeData.balance = tradeData.exports - tradeData.imports;
+            tradeData.volume = tradeData.exports + tradeData.imports;
+            
+            return tradeData;
+        } catch (error) {
+            console.warn(`Error parsing Eurostat data:`, error);
+            return null;
+        }
+    },
+    
+    /**
+     * Parser les données UN Comtrade
+     */
+    parseComtradeData(data, countryName) {
+        try {
+            if (!data || !data.data) return null;
+            
+            let exports = 0;
+            let imports = 0;
+            
+            data.data.forEach(record => {
+                if (record.flowCode === 'X') { // Export
+                    exports += record.primaryValue || 0;
+                } else if (record.flowCode === 'M') { // Import
+                    imports += record.primaryValue || 0;
+                }
+            });
+            
+            // Convertir en millions si nécessaire
+            exports = exports / 1000000; // USD to millions
+            imports = imports / 1000000;
+            
+            return {
+                country: countryName,
+                exports: exports,
+                imports: imports,
+                balance: exports - imports,
+                volume: exports + imports
+            };
+        } catch (error) {
+            console.warn(`Error parsing Comtrade data:`, error);
+            return null;
+        }
+    },
+    
+    /**
+     * Parser les données World Bank
+     */
+    parseWorldBankData(exportsData, importsData, countryName) {
+        try {
+            const exports = exportsData[1]?.[0]?.value || 0;
+            const imports = importsData[1]?.[0]?.value || 0;
+            
+            // Convertir de USD à millions
+            const exportsM = exports / 1000000;
+            const importsM = imports / 1000000;
+            
+            return {
+                country: countryName,
+                exports: exportsM,
+                imports: importsM,
+                balance: exportsM - importsM,
+                volume: exportsM + importsM
+            };
+        } catch (error) {
+            console.warn(`Error parsing World Bank data:`, error);
+            return null;
+        }
     },
     
     /**
@@ -266,13 +453,84 @@ const API_SMART_CONFIG = {
     },
     
     /**
+     * Récupérer données de commerce bilatéral entre deux pays
+     * Utilise UN Comtrade qui supporte les données bilatérales
+     * 
+     * Note: Les appels directs peuvent échouer en raison de CORS.
+     * En production, utiliser un proxy CORS ou backend intermédiaire.
+     */
+    async fetchBilateralTrade(sourceCountry, partnerCountry, year) {
+        try {
+            const sourceISO = COUNTRY_ISO_CODES[sourceCountry];
+            const partnerISO = COUNTRY_ISO_CODES[partnerCountry];
+            
+            if (!sourceISO || !partnerISO) return null;
+            
+            // UN Comtrade API pour commerce bilatéral
+            // Format: /reporter/partner/year
+            const url = `https://comtradeapi.un.org/data/v1/get/C/A/${year}/${sourceISO}/${partnerISO}/total`;
+            
+            console.log(`📡 Fetching bilateral data: ${sourceCountry} ↔ ${partnerCountry} (${year})`);
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                },
+                mode: 'cors' // Tenter CORS direct
+            });
+            
+            if (!response.ok) {
+                console.warn(`❌ Comtrade API returned ${response.status} for ${sourceCountry}-${partnerCountry}`);
+                return null;
+            }
+            
+            const data = await response.json();
+            
+            if (!data || !data.data || data.data.length === 0) {
+                return null;
+            }
+            
+            let exports = 0;
+            let imports = 0;
+            
+            data.data.forEach(record => {
+                const value = record.primaryValue || 0;
+                if (record.flowCode === 'X' || record.flowCode === 'Export') {
+                    exports += value;
+                } else if (record.flowCode === 'M' || record.flowCode === 'Import') {
+                    imports += value;
+                }
+            });
+            
+            // Convertir de USD à millions d'euros (approximation: 1 EUR = 1.1 USD)
+            const euroRate = 0.91;
+            exports = (exports / 1000000) * euroRate;
+            imports = (imports / 1000000) * euroRate;
+            
+            return {
+                exports: exports,
+                imports: imports,
+                balance: exports - imports,
+                volume: exports + imports,
+                source: 'UN Comtrade',
+                quality: 'official'
+            };
+        } catch (error) {
+            console.warn(`❌ Error fetching bilateral trade ${sourceCountry}-${partnerCountry}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
      * Obtenir données pour tous les pays (mode batch avec métadonnées)
      */
     async fetchAllCountriesData(year = 2025, selectedCountry = 'France') {
         console.log(`\n🌍 Fetching trade data for all countries (year: ${year}, from: ${selectedCountry})`);
-        console.log(`📋 Strategy: National API → Regional → International → Simulated\n`);
+        console.log(`📋 Strategy: ${this.useRealAPIs ? 'Real APIs (Bilateral)' : 'Simulation only'} → Fallback\n`);
         
         const results = [];
+        let successCount = 0;
+        let fallbackCount = 0;
         
         for (const country of countries) {
             if (country.name === selectedCountry) {
@@ -294,10 +552,43 @@ const API_SMART_CONFIG = {
                     }
                 });
             } else {
-                const data = await this.fetchTradeDataWithFallback(country.name, year);
+                let tradeData = null;
+                
+                // Essayer d'abord les données bilatérales réelles si activé
+                if (this.useRealAPIs) {
+                    tradeData = await this.fetchBilateralTrade(selectedCountry, country.name, year);
+                    
+                    if (tradeData) {
+                        successCount++;
+                        console.log(`✅ ${country.name}: Real data from ${tradeData.source}`);
+                        results.push({
+                            ...country,
+                            balance: tradeData.balance,
+                            exports: tradeData.exports,
+                            imports: tradeData.imports,
+                            volume: tradeData.volume,
+                            _metadata: {
+                                source: tradeData.source,
+                                sourceType: 'International Organization',
+                                country: country.name,
+                                quality: 'official',
+                                priority: 1,
+                                lastUpdate: new Date().toISOString()
+                            }
+                        });
+                        
+                        // Délai pour respecter les limites de taux
+                        await new Promise(resolve => setTimeout(resolve, this.rateLimitDelay));
+                        continue;
+                    }
+                }
+                
+                // Fallback vers simulation si API échoue ou désactivée
+                fallbackCount++;
+                const simulatedData = await this.fetchTradeDataWithFallback(country.name, year);
                 results.push({
                     ...country,
-                    ...data
+                    ...simulatedData
                 });
             }
         }
@@ -306,6 +597,8 @@ const API_SMART_CONFIG = {
         const metadata = this.getAllSourceMetadata();
         console.log(`\n✅ Data fetching complete!`);
         console.log(`📊 Sources summary:`);
+        console.log(`   - Real API data: ${successCount} countries`);
+        console.log(`   - Simulated data: ${fallbackCount} countries`);
         console.log(`   - Total countries: ${metadata.totalCountries}`);
         console.log(`   - By source type:`, metadata.bySourceType);
         console.log(`   - By quality:`, metadata.byQuality);
@@ -322,6 +615,14 @@ const API_SMART_CONFIG = {
 
 // Backward compatibility: ancienne API_CONFIG pointant vers le nouveau système
 const API_CONFIG = {
+    // Exposer le flag pour activer/désactiver les APIs réelles
+    get useRealAPIs() {
+        return API_SMART_CONFIG.useRealAPIs;
+    },
+    set useRealAPIs(value) {
+        API_SMART_CONFIG.useRealAPIs = value;
+    },
+    
     async fetchBalancePaiements(year = 2025, selectedCountry = 'France') {
         return API_SMART_CONFIG.fetchAllCountriesData(year, selectedCountry);
     },

@@ -54,7 +54,16 @@
                 <option value="2014">2014</option>
                 <option value="2013">2013</option>
             </select>
-            <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">� Filtrer par:</h3>
+            <div style="margin-bottom: 15px; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <label style="display: flex; align-items: center; cursor: pointer; color: white; font-size: 13px;">
+                    <input type="checkbox" id="use-real-api-toggle" checked style="margin-right: 8px; width: 16px; height: 16px; cursor: pointer;">
+                    <span>🌐 Utiliser données officielles (UN Comtrade)</span>
+                </label>
+                <small style="color: rgba(255,255,255,0.6); font-size: 11px; margin-left: 24px; display: block; margin-top: 4px;">
+                    Désactivez pour utiliser uniquement la simulation (plus rapide)
+                </small>
+            </div>
+            <h3 style="margin: 0 0 10px 0; color: white; font-size: 14px;">🔍 Filtrer par:</h3>
             <select id="filter-type-selector" style="width: 100%; padding: 8px; border-radius: 6px; border: none; font-size: 14px; cursor: pointer; margin-bottom: 10px;">
                 <option value="all">🌐 Tous les pays</option>
                 <option value="region">🌍 Région géographique</option>

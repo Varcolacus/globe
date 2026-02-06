@@ -2549,6 +2549,14 @@ document.getElementById('year-selector').addEventListener('change', (e) => {
     loadBalanceData(selectedYear);
 });
 
+// Gestionnaire pour activer/désactiver les appels API réels
+document.getElementById('use-real-api-toggle').addEventListener('change', (e) => {
+    API_CONFIG.useRealAPIs = e.target.checked;
+    console.log(`${e.target.checked ? '🌐' : '⚡'} ${e.target.checked ? 'APIs réelles activées' : 'Mode simulation (rapide)'}`);
+    // Recharger les données avec le nouveau mode
+    loadBalanceData(currentYear);
+});
+
 // Système de recherche de pays avec dropdown filtrable
 let allCountriesSorted = [];
 let selectedCountryIndex = -1;
