@@ -2833,13 +2833,21 @@ function showDataTable() {
     const tbody = document.getElementById('data-table-body');
     const metadataDiv = document.getElementById('metadata-info');
     const modalYearSelector = document.getElementById('modal-year-selector');
+    const modalTitle = document.getElementById('modal-title');
+    
+    // Obtenir le drapeau du pays source
+    const sourceCountry = countries.find(c => c.name === currentSourceCountry);
+    const sourceFlag = sourceCountry ? sourceCountry.flag : '🏳️';
+    
+    // Mettre à jour le titre du modal
+    modalTitle.textContent = `📊 Balance des Paiements - ${sourceFlag} ${currentSourceCountry}`;
     
     // Synchroniser le sélecteur d'année du modal avec l'année courante
     modalYearSelector.value = currentYear.toString();
     
     // Filtrer les pays avec commerce et trier par volume
     const tradingCountries = balanceData
-        .filter(c => c.volume > 0 && c.name !== 'France')
+        .filter(c => c.volume > 0 && c.name !== currentSourceCountry)
         .sort((a, b) => b.volume - a.volume);
     
     // Calculer les totaux
@@ -2860,8 +2868,8 @@ function showDataTable() {
     metadataDiv.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <strong>📊 Source:</strong> Banque de France (Webstat API)<br>
-                <small>https://webstat.banque-france.fr</small>
+                <strong>📊 Source:</strong> API Nationale / Simulation<br>
+                <small>Données commerciales internationales</small>
             </div>
             <div>
                 <strong>📅 Année:</strong> ${currentYear}<br>
@@ -2877,7 +2885,7 @@ function showDataTable() {
             </div>
         </div>
         <div style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
-            ℹ️ Données en millions d'euros (M€). Les pourcentages indiquent la part de chaque pays dans le commerce total de la France.
+            ℹ️ Données en millions d'euros (M€). Les pourcentages indiquent la part de chaque pays dans le commerce total de ${sourceFlag} ${currentSourceCountry}.
         </div>
     `;
     
@@ -2934,7 +2942,7 @@ function showDataTable() {
 function downloadCSV() {
     // Filtrer et trier les données
     const tradingCountries = balanceData
-        .filter(c => c.volume > 0 && c.name !== 'France')
+        .filter(c => c.volume > 0 && c.name !== currentSourceCountry)
         .sort((a, b) => b.volume - a.volume);
     
     // Calculer les totaux
@@ -2943,10 +2951,14 @@ function downloadCSV() {
     const totalBalance = totalExports - totalImports;
     const totalVolume = totalExports + totalImports;
     
+    // Obtenir le drapeau du pays source
+    const sourceCountry = countries.find(c => c.name === currentSourceCountry);
+    const sourceFlag = sourceCountry ? sourceCountry.flag : '';
+    
     // En-tête du CSV avec métadonnées
     const lastUpdate = new Date().toISOString().split('T')[0];
-    let csv = `"Balance des Paiements - France"\n`;
-    csv += `"Source: Banque de France (Webstat API)"\n`;
+    let csv = `"Balance des Paiements - ${currentSourceCountry}"\n`;
+    csv += `"Source: API Nationale / Simulation"\n`;
     csv += `"Année: ${currentYear}"\n`;
     csv += `"Date d'extraction: ${lastUpdate}"\n`;
     csv += `"Nombre de pays: ${tradingCountries.length}"\n`;
@@ -2975,8 +2987,9 @@ function downloadCSV() {
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
+    const countryNameForFile = currentSourceCountry.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
     link.setAttribute('href', url);
-    link.setAttribute('download', `balance_paiements_france_${currentYear}_${lastUpdate}.csv`);
+    link.setAttribute('download', `balance_paiements_${countryNameForFile}_${currentYear}_${lastUpdate}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
