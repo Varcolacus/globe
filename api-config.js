@@ -2,6 +2,28 @@
 // NOTE: Les variables NATIONAL_APIS et COUNTRY_ISO_CODES sont disponibles
 // globalement via national-apis-config.js chargé dans index.html
 
+/**
+ * Détecte l'URL du proxy CORS en fonction de l'environnement
+ * @returns {string} URL du proxy CORS adaptée à l'environnement
+ */
+function getCorsProxyUrl() {
+    const hostname = window.location.hostname;
+    
+    // Détection GitHub Codespaces
+    if (hostname.includes('github.dev') || hostname.includes('githubpreview.dev')) {
+        // Extraire le nom du codespace depuis l'URL (format: {codespace}-{port}.app.github.dev)
+        const match = hostname.match(/^([^-]+(?:-[^-]+)*?)-(\d+)\./);
+        if (match) {
+            const codespaceName = match[1];
+            // Construire l'URL du proxy sur le port 3001
+            return `https://${codespaceName}-3001.app.github.dev/?url=`;
+        }
+    }
+    
+    // Environnement local par défaut
+    return 'http://localhost:3001/?url=';
+}
+
 // Configuration intelligente avec fallback automatique
 const API_SMART_CONFIG = {
     // Stratégie de fallback : National > Regional > International
@@ -12,13 +34,21 @@ const API_SMART_CONFIG = {
     
     // Proxy CORS pour contourner les restrictions du navigateur
     useCorsProxy: true,
-    corsProxyUrl: 'http://localhost:3001/?url=',
+    corsProxyUrl: getCorsProxyUrl(),
     
     // Limite de taux pour éviter de surcharger les APIs
     rateLimitDelay: 10, // ms entre chaque requête
     
     // Cache des métadonnées de sources
     sourceMetadata: new Map(),
+    
+    // Log de l'environnement détecté
+    init() {
+        console.log(`🌐 Environnement détecté: ${window.location.hostname}`);
+        console.log(`🔗 CORS Proxy URL: ${this.corsProxyUrl}`);
+        console.log(`✅ Proxy activé: ${this.useCorsProxy}`);
+        return this;
+    },
     
     /**
      * Obtenir la configuration API appropriée pour un pays
@@ -1023,3 +1053,6 @@ const VESSEL_CONFIG = {
         return null;
     }
 };
+
+// Initialisation de la configuration au chargement
+API_SMART_CONFIG.init();
