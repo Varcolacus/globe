@@ -11,11 +11,11 @@ const API_SMART_CONFIG = {
     useRealAPIs: true,  // Toujours activé - pas de simulation
     
     // Proxy CORS pour contourner les restrictions du navigateur
-    useCorsProxy: false,  // DÉSACTIVÉ - ne fonctionne pas dans Codespaces
+    useCorsProxy: true,
     corsProxyUrl: 'http://localhost:3001/?url=',
     
     // Limite de taux pour éviter de surcharger les APIs
-    rateLimitDelay: 0, // ms entre chaque requête (0 = instantané quand données simulées)
+    rateLimitDelay: 10, // ms entre chaque requête
     
     // Cache des métadonnées de sources
     sourceMetadata: new Map(),
@@ -609,12 +609,6 @@ const API_SMART_CONFIG = {
             // ========================================================================
             // PRIORITÉ 3 : UN COMTRADE (couverture mondiale - fallback universel)
             // ========================================================================
-            
-            // Si le proxy CORS n'est pas activé, impossible d'appeler l'API depuis le navigateur
-            // Retourner null pour utiliser les données simulées
-            if (!this.useCorsProxy) {
-                return null; // Forcer utilisation des données simulées
-            }
             
             // UN Comtrade API pour commerce bilatéral
             // Format: /reporter/partner/year
