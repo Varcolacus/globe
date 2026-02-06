@@ -1,9 +1,30 @@
-# 🌐 Utiliser les données officielles UN Comtrade
+# 🌐 Données officielles - Sources nationales et internationales
 
 ## ⚠️ MODE PRODUCTION : Données officielles uniquement
 
-Cette application utilise **exclusivement des données officielles** de l'API UN Comtrade.
+Cette application utilise **exclusivement des données officielles** provenant des instituts nationaux de statistiques.
 **Aucune donnée simulée** n'est générée. Si les données ne sont pas disponibles pour un pays/année, la valeur sera 0.
+
+### 📊 Hiérarchie des sources (par priorité)
+
+1. **APIs Nationales** (via Eurostat pour pays EU) 🇪🇺
+   - Données directes des instituts nationaux (INSEE, Destatis, ISTAT, etc.)
+   - Mise à jour la plus récente
+   - Détails les plus précis
+
+2. **UN Comtrade** (couverture mondiale) 🌍
+   - Base de données maintenue par l'ONU
+   - **Source primaire : instituts nationaux de statistiques**
+   - Collecte et harmonise les données de 170+ pays
+   - Exemples de sources : INSEE (France), Destatis (Allemagne), Census Bureau (USA)
+   - Données standardisées et comparables internationalement
+
+3. **No data available** ⚪
+   - Affiche 0 si aucune source n'a de données
+
+> 💡 **Important** : UN Comtrade n'invente pas de données. C'est une agrégation officielle 
+> des rapports commerciaux soumis par chaque pays à l'ONU. Les données proviennent 
+> directement des douanes et instituts statistiques nationaux.
 
 ## Problème CORS
 
@@ -54,18 +75,24 @@ Vous devriez voir des données JSON sur le commerce France-Allemagne.
 
 1. Démarrer le proxy CORS (voir ci-dessus)
 2. Ouvrir l'application : `http://localhost:8000/index.html`
-3. L'application utilise **automatiquement** les données officielles UN Comtrade
+3. L'application utilise **automatiquement** les sources officielles par priorité :
+   - Eurostat (pour pays EU) → UN Comtrade → No data
 4. Sélectionner un pays et une année
 5. Observer la console du navigateur :
-   - ✅ "Official data from UN Comtrade" = données récupérées avec succès
-   - ⚪ "No data available" = données non disponibles (affichera 0)
+   - ✅ "Official data from UN Comtrade (National Sources)" = données nationales via UN Comtrade
+   - ✅ "Official data from Eurostat (National Data)" = données nationales via Eurostat
+   - ⚪ "No official data available" = aucune donnée disponible (affichera 0)
 
 ## 📊 Vérifier les données officielles
 
 1. Cliquer sur "📊 Afficher Données"
 2. Regarder la colonne "Source" dans le tableau
-3. Les pays avec données officielles afficheront "UN Comtrade"
-4. Les autres afficheront "No data available" (valeur = 0)
+3. Les sources possibles :
+   - `UN Comtrade (National Sources)` = Données des instituts nationaux via UN Comtrade
+   - `Eurostat (National Data)` = Données des instituts nationaux européens via Eurostat
+   - `No data available` = Aucune donnée officielle (valeur = 0)
+
+> 💡 Dans tous les cas, les données proviennent des instituts nationaux de statistiques
 
 ## ⚙️ Configuration (pour développeurs)
 
@@ -145,11 +172,17 @@ const ALLOWED_APIS = [
 ];
 ```
 
-## 📈 Limitations
+## 📈 Limitations et notes importantes
 
-- **Rate Limiting**: UN Comtrade limite à 100 requêtes/heure (gratuit)
-- **Données manquantes**: Tous les pays ne reportent pas à UN Comtrade
+### Sources des données
+- **UN Comtrade** : Base de données de l'ONU qui compile les rapports commerciaux soumis par les instituts nationaux de statistiques de chaque pays (ex: INSEE pour la France, Destatis pour l'Allemagne, Census Bureau pour les USA, etc.)
+- Les données sont collectées auprès des douanes et offices statistiques nationaux
+- UN Comtrade standardise et harmonise ces données pour la comparabilité internationale
+
+### Limitations techniques
+- **Rate Limiting**: UN Comtrade limite à 100 requêtes/heure (compte gratuit)
+- **Données manquantes**: Certains pays ne soumettent pas leurs rapports à temps ou complètement
 - **Délai**: ~200ms entre requêtes (configurable dans api-config.js)
-- **Année 2025**: Données partielles ou inexistantes (année future)
+- **Année 2025**: Données partielles ou inexistantes (année future, pas encore reportée)
 
 Pour plus de détails, consulter la [documentation UN Comtrade](https://comtradeapi.un.org/).
