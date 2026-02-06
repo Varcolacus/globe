@@ -1919,7 +1919,9 @@ function getMajorShippingRoutes(year) {
             name: 'West Africa Coast',
             waypoints: [
                 { lat: 14.69, lng: -17.44 }, // Dakar
-                { lat: 10.0, lng: -15.0 },   // Côte Guinée
+                { lat: 12.0, lng: -18.0 },   // Large Guinée-Bissau (océan)
+                { lat: 9.0, lng: -16.0 },    // Large Sierra Leone (océan)
+                { lat: 6.5, lng: -10.0 },    // Large Libéria (océan)
                 { lat: 5.31, lng: -4.01 },   // Abidjan
                 { lat: 5.62, lng: -0.02 },   // Tema
                 { lat: 6.0, lng: 2.0 },      // Golfe Guinée
