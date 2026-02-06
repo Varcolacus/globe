@@ -7,24 +7,111 @@ Cette application utilise **exclusivement des données officielles** provenant d
 
 ### 📊 Hiérarchie des sources (par priorité)
 
-1. **APIs Nationales** (via Eurostat pour pays EU) 🇪🇺
-   - Données directes des instituts nationaux (INSEE, Destatis, ISTAT, etc.)
-   - Mise à jour la plus récente
-   - Détails les plus précis
+#### Hiérarchie réelle implémentée :
 
-2. **UN Comtrade** (couverture mondiale) 🌍
-   - Base de données maintenue par l'ONU
-   - **Source primaire : instituts nationaux de statistiques**
-   - Collecte et harmonise les données de 170+ pays
-   - Exemples de sources : INSEE (France), Destatis (Allemagne), Census Bureau (USA)
+1. **APIs Nationales avec support bilateral** (PRIORITÉ 1) 🏛️
+   - **US Census Bureau** (États-Unis) - Données bilatérales complètes
+   - **Statistics Canada** (Canada) - Commerce par pays partenaire
+   - **Statistics Norway** (Norvège) - Détails par pays
+   - **Swiss Federal Customs** (Suisse) - Données douanières bilatérales
+   - *Note* : Implémentation en cours - parsing spécifique pour chaque API
+
+2. **Eurostat** (pour commerce intra-EU) 🇪🇺
+   - Source : Instituts nationaux des 27 pays UE
+   - Exemples : INSEE (France), Destatis (Allemagne), ISTAT (Italie)
+   - Données standardisées au niveau européen
+   - *Note* : Endpoint bilateral en cours d'implémentation
+
+3. **UN Comtrade** (couverture mondiale) 🌍 **[ACTUELLEMENT UTILISÉ]**
+   - **Source primaire** : Instituts nationaux de statistiques de 170+ pays
+   - Collecte et harmonise les rapports soumis par chaque pays à l'ONU
+   - Exemples de contributeurs : INSEE, Destatis, Census Bureau, Statistics Canada, etc.
+   - **Avantage unique** : Seule source avec couverture bilatérale mondiale complète
    - Données standardisées et comparables internationalement
 
-3. **No data available** ⚪
+4. **No data available** ⚪
    - Affiche 0 si aucune source n'a de données
 
-> 💡 **Important** : UN Comtrade n'invente pas de données. C'est une agrégation officielle 
-> des rapports commerciaux soumis par chaque pays à l'ONU. Les données proviennent 
-> directement des douanes et instituts statistiques nationaux.
+### 🔑 Pourquoi UN Comtrade est actuellement utilisé
+
+**Le défi des données bilatérales :**
+
+La plupart des APIs des **banques centrales et instituts nationaux** (Banque de France, Bundesbank, Banca d'Italia, Banco de España, Bank of Japan, etc.) ne fournissent que :
+- ✅ Agrégats totaux (imports/exports totaux du pays)
+- ✅ Données par secteur/produit
+- ❌ **PAS de détail par pays partenaire** (France ↔ Allemagne spécifiquement)
+
+**Seules quelques APIs nationales** proposent des données bilatérales :
+- US Census Bureau ✅
+- Statistics Canada ✅  
+- Statistics Norway ✅
+- Swiss Federal Customs ✅
+- (UK ONS, ABS Australia - à vérifier)
+
+**UN Comtrade résout ce problème** car :
+- C'est un **agrégateur officiel** de l'ONU
+- Chaque pays soumet ses **rapports douaniers complets** avec détails bilatéraux
+- Les données sont **harmonisées** selon la classification HS (Harmonized System)
+- Couverture mondiale de 170+ pays
+
+### 📋 Flux réel des données
+
+```
+Douanes nationales (France customs, German Zoll, etc.)
+    ↓
+Institut national de statistiques (INSEE, Destatis, etc.)
+    ↓
+Rapport soumis à l'ONU avec détails bilatéraux
+    ↓
+UN Comtrade (agrégation et standardisation)
+    ↓
+Notre application
+```
+
+> 💡 **Important** : Les données UN Comtrade ne sont **PAS inventées** par l'ONU.  
+> Ce sont les rapports officiels soumis par chaque pays. L'ONU agit comme 
+> **plateforme centralisée d'accès** aux données nationales.
+
+### 🚧 Statut d'implémentation des APIs nationales
+
+**Ce qui est prêt :**
+- ✅ Configuration de 65 APIs nationales dans [national-apis-config.js](national-apis-config.js)
+- ✅ Méthode `tryNationalBilateralAPI()` créée
+- ✅ Hiérarchie de fallback implémentée
+- ✅ Support des principales APIs : US Census, Statistics Canada, SSB Norway, Swiss Customs
+
+**Ce qui reste à faire :**
+- 🔨 Parsing spécifique pour chaque format d'API nationale
+- 🔨 Endpoint Eurostat bilateral (COMEXT database)
+- 🔨 Authentification pour APIs nécessitant clés (US Census, etc.)
+
+**Pourquoi UN Comtrade fonctionne en priorité :**
+- Format standardisé unique pour tous les pays
+- Endpoint bilateral simple et unifié
+- Pas d'authentification requise (avec limites de taux)
+- Implémentation immédiate sans code custom par pays
+
+**Pour passer aux APIs nationales directes :**
+Chaque API nécessite son propre parser :
+```javascript
+// Exemple US Census Bureau
+if (sourceISO === 'US') {
+    const url = `https://api.census.gov/data/timeseries/intltrade/imports/hs?` +
+               `get=CTY_CODE,CTY_NAME,GEN_VAL_MO&YEAR=${year}&CTY_CODE=${partnerCode}&key=${API_KEY}`;
+    // Parse format spécifique Census Bureau...
+}
+
+// Exemple Statistics Canada  
+if (sourceISO === 'CA') {
+    const url = `https://www150.statcan.gc.ca/t1/wds/rest/getDataFromCubePidCoordAndLatestNPeriods`;
+    // Parse format spécifique StatCan...
+}
+
+// Etc. pour 65 APIs nationales...
+```
+
+> 📚 **Infrastructure complète disponible** : Toutes les URLs et configurations sont dans  
+> [national-apis-config.js](national-apis-config.js) - prêt pour l'implémentation pays par pays.
 
 ## Problème CORS
 

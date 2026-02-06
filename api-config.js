@@ -1,5 +1,6 @@
 // Import national APIs configuration
-// const { NATIONAL_APIS, COUNTRY_ISO_CODES } = require('./national-apis-config.js');
+// NOTE: Les variables NATIONAL_APIS et COUNTRY_ISO_CODES sont disponibles
+// globalement via national-apis-config.js chargé dans index.html
 
 // Configuration intelligente avec fallback automatique
 const API_SMART_CONFIG = {
@@ -457,17 +458,83 @@ const API_SMART_CONFIG = {
     },
     
     /**
-     * Récupérer données de commerce bilatéral entre deux pays via UN Comtrade
+     * Essayer de récupérer données bilatérales depuis l'API nationale
+     * IMPORTANT: Seules certaines APIs nationales fournissent des données bilatérales
      * 
-     * IMPORTANT: UN Comtrade est une base de données maintenue par l'ONU qui collecte
-     * et agrège les données commerciales provenant des instituts nationaux de statistiques
-     * de chaque pays (ex: INSEE pour France, Destatis pour Allemagne, etc.).
+     * APIs avec support bilateral confirmé :
+     * - US Census Bureau : https://api.census.gov/data/timeseries/intltrade/imports/hs
+     * - Statistics Canada : https://www150.statcan.gc.ca/t1/wds/rest
+     * - Statistics Norway (SSB) : https://data.ssb.no/api/v0
+     * - Swiss Federal Customs : https://www.gate.ezv.admin.ch/swissimpex
      * 
-     * Avantages UN Comtrade:
-     * - Données harmonisées et standardisées
-     * - Couverture mondiale (170+ pays)
-     * - Données bilatérales détaillées (pays A ↔ pays B)
-     * - Source primaire: instituts nationaux de statistiques
+     * APIs avec support bilateral à vérifier :
+     * - Office for National Statistics (UK)
+     * - Australian Bureau of Statistics
+     * - Statistics Netherlands (CBS)
+     * 
+     * La plupart des autres APIs nationales (Banque de France, Bundesbank, Banca d'Italia, etc.)
+     * ne fournissent que des agrégats totaux, pas de détail par pays partenaire.
+     */
+    async tryNationalBilateralAPI(sourceCountry, partnerCountry, sourceISO, partnerISO, year) {
+        try {
+            // Vérifier si l'API nationale est configurée
+            const apiConfig = NATIONAL_APIS.premium[sourceISO] || 
+                            NATIONAL_APIS.standard[sourceISO] || 
+                            NATIONAL_APIS.limited[sourceISO];
+            
+            if (!apiConfig) {
+                return null; // Pas d'API nationale configurée
+            }
+            
+            console.log(`🏛️ Trying national API: ${apiConfig.institution} for ${sourceCountry}-${partnerCountry}`);
+            
+            // TODO: Implémenter les appels spécifiques à chaque API nationale
+            // Chaque API a son propre format et endpoints
+            
+            // Exemple pour US Census Bureau (à implémenter) :
+            if (sourceISO === 'US') {
+                // const url = `${apiConfig.url}/imports/hs?get=CTY_CODE,CTY_NAME,GEN_VAL_MO&YEAR=${year}&CTY_CODE=${partnerISO}`;
+                // const response = await fetch(this.useCorsProxy ? `${this.corsProxyUrl}${encodeURIComponent(url)}` : url);
+                // ... parse response
+            }
+            
+            // Exemple pour Statistics Canada (à implémenter) :
+            if (sourceISO === 'CA') {
+                // Endpoint spécifique à Statistics Canada
+                // ... implementation
+            }
+            
+            // Pour l'instant, retourner null pour signaler que l'implémentation
+            // spécifique de chaque API nationale n'est pas encore faite
+            console.log(`⚠️ ${apiConfig.institution}: Bilateral data parsing not yet implemented`);
+            return null;
+            
+        } catch (error) {
+            console.warn(`❌ National API failed for ${sourceCountry}-${partnerCountry}:`, error.message);
+            return null;
+        }
+    },
+    
+    /**
+     * Récupérer données de commerce bilatéral entre deux pays
+     * 
+     * HIÉRARCHIE DES SOURCES (par priorité) :
+     * 
+     * 1. **API Nationale du pays source** (si disponible avec données bilatérales)
+     *    - Exemples : US Census Bureau, Statistics Canada, Banque de France
+     *    - Avantage : Données les plus récentes et détaillées
+     *    - Limitation : Peu d'APIs nationales fournissent des données bilatérales
+     * 
+     * 2. **Eurostat** (pour pays intra-EU uniquement)
+     *    - Source : Instituts nationaux des pays UE (INSEE, Destatis, ISTAT, etc.)
+     *    - Données harmonisées au niveau européen
+     *    - Couverture : 27 pays membres de l'UE
+     * 
+     * 3. **UN Comtrade** (couverture mondiale)
+     *    - Source primaire : Instituts nationaux de statistiques de 170+ pays
+     *    - Collecte et harmonise les rapports nationaux soumis à l'ONU
+     *    - Exemples de sources : INSEE (France), Destatis (Allemagne), Census Bureau (USA)
+     *    - Avantage : Seule source avec couverture bilatérale mondiale
      * 
      * Note technique: Les appels directs peuvent échouer en raison de CORS.
      * En production, utiliser un proxy CORS ou backend intermédiaire.
@@ -479,6 +546,68 @@ const API_SMART_CONFIG = {
             
             if (!sourceISO || !partnerISO) return null;
             
+            // ========================================================================
+            // PRIORITÉ 1 : API NATIONALE du pays source (si elle supporte bilateral)
+            // ========================================================================
+            // Liste des pays dont l'API nationale supporte les données bilatérales
+            const nationalBilateralSupport = {
+                'US': {
+                    name: 'US Census Bureau',
+                    supported: true,
+                    note: 'Données bilatérales détaillées disponibles'
+                },
+                'CA': {
+                    name: 'Statistics Canada',
+                    supported: true,
+                    note: 'Commerce bilatéral disponible par pays'
+                },
+                'NO': {
+                    name: 'Statistics Norway',
+                    supported: true,
+                    note: 'SSB fournit données par pays partenaire'
+                },
+                'CH': {
+                    name: 'Swiss Federal Customs',
+                    supported: true,
+                    note: 'Données douanières bilatérales complètes'
+                }
+                // TODO: Vérifier et ajouter d'autres pays (UK, JP, AU, etc.)
+                // La plupart des APIs nationales ne fournissent que des agrégats totaux
+            };
+            
+            // Essayer API nationale si le pays source la supporte
+            if (nationalBilateralSupport[sourceISO]?.supported) {
+                const nationalData = await this.tryNationalBilateralAPI(
+                    sourceCountry, partnerCountry, sourceISO, partnerISO, year
+                );
+                if (nationalData) {
+                    console.log(`✅ Using ${nationalBilateralSupport[sourceISO].name} (National Source)`);
+                    return {
+                        ...nationalData,
+                        source: nationalBilateralSupport[sourceISO].name,
+                        quality: 'official',
+                        note: 'Direct from national statistical institute'
+                    };
+                }
+            }
+            
+            // ========================================================================
+            // PRIORITÉ 2 : EUROSTAT (pour commerce intra-EU uniquement)
+            // ========================================================================
+            const euCountries = ['AT', 'BE', 'BG', 'HR', 'CY', 'CZ', 'DK', 'EE', 'FI', 
+                               'FR', 'DE', 'GR', 'HU', 'IE', 'IT', 'LV', 'LT', 'LU', 
+                               'MT', 'NL', 'PL', 'PT', 'RO', 'SK', 'SI', 'ES', 'SE'];
+            
+            if (euCountries.includes(sourceISO) && euCountries.includes(partnerISO)) {
+                // TODO: Implémenter appel Eurostat bilateral
+                // const eurostatData = await this.fetchEurostatBilateral(sourceISO, partnerISO, year);
+                // if (eurostatData) return eurostatData;
+                console.log(`📊 ${sourceCountry}-${partnerCountry}: Could use Eurostat (EU-EU trade) - Not yet implemented`);
+            }
+            
+            // ========================================================================
+            // PRIORITÉ 3 : UN COMTRADE (couverture mondiale - fallback universel)
+            // ========================================================================
             // UN Comtrade API pour commerce bilatéral
             // Format: /reporter/partner/year
             const apiUrl = `https://comtradeapi.un.org/data/v1/get/C/A/${year}/${sourceISO}/${partnerISO}/total`;
@@ -488,7 +617,7 @@ const API_SMART_CONFIG = {
                 ? `${this.corsProxyUrl}${encodeURIComponent(apiUrl)}`
                 : apiUrl;
             
-            console.log(`📡 Fetching bilateral data: ${sourceCountry} ↔ ${partnerCountry} (${year}) ${this.useCorsProxy ? '(via proxy)' : ''}`);
+            console.log(`🌐 Using UN Comtrade (aggregates national data): ${sourceCountry} ↔ ${partnerCountry} (${year})`);
             
             const response = await fetch(url, {
                 headers: {

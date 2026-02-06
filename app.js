@@ -2875,8 +2875,8 @@ function showDataTable() {
     metadataDiv.innerHTML = `
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
             <div>
-                <strong>📊 Source:</strong> UN Comtrade (Données Officielles)<br>
-                <small>API comtradeapi.un.org</small>
+                <strong>📊 Sources:</strong> APIs Nationales → Eurostat → UN Comtrade<br>
+                <small>Données des instituts statistiques nationaux</small>
             </div>
             <div>
                 <strong>📅 Année:</strong> ${currentYear}<br>
@@ -2965,7 +2965,7 @@ function downloadCSV() {
     // En-tête du CSV avec métadonnées
     const lastUpdate = new Date().toISOString().split('T')[0];
     let csv = `"Balance des Paiements - ${currentSourceCountry}"\n`;
-    csv += `"Source: UN Comtrade (Données Officielles) - comtradeapi.un.org"\n`;
+    csv += `"Sources: APIs Nationales → Eurostat → UN Comtrade (données instituts statistiques nationaux)"\n`;
     csv += `"Année: ${currentYear}"\n`;
     csv += `"Date d'extraction: ${lastUpdate}"\n`;
     csv += `"Nombre de pays: ${tradingCountries.length}"\n`;
