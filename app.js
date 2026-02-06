@@ -1920,8 +1920,9 @@ function getMajorShippingRoutes(year) {
             waypoints: [
                 { lat: 14.69, lng: -17.44 }, // Dakar
                 { lat: 12.0, lng: -18.0 },   // Large Guinée-Bissau (océan)
-                { lat: 9.0, lng: -16.0 },    // Large Sierra Leone (océan)
-                { lat: 6.5, lng: -10.0 },    // Large Libéria (océan)
+                { lat: 9.0, lng: -17.5 },    // Large Sierra Leone (océan)
+                { lat: 7.0, lng: -14.0 },    // Large Libéria ouest (océan)
+                { lat: 5.5, lng: -8.0 },     // Large Côte d'Ivoire ouest (océan)
                 { lat: 5.31, lng: -4.01 },   // Abidjan
                 { lat: 5.62, lng: -0.02 },   // Tema
                 { lat: 6.0, lng: 2.0 },      // Golfe Guinée
